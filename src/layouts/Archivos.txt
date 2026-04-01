@@ -1,0 +1,2 @@
+Componentes relacionados con el layout del proyecto.
+como el navbar, hero, footer, etc.

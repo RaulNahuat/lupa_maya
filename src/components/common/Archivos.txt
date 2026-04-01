@@ -1,0 +1,2 @@
+Componentes que pueden ser reutilizado en todo el proyecto,
+como botones, modales, tarjetas, etc.

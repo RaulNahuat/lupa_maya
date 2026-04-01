@@ -1,0 +1,3 @@
+Componentes relacionados con el reconocimiento de 
+objetos, para poner la lógica del reconocimiento 
+de las imagenes
