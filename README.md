@@ -15,7 +15,26 @@ Sigue estos pasos para correr el proyecto localmente:
    ```bash
    pnpm run dev
    ```
+---
 
+## Comandos para correr las migraciones
+
+```bash
+npx sequelize-cli db:migrate
+```
+
+## Comandos para ver el estado de las migraciones
+
+```bash
+npx sequelize-cli db:migrate:status
+```
+---
+
+## Comandos para correr los seeders
+
+```bash
+npx sequelize-cli db:seed:all
+```
 ---
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
