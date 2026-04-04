@@ -18,6 +18,16 @@ module.exports = {
         deleted_at: null
       },
       {
+        nombre: 'Juan',
+        apellido: 'Pérez',
+        email: 'juan@lupamaya.com',
+        password_hash: await bcrypt.hash('Admin1234', saltRounds),
+        rol: 'ADMIN',
+        created_at: new Date(),
+        updated_at: new Date(),
+        deleted_at: null
+      },
+      {
         nombre: 'María',
         apellido: 'López',
         email: 'maria.lopez@lupamaya.com',
@@ -67,6 +77,7 @@ module.exports = {
       email: {
         [Sequelize.Op.in]: [
           'admin@lupamaya.com',
+          'juan@lupamaya.com',
           'maria.lopez@lupamaya.com',
           'carlos.perez@lupamaya.com',
           'ana.garcia@lupamaya.com',
