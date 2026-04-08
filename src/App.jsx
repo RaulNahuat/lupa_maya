@@ -1,18 +1,29 @@
-import './App.css'
+import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import './App.css';
 
 function App() {
+  const [isAdminMode, setIsAdminMode] = useState(false);
+
   return (
-    <>
-    <section className='bg-red-200 h-screen'>
-      <div className='bg-blue-300 content-center justify-center justify-items-center h-full'>
-        <div>
-          <h1 className='text-4xl font-bold text-center'>Lupa Maya</h1>
-          <p className='text-xl font-semibold text-center'>Descubre la belleza de los glifos de la cultura maya</p>
-        </div>
+    <Router>
+      <div className="min-h-screen bg-maya-cream flex flex-col">
+        <Navbar isAdminMode={isAdminMode} setIsAdminMode={setIsAdminMode} />
+        <main className="grow">
+          <Routes>
+            <Route path="/login" element={<Login isAdminMode={isAdminMode} />} />
+            <Route path="/register" element={<Register isAdminMode={isAdminMode} />} />
+            <Route path="/" element={<Navigate to="/login" replace />} />
+
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </main>
       </div>
-    </section>
-    </>
-  )
+    </Router>
+  );
 }
 
-export default App
+export default App;

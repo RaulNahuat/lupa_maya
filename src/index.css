@@ -1,2 +1,30 @@
 @import "tailwindcss";
 
+@theme {
+  --color-maya-cream: #FCF8F2;
+  --color-maya-dark: #01412E;
+  --color-maya-gold: #D4951E;
+  --color-maya-gold-hover: #B8851A;
+  --color-maya-orange-light: #FFF4E6;
+  --color-maya-green-light: #E6F9F3;
+  --color-maya-gray: #718096;
+
+  --font-maya: "Outfit", "Inter", "system-ui", "sans-serif";
+  --radius-4xl: 2rem;
+}
+
+@layer base {
+  :root {
+    font-family: var(--font-maya);
+    background-color: var(--color-maya-cream);
+    color: var(--color-maya-dark);
+  }
+
+  body {
+    @apply m-0 flex place-items-center min-w-[320px] min-h-screen text-maya-dark bg-maya-cream;
+  }
+
+  #root {
+    @apply w-full;
+  }
+}

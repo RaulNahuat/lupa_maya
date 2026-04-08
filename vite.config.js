@@ -5,7 +5,74 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss(), VitePWA({
-    registerType: 'autoUpdate',
-  })],
+  plugins: [
+    react(),
+    tailwindcss(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.svg', 'pwa-icon-512.png'],
+      manifest: {
+        id: '/',
+        start_url: '/',
+        name: 'Lupa Maya',
+        short_name: 'LupaMaya',
+        description: 'Descubre la belleza de la cultura Maya',
+        theme_color: '#FCF8F2',
+        background_color: '#FCF8F2',
+        display: 'standalone',
+        icons: [
+          {
+            src: 'pwa-icon-512.png',
+            sizes: '1024x1024',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: 'pwa-icon-512.png',
+            sizes: '1024x1024',
+            type: 'image/png',
+            purpose: 'maskable'
+          }
+        ],
+        screenshots: [
+          {
+            src: 'screenshot-wide.png',
+            sizes: '343x361',
+            type: 'image/png',
+            form_factor: 'wide',
+            label: 'Lupa Maya en Escritorio'
+          },
+          {
+            src: 'screenshot-narrow.png',
+            sizes: '1024x1024',
+            type: 'image/png',
+            form_factor: 'narrow',
+            label: 'Lupa Maya en Móvil'
+          }
+        ]
+      },
+      workbox: {
+        // En desarrollo, quitamos globPatterns para evitar el error de "no match found" 
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          }
+        ]
+      },
+      devOptions: {
+        enabled: true
+      }
+    })
+  ],
 })
