@@ -32,9 +32,19 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false
       },
-      activo: {
+      version: {
+        type: Sequelize.INTEGER,
+        defaultValue: 1
+      },
+      completado: {
         type: Sequelize.BOOLEAN,
-        defaultValue: true
+        defaultValue: false,
+        allowNull: false
+      },
+      desbloqueado: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
       }
     });
   },

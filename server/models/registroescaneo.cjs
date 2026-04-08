@@ -43,6 +43,19 @@ module.exports = (sequelize, DataTypes) => {
     sync_status: {
       type: DataTypes.ENUM('SINCRONIZADO', 'PENDIENTE'),
       defaultValue: 'SINCRONIZADO'
+    },
+    local_id: {
+      type: DataTypes.STRING(36),
+      allowNull: true,
+      unique: true
+    },
+    usuario_local_id: {
+      type: DataTypes.STRING(36),
+      allowNull: true
+    },
+    last_synced_at: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,

@@ -42,11 +42,24 @@ module.exports = (sequelize, DataTypes) => {
     sync_status: {
       type: DataTypes.ENUM('SINCRONIZADO', 'PENDIENTE', 'EN_CONFLICTO'),
       defaultValue: 'SINCRONIZADO'
+    },
+    local_id: {
+      type: DataTypes.STRING(36),
+      allowNull: true,
+      unique: true
+    },
+    usuario_local_id: {
+      type: DataTypes.STRING(36),
+      allowNull: true
+    },
+    last_synced_at: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,
     modelName: 'ProgresoUsuario',
-    tableName: 'progreso_usuario',
+    tableName: 'progreso_usuarios',
     timestamps: true,
     createdAt: false,
     updatedAt: 'updated_at',

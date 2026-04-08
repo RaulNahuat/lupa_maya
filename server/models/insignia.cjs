@@ -37,6 +37,10 @@ module.exports = (sequelize, DataTypes) => {
     valor_condicion: {
       type: DataTypes.INTEGER,
       allowNull: false
+    },
+    version: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1
     }
   }, {
     sequelize,

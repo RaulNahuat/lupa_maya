@@ -19,12 +19,16 @@ module.exports = {
       },
       email: {
         type: Sequelize.STRING(120),
-        allowNull: false,
+        allowNull: true,
         unique: true
       },
       password_hash: {
         type: Sequelize.STRING(255),
-        allowNull: false
+        allowNull: true
+      },
+      pin_hash: {
+        type: Sequelize.STRING(255),
+        allowNull: true
       },
       rol: {
         type: Sequelize.ENUM('NINO', 'ADMIN'),
@@ -44,6 +48,11 @@ module.exports = {
       deleted_at: {
         type: Sequelize.DATE,
         allowNull: true
+      },
+      local_id: {
+        type: Sequelize.STRING(36),
+        allowNull: true,
+        unique: true
       }
     });
   },

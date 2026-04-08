@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'OpcionRespuesta',
-    tableName: 'opciones_respuesta',
+    tableName: 'opciones_respuestas',
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: false

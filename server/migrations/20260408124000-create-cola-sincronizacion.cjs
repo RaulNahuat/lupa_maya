@@ -2,36 +2,36 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('grupos_niveles', {
+    await queryInterface.createTable('cola_sincronizacion', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.BIGINT
       },
-      numero_grupo: {
-        type: Sequelize.INTEGER,
+      entidad: {
+        type: Sequelize.STRING(50),
         allowNull: false
       },
-      nombre: {
-        type: Sequelize.STRING(100),
+      entidad_id: {
+        type: Sequelize.STRING(36),
         allowNull: false
       },
-      descripcion: {
-        type: Sequelize.TEXT,
+      accion: {
+        type: Sequelize.ENUM('CREATE', 'UPDATE', 'DELETE'),
+        allowNull: false
+      },
+      datos: {
+        type: Sequelize.JSON,
         allowNull: true
       },
-      dificultad: {
-        type: Sequelize.ENUM('BASICO', 'INTERMEDIO', 'AVANZADO'),
-        allowNull: false
+      estado: {
+        type: Sequelize.ENUM('PENDIENTE', 'ENVIADO', 'ERROR'),
+        defaultValue: 'PENDIENTE'
       },
-      activo: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: true
-      },
-      version: {
+      reintentos: {
         type: Sequelize.INTEGER,
-        defaultValue: 1
+        defaultValue: 0
       },
       created_at: {
         allowNull: false,
@@ -41,6 +41,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('grupos_niveles');
+    await queryInterface.dropTable('cola_sincronizacion');
   }
 };

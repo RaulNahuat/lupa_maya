@@ -34,6 +34,10 @@ module.exports = (sequelize, DataTypes) => {
     activo: {
       type: DataTypes.BOOLEAN,
       defaultValue: true
+    },
+    version: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1
     }
   }, {
     sequelize,

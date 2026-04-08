@@ -12,6 +12,7 @@ module.exports = {
         apellido: 'Sistema',
         email: 'admin@lupamaya.com',
         password_hash: await bcrypt.hash('Admin1234!', saltRounds),
+        pin_hash: null,
         rol: 'ADMIN',
         created_at: new Date(),
         updated_at: new Date(),
@@ -22,6 +23,7 @@ module.exports = {
         apellido: 'Pérez',
         email: 'juan@lupamaya.com',
         password_hash: await bcrypt.hash('Admin1234', saltRounds),
+        pin_hash: null,
         rol: 'ADMIN',
         created_at: new Date(),
         updated_at: new Date(),
@@ -30,8 +32,9 @@ module.exports = {
       {
         nombre: 'María',
         apellido: 'López',
-        email: 'maria.lopez@lupamaya.com',
-        password_hash: await bcrypt.hash('Nino1234!', saltRounds),
+        email: null,
+        password_hash: null,
+        pin_hash: await bcrypt.hash('1234', saltRounds),
         rol: 'NINO',
         created_at: new Date(),
         updated_at: new Date(),
@@ -40,8 +43,9 @@ module.exports = {
       {
         nombre: 'Carlos',
         apellido: 'Pérez',
-        email: 'carlos.perez@lupamaya.com',
-        password_hash: await bcrypt.hash('Nino1234!', saltRounds),
+        email: null,
+        password_hash: null,
+        pin_hash: await bcrypt.hash('1234', saltRounds),
         rol: 'NINO',
         created_at: new Date(),
         updated_at: new Date(),
@@ -50,8 +54,9 @@ module.exports = {
       {
         nombre: 'Ana',
         apellido: 'García',
-        email: 'ana.garcia@lupamaya.com',
-        password_hash: await bcrypt.hash('Nino1234!', saltRounds),
+        email: null,
+        password_hash: null,
+        pin_hash: await bcrypt.hash('1234', saltRounds),
         rol: 'NINO',
         created_at: new Date(),
         updated_at: new Date(),
@@ -60,8 +65,9 @@ module.exports = {
       {
         nombre: 'Luis',
         apellido: 'Martínez',
-        email: 'luis.martinez@lupamaya.com',
-        password_hash: await bcrypt.hash('Nino1234!', saltRounds),
+        email: null,
+        password_hash: null,
+        pin_hash: await bcrypt.hash('1234', saltRounds),
         rol: 'NINO',
         created_at: new Date(),
         updated_at: new Date(),
@@ -74,15 +80,8 @@ module.exports = {
 
   async down(queryInterface, Sequelize) {
     await queryInterface.bulkDelete('usuarios', {
-      email: {
-        [Sequelize.Op.in]: [
-          'admin@lupamaya.com',
-          'juan@lupamaya.com',
-          'maria.lopez@lupamaya.com',
-          'carlos.perez@lupamaya.com',
-          'ana.garcia@lupamaya.com',
-          'luis.martinez@lupamaya.com'
-        ]
+      nombre: {
+        [Sequelize.Op.in]: ['Admin', 'Juan', 'María', 'Carlos', 'Ana', 'Luis']
       }
     }, {});
   }

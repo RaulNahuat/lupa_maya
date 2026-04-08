@@ -28,6 +28,10 @@ module.exports = {
       valor_condicion: {
         type: Sequelize.INTEGER,
         allowNull: false
+      },
+      version: {
+        type: Sequelize.INTEGER,
+        defaultValue: 1
       }
     });
   },

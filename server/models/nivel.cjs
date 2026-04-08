@@ -35,10 +35,18 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    activo: {
+    version: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1
+    },
+    completado: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true
-    }
+      defaultValue: false
+    },
+    desbloqueado: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
   }, {
     sequelize,
     modelName: 'Nivel',

@@ -32,6 +32,19 @@ module.exports = {
       sync_status: {
         type: Sequelize.ENUM('SINCRONIZADO', 'PENDIENTE'),
         defaultValue: 'SINCRONIZADO'
+      },
+      local_id: {
+        type: Sequelize.STRING(36),
+        allowNull: true,
+        unique: true
+      },
+      usuario_local_id: {
+        type: Sequelize.STRING(36),
+        allowNull: true
+      },
+      last_synced_at: {
+        type: Sequelize.DATE,
+        allowNull: true
       }
     });
   },

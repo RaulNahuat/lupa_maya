@@ -26,6 +26,10 @@ module.exports = (sequelize, DataTypes) => {
     activa: {
       type: DataTypes.BOOLEAN,
       defaultValue: true
+    },
+    version: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1
     }
   }, {
     sequelize,

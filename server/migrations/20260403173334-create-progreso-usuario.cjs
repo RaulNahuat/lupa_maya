@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('progreso_usuario', {
+    await queryInterface.createTable('progreso_usuarios', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -49,6 +49,19 @@ module.exports = {
         type: Sequelize.ENUM('SINCRONIZADO', 'PENDIENTE', 'EN_CONFLICTO'),
         defaultValue: 'SINCRONIZADO'
       },
+      local_id: {
+        type: Sequelize.STRING(36),
+        allowNull: true,
+        unique: true
+      },
+      usuario_local_id: {
+        type: Sequelize.STRING(36),
+        allowNull: true
+      },
+      last_synced_at: {
+        type: Sequelize.DATE,
+        allowNull: true
+      },
       updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
@@ -57,12 +70,12 @@ module.exports = {
     });
 
     // Unique constraint (usuario_id, nivel_id)
-    await queryInterface.addIndex('progreso_usuario', ['usuario_id', 'nivel_id'], {
+    await queryInterface.addIndex('progreso_usuarios', ['usuario_id', 'nivel_id'], {
       unique: true,
-      name: 'progreso_usuario_usuario_nivel_unique'
+      name: 'progreso_usuarios_usuario_nivel_unique'
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('progreso_usuario');
+    await queryInterface.dropTable('progreso_usuarios');
   }
 };

@@ -15,8 +15,14 @@ app.use(cors());
 app.use(express.json());
 
 db.sequelize.authenticate()
-  .then(() => console.log("Conexion exitosa a la base de datos"))
-  .catch((error) => console.error("Error al conectar:", error));
+  .then(() => {
+    console.log("Conexion exitosa a la base de datos");
+    return db.sequelize.sync({ alter: false });
+  })
+  .then(() => {
+    console.log("Base de datos sincronizada: Se han aplicado los modelos a las tablas.");
+  })
+  .catch((error) => console.error("Error al conectar o sincronizar:", error));
 
 app.get("/", (req, res) => {
   res.send("API de Lupa Maya funcionando");
