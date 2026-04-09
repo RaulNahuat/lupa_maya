@@ -1,19 +1,19 @@
-import { initDB } from "../data/db";
+import { db } from "../data/db";
 
 const API_SYNC_URL = "http://localhost:5000/api/sync";
 
 export const descargarCambios = async () => {
     console.log("Descargando cambios desde el servidor...");
-    const db = await initDB();
 
-    // 1. Obtener el timestamp de la última sincronización
-    const lastSync = await new Promise((resolve) => {
-        const transaction = db.transaction(['configuracion'], 'readonly');
-        const store = transaction.objectStore('configuracion');
-        const request = store.get('lastSync');
-        request.onsuccess = () => resolve(request.result ? request.result.valor : 0);
-        request.onerror = () => resolve(0);
-    });
+    let lastSync = 0;
+    try {
+        const config = await db.configuracion.get('lastSync');
+        if (config) {
+            lastSync = config.valor;
+        }
+    } catch (e) {
+        lastSync = 0;
+    }
 
     try {
         const response = await fetch(`${API_SYNC_URL}/pull?lastSync=${lastSync}`);
@@ -22,11 +22,7 @@ export const descargarCambios = async () => {
         if (result.success && result.cambios.length > 0) {
             console.log(`Recibidos ${result.cambios.length} cambios.`);
             
-            await new Promise((resolve, reject) => {
-                const transaction = db.transaction(['usuarios', 'configuracion'], 'readwrite');
-                const userStore = transaction.objectStore('usuarios');
-                const configStore = transaction.objectStore('configuracion');
-
+            await db.transaction('rw', db.usuarios, db.configuracion, async () => {
                 for (const userRemote of result.cambios) {
                     if (!userRemote.local_id) {
                         console.warn("Saltando usuario sin local_id válido:", userRemote.id);
@@ -34,22 +30,16 @@ export const descargarCambios = async () => {
                     }
 
                     if (userRemote.deleted_at) {
-                        // Si está borrado en el servidor, lo borramos localmente
-                        userStore.delete(userRemote.local_id);
+                        await db.usuarios.delete(userRemote.local_id);
                     } else {
-                        // Si no, lo guardamos o actualizamos
-                        userStore.put({
+                        await db.usuarios.put({
                             ...userRemote,
                             sync_status: 'SINCRONIZADO'
                         });
                     }
                 }
-
-                // Guardar el nuevo timestamp
-                configStore.put({ clave: 'lastSync', valor: result.serverTime });
-
-                transaction.oncomplete = () => resolve();
-                transaction.onerror = () => reject(transaction.error);
+                
+                await db.configuracion.put({ clave: 'lastSync', valor: result.serverTime });
             });
             console.log("Cambios aplicados correctamente.");
         }
@@ -65,15 +55,7 @@ export const procesarColaSincronizacion = async () => {
     await descargarCambios();
 
     // Luego subimos lo que tengamos pendiente (Push)
-    const db = await initDB();
-    
-    const items = await new Promise((resolve, reject) => {
-        const transaction = db.transaction(['cola_sincronizacion'], 'readonly');
-        const store = transaction.objectStore('cola_sincronizacion');
-        const request = store.getAll();
-        request.onsuccess = () => resolve(request.result.filter(item => item.estado === 'PENDIENTE'));
-        request.onerror = () => reject(request.error);
-    });
+    const items = await db.cola_sincronizacion.where('estado').equals('PENDIENTE').toArray();
 
     if (items.length === 0) {
         console.log("No hay datos locales para subir.");
@@ -91,25 +73,15 @@ export const procesarColaSincronizacion = async () => {
             const result = await response.json();
 
             if (result.success) {
-                await new Promise((resolve, reject) => {
-                    const updateTransaction = db.transaction(['cola_sincronizacion', 'usuarios'], 'readwrite');
-                    const colaStore = updateTransaction.objectStore('cola_sincronizacion');
-                    const userStore = updateTransaction.objectStore('usuarios');
-
+                await db.transaction('rw', db.cola_sincronizacion, db.usuarios, async () => {
                     item.estado = 'ENVIADO';
-                    colaStore.put(item);
+                    await db.cola_sincronizacion.put(item);
 
-                    const userRequest = userStore.get(item.entidad_id);
-                    userRequest.onsuccess = () => {
-                        const user = userRequest.result;
-                        if (user) {
-                            user.sync_status = 'SINCRONIZADO';
-                            userStore.put(user);
-                        }
-                    };
-
-                    updateTransaction.oncomplete = () => resolve();
-                    updateTransaction.onerror = () => reject(updateTransaction.error);
+                    const user = await db.usuarios.get(item.entidad_id);
+                    if (user) {
+                        user.sync_status = 'SINCRONIZADO';
+                        await db.usuarios.put(user);
+                    }
                 });
                 console.log(`Ítem ${item.id} subido con éxito.`);
             }

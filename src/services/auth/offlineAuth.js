@@ -1,66 +1,71 @@
-import { initDB } from "../../data/db";
+import { db } from "../../data/db";
+import bcrypt from "bcryptjs";
 
 export const registroOffline = async (usuarioData) => {
-    const db = await initDB();
     const local_id = crypto.randomUUID();
 
+    const payload = { ...usuarioData };
+    if (payload.pin) {
+        payload.pin_hash = bcrypt.hashSync(payload.pin, 10);
+        delete payload.pin;
+    }
+    if (payload.password) {
+        payload.password_hash = bcrypt.hashSync(payload.password, 10);
+        delete payload.password;
+    }
+
     const nuevoUsuario = {
-        ...usuarioData,
+        ...payload,
         local_id,
         sync_status: 'PENDIENTE',
         created_at: new Date().toISOString()
     };
 
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction(['usuarios', 'cola_sincronizacion'], 'readwrite');
-
-        transaction.objectStore('usuarios').add(nuevoUsuario);
-
-        transaction.objectStore('cola_sincronizacion').add({
+    await db.transaction('rw', db.usuarios, db.cola_sincronizacion, async () => {
+        await db.usuarios.add(nuevoUsuario);
+        await db.cola_sincronizacion.add({
             entidad: 'usuarios',
             entidad_id: local_id,
             accion: 'CREAR',
             datos: nuevoUsuario,
             estado: 'PENDIENTE'
         });
-
-        transaction.oncomplete = () => resolve(nuevoUsuario);
-        transaction.onerror = () => reject(transaction.error);
     });
+
+    return nuevoUsuario;
 };
 
 export const loginOffline = async (credenciales, esAdmin = false) => {
-    const db = await initDB();
-
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction(['usuarios'], 'readonly');
-        const store = transaction.objectStore('usuarios');
+    if (esAdmin) {
+        const user = await db.usuarios.where('email').equals(credenciales.email).first();
+        if (!user) throw 'Usuario no encontrado';
         
-        if (esAdmin) {
-            const index = store.index('email');
-            const request = index.get(credenciales.email);
-            request.onsuccess = () => {
-                const user = request.result;
-                if (!user) return reject('Usuario no encontrado');
-                if (user.password === credenciales.password) {
-                    resolve(user);
-                } else {
-                    reject('Contraseña incorrecta');
-                }
-            };
-            request.onerror = () => reject(request.error);
+        if (user.password_hash && bcrypt.compareSync(credenciales.password, user.password_hash)) {
+            return user;
+        } else if (user.password === credenciales.password) {
+            return user;
         } else {
-            const request = store.getAll();
-            request.onsuccess = () => {
-                const users = request.result;
-                const encontrado = users.find(u => u.nombre === credenciales.nombre && u.pin === credenciales.pin);
-                if (encontrado) {
-                    resolve(encontrado);
-                } else {
-                    reject('Usuario no encontrado o PIN incorrecto');
-                }
-            };
-            request.onerror = () => reject(request.error);
+            throw 'Contraseña incorrecta';
         }
-    });
+    } else {
+        const users = await db.usuarios.toArray();
+        const posibles = users.filter(u => u.nombre === credenciales.nombre);
+        
+        let encontrado = null;
+        for (const u of posibles) {
+            if (u.pin_hash && bcrypt.compareSync(credenciales.pin, u.pin_hash)) {
+                encontrado = u;
+                break;
+            } else if (u.pin === credenciales.pin) {
+                encontrado = u;
+                break;
+            }
+        }
+        
+        if (encontrado) {
+            return encontrado;
+        } else {
+            throw 'Usuario no encontrado o PIN incorrecto';
+        }
+    }
 };

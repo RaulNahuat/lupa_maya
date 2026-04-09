@@ -1,43 +1,24 @@
-import { initUsuariosStore } from './store/usuarios.store';
-import { initColaSincronizacionStore } from './store/colaSincronizacion.store';
-import { initConfiguracionStore } from './store/configuracion.store';
-import { initNivelesStore } from './store/niveles.store';
-import { initProgresoStore } from './store/progreso.store';
-import { initGlifosStore } from './store/glifos.store';
-import { initGruposNivelesStore } from './store/gruposNiveles.store';
-import { initInsigniasStore } from './store/insignias.store';
-import { initNivelGlifoObjetivoStore } from './store/nivelGlifoObjetivo.store';
-import { initPreguntasStore } from './store/preguntas.store';
-import { initOpcionesRespuestasStore } from './store/opcionesRespuestas.store';
-import { initRegistrosEscaneoStore } from './store/registrosEscaneo.store';
-import { initUsuarioInsigniasStore } from './store/usuarioInsignias.store';
+import Dexie from 'dexie';
 
-const DB_NAME = "lupa_maya_db";
-const DB_VERSION = 1;
+export const db = new Dexie("lupa_maya_db");
 
-export const initDB = () => {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
+db.version(1).stores({
+    usuarios: 'local_id, email, rol',
+    cola_sincronizacion: '++id, estado',
+    configuracion: 'clave',
+    niveles: 'id',
+    progreso_usuarios: 'local_id, usuario_id, nivel_id, usuario_local_id',
+    glifos: 'id, grupo_id',
+    grupos_niveles: 'id',
+    insignias: 'id',
+    nivel_glifos_objetivos: 'id, nivel_id, glifo_id',
+    preguntas: 'id, nivel_id',
+    opciones_respuestas: 'id, preguntas_id',
+    registro_escaneos: 'local_id, usuario_id, usuario_local_id, nivel_id',
+    usuario_insignias: 'local_id, usuario_id, insignia_id, usuario_local_id'
+});
 
-        request.onupgradeneeded = (event) => {
-            const db = event.target.result;
-            // Inicialización modular de todos los ObjectStores (los 13 modelos de la base de datos)
-            initUsuariosStore(db);
-            initColaSincronizacionStore(db);
-            initConfiguracionStore(db);
-            initNivelesStore(db);
-            initProgresoStore(db);
-            initGlifosStore(db);
-            initGruposNivelesStore(db);
-            initInsigniasStore(db);
-            initNivelGlifoObjetivoStore(db);
-            initPreguntasStore(db);
-            initOpcionesRespuestasStore(db);
-            initRegistrosEscaneoStore(db);
-            initUsuarioInsigniasStore(db);
-        };
-
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-    });
+export const initDB = async () => {
+    await db.open();
+    return db;
 };
