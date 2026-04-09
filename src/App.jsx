@@ -1,3 +1,6 @@
+import { Routes, Route, Navigate } from "react-router-dom"
+import LevelMap from "./pages/player/LevelMap"
+import LevelPlay from "./pages/player/LevelPlay"
 import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -10,6 +13,12 @@ function App() {
   const [isAdminMode, setIsAdminMode] = useState(false);
 
   return (
+    <Routes> 
+      <Route path="/" element={<Navigate to="/map" replace/>} />
+      <Route path="/map" element={<LevelMap />} />
+      <Route path="/level/:id" element={<LevelPlay />} />
+    </Routes>
+  )
     <Router>
       <div className="min-h-screen bg-maya-cream flex flex-col">
         <Navbar isAdminMode={isAdminMode} setIsAdminMode={setIsAdminMode} />
