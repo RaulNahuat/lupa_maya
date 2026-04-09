@@ -1,53 +1,78 @@
-# Lupa Maya (React + Vite)
+# Lupa Maya 🔍🗿 (React + Vite PWA)
+
+¡Bienvenido al proyecto Lupa Maya! Una aplicación progresiva (PWA) diseñada para descubrir la belleza de la cultura Maya, con soporte offline y sincronización automática.
+
+## Requisitos Previos
+
+Antes de comenzar, asegúrate de tener instalado:
+- **Node.js** (v18 o superior recomendado)
+- **pnpm** (Opcional, pero recomendado. Instálalo con `npm install -g pnpm`)
+- **MySQL** corriendo localmente.
 
 ## Instalación y Configuración
 
-Sigue estos pasos para correr el proyecto localmente:
+Sigue estos pasos para configurar el proyecto en tu máquina:
 
-1. **Instalar dependencias**: El proyecto utiliza `pnpm`. Si no lo tienes, puedes instalarlo globalmente con `npm install -g pnpm`.
-   Luego, en la raíz del proyecto, ejecuta:
+1. **Instalar dependencias**:
    ```bash
    pnpm install
    ```
+
 2. **Configurar el entorno**:
-   - Crea un archivo `.env` para las variables de entorno.
-3. **Correr el servidor de desarrollo**:
+   - Copia el archivo `.env.example` y cámbialo a `.env`.
+   - Edita el archivo `.env` con tus credenciales de MySQL (host, usuario, contraseña, etc.).
    ```bash
-   pnpm run dev
+   cp .env.example .env
    ```
----
 
-## Comandos para correr las migraciones
+3. **Configurar la Base de Datos**:
+   - Asegúrate de que la base de datos definida en tu `.env` (ej. `lupa_maya_db`) exista en tu servidor MySQL.
+   - Ejecuta las migraciones para crear las tablas:
+     ```bash
+     npx sequelize-cli db:migrate
+     ```
+   - (Opcional) Carga los datos iniciales (seeds):
+     ```bash
+     npx sequelize-cli db:seed:all
+     ```
 
+## Cómo Correr el Proyecto
+
+Para trabajar en el proyecto, necesitas correr tanto el **Servidor (Backend)** como el **Cliente (Frontend)**.
+
+### 1. Iniciar el Backend (API)
+En una terminal aparte:
 ```bash
-npx sequelize-cli db:migrate
+npx nodemon server/index.js
 ```
 
-## Comandos para ver el estado de las migraciones
-
+### 2. Iniciar el Frontend (Cliente)
+En otra terminal aparte:
 ```bash
-npx sequelize-cli db:migrate:status
+pnpm run dev
 ```
+
 ---
 
-## Comandos para correr los seeders
+## Pruebas de PWA y Modo Offline
 
-```bash
-npx sequelize-cli db:seed:all
-```
----
+La aplicación está configurada como una **PWA (Progressive Web App)**. Sin embargo, el modo **Offline real** solo puede probarse en la versión de producción (ya que el modo desarrollo depende del servidor de Vite activo).
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### Pasos para probar Offline:
 
-Currently, two official plugins are available:
+1. **Generar el build**:
+   ```bash
+   pnpm run build
+   ```
+2. **Servir la vista previa**:
+   ```bash
+   pnpm run preview
+   ```
+3. **Instalar la App**: Abre la URL en el navegador e instala la aplicación como una App de escritorio/móvil.
+4. **Test de desconexión**: Apaga el terminal de `pnpm run preview` y abre la App instalada. Verás que carga correctamente sin servidor.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Otros Comandos Útiles
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Ver estado de migraciones**: `npx sequelize-cli db:migrate:status`
+- **Deshacer última migración**: `npx sequelize-cli db:migrate:undo`
+- **Linting**: `pnpm run lint`
