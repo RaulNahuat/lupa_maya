@@ -52,7 +52,7 @@ export default defineConfig({
         ]
       },
       workbox: {
-        // En desarrollo, quitamos globPatterns para evitar el error de "no match found" 
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,ttf,woff2}'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -61,7 +61,7 @@ export default defineConfig({
               cacheName: 'google-fonts-cache',
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
+                maxAgeSeconds: 60 * 60 * 24 * 365
               },
               cacheableResponse: {
                 statuses: [0, 200]

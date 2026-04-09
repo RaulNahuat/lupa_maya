@@ -1,2 +1,0 @@
-Datos mock para pruebas o algo que nos sirva para probar 
-sin la db creo

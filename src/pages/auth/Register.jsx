@@ -1,12 +1,37 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PinPad from '../../components/auth/PinPad';
 import SecondaryButton from '../../components/SecondaryButton';
 import mayaCharacter from '../../assets/maya-character.png';
+import { registroOffline } from '../../services/auth/offlineAuth';
 
 const Register = () => {
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
+  const navigate = useNavigate();
+
+  const dotsToShow = pin.length < 4 ? pin.length : confirmPin.length;
+  const labelText = pin.length < 4 ? "Elige tu PIN de 4 números" : "Confirma tu PIN";
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    if (pin !== confirmPin) {
+      alert('Los PIN no coinciden');
+      return;
+    }
+    try {
+      const nuevoUsuario = await registroOffline({
+        nombre: e.target.nombre.value,
+        apellido: e.target.apellido.value,
+        pin,
+        rol: 'NINO',
+      });
+      console.log('Usuario registrado:', nuevoUsuario);
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error al registrar usuario:', error);
+    }
+  };
 
   const handlePinPress = (num) => {
     if (pin.length < 4) setPin(prev => prev + num);
@@ -40,21 +65,32 @@ const Register = () => {
         </h1>
         <p className="text-maya-gray font-medium mb-8 text-sm">Crea tu aventura con nombre y PIN</p>
 
-        <form className="w-full space-y-4">
-          <input
-            type="text"
-            placeholder="¿Cómo te llamas?"
-            className="w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-[#02845E] outline-none transition-all placeholder:text-gray-400 text-maya-dark text-center font-bold shadow-sm"
-          />
+        <form className="w-full space-y-4" onSubmit={handleRegister}>
+          <div className="space-y-3">
+            <input
+              type="text"
+              name="nombre"
+              required
+              placeholder="¿Cómo te llamas?"
+              className="w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-[#02845E] outline-none transition-all placeholder:text-gray-400 text-maya-dark text-center font-bold shadow-sm"
+            />
+            <input
+              type="text"
+              name="apellido"
+              required
+              placeholder="¿Cuál es tu apellido?"
+              className="w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-[#02845E] outline-none transition-all placeholder:text-gray-400 text-maya-dark text-center font-bold shadow-sm"
+            />
+          </div>
 
           <div className="space-y-4 flex flex-col items-center pt-4">
             <div className="flex flex-col items-center gap-2">
-              <span className="text-sm font-bold text-maya-gray">Elige tu PIN de 4 números</span>
+              <span className="text-sm font-bold text-maya-gray">{labelText}</span>
               <div className="flex gap-2">
                 {[...Array(4)].map((_, i) => (
                   <div
                     key={i}
-                    className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-300 ${pin.length > i ? 'bg-[#02845E] border-[#02845E] scale-110' : 'border-gray-200'
+                    className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-300 ${dotsToShow > i ? 'bg-[#02845E] border-[#02845E] scale-110' : 'border-gray-200'
                       }`}
                   />
                 ))}
