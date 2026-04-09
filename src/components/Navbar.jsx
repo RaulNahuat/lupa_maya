@@ -8,6 +8,9 @@ const Navbar = ({ isAdminMode, setIsAdminMode }) => {
   const navigate = useNavigate();
 
   const isAuthPage = ['/login', '/register'].includes(location.pathname);
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
+  if (isAdminRoute) return null;
 
   const handleModeSelection = (admin) => {
     setIsAdminMode(admin);

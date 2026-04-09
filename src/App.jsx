@@ -6,6 +6,8 @@ import Register from './pages/auth/Register';
 import Dashboard from './pages/Dashboard';
 import LevelMap from "./pages/player/LevelMap";
 import LevelPlay from "./pages/player/LevelPlay";
+import AdminGlyphsPage from './pages/admin/AdminGlyphsPage';
+import AdminUsersPage from './pages/admin/AdminUsersPage';
 import './App.css';
 
 function App() {
@@ -21,6 +23,8 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/map" element={<LevelMap />} />
           <Route path="/level/:id" element={<LevelPlay />} />
+          <Route path="/admin/glyphs" element={<AdminGlyphsPage />} />
+          <Route path="/admin/users" element={<AdminUsersPage />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
