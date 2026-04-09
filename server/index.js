@@ -51,7 +51,8 @@ app.post("/api/sync", async (req, res) => {
         nombre: datos.nombre,
         apellido: datos.apellido || "Pendiente",
         email: datos.email || null,
-        pin_hash: datos.pin,
+        pin_hash: datos.pin_hash || datos.pin,
+        password_hash: datos.password_hash || datos.password,
         rol: datos.rol || "NINO",
         local_id: datos.local_id
       });
