@@ -3,12 +3,19 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { createRequire } from "module";
 
+import http from "http";
+import { Server } from "socket.io";
+
 dotenv.config();
 
 const require = createRequire(import.meta.url);
 const db = require("./models/index.cjs");
+const { Op } = require("sequelize");
 
 const app = express();
+// Socket.io initialization
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: "*" } });
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
@@ -57,6 +64,9 @@ app.post("/api/sync", async (req, res) => {
         local_id: datos.local_id
       });
 
+      // Emitir evento de cambio por WebSockets
+      io.emit("hay_cambios");
+
       return res.status(201).json({ success: true, data: nuevo });
     }
 
@@ -73,7 +83,6 @@ app.get("/api/sync/pull", async (req, res) => {
   const lastSyncDate = lastSync && lastSync !== 'null' ? new Date(parseInt(lastSync)) : new Date(0);
 
   try {
-    const { Op } = require("sequelize");
     const cambiosRaw = await db.Usuario.findAll({
       where: {
         [Op.or]: [
@@ -103,6 +112,6 @@ app.get("/api/sync/pull", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+server.listen(PORT, () => {
+  console.log(`Servidor y Sockets corriendo en el puerto ${PORT}`);
 });

@@ -1,6 +1,6 @@
 import { db } from "../data/db";
 
-const API_SYNC_URL = "http://localhost:5000/api/sync";
+const API_SYNC_URL = `${import.meta.env.VITE_API_URL}/api/sync`;
 
 export const descargarCambios = async () => {
     console.log("Descargando cambios desde el servidor...");

@@ -4,6 +4,7 @@ import PinPad from '../../components/auth/PinPad';
 import SecondaryButton from '../../components/SecondaryButton';
 import mayaCharacter from '../../assets/maya-character.png';
 import { registroOffline } from '../../services/auth/offlineAuth';
+import { procesarColaSincronizacion } from '../../services/syncService';
 
 const Register = () => {
   const [pin, setPin] = useState('');
@@ -27,6 +28,7 @@ const Register = () => {
         rol: 'NINO',
       });
       console.log('Usuario registrado:', nuevoUsuario);
+      procesarColaSincronizacion();
       navigate('/dashboard');
     } catch (error) {
       console.error('Error al registrar usuario:', error);

@@ -1,10 +1,13 @@
-import { useState } from 'react';
 import PinPad from './PinPad';
 import PrimaryButton from '../PrimaryButton';
+import { loginOffline } from '../../services/auth/offlineAuth';
+import { procesarColaSincronizacion } from '../../services/syncService';
+import { useNavigate } from 'react-router-dom';
 
 const LoginUser = () => {
   const [nombre, setNombre] = useState('');
   const [pin, setPin] = useState('');
+  const navigate = useNavigate();
 
   const handleNumberPress = (num) => {
     if (pin.length < 4) {
@@ -16,9 +19,16 @@ const LoginUser = () => {
     setPin(prev => prev.slice(0, -1));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login Niño:', { nombre, pin });
+    try {
+      const user = await loginOffline({ nombre, pin });
+      console.log('Login Niño exitoso:', user);
+      procesarColaSincronizacion();
+      navigate('/dashboard');
+    } catch (error) {
+      alert(error);
+    }
   };
 
   return (

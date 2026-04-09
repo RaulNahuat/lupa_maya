@@ -1,13 +1,23 @@
-import { useState } from 'react';
 import PrimaryButton from '../PrimaryButton';
+import { loginOffline } from '../../services/auth/offlineAuth';
+import { procesarColaSincronizacion } from '../../services/syncService';
+import { useNavigate } from 'react-router-dom';
 
 const LoginAdmin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login Admin:', { email, password });
+    try {
+      const user = await loginOffline({ email, password }, true);
+      console.log('Login Admin exitoso:', user);
+      procesarColaSincronizacion();
+      navigate('/dashboard');
+    } catch (error) {
+      alert(error);
+    }
   };
 
   return (
