@@ -1,17 +1,14 @@
-import './App.css'
+import { Routes, Route, Navigate } from "react-router-dom"
+import LevelMap from "./pages/player/LevelMap"
+import LevelPlay from "./pages/player/LevelPlay"
 
 function App() {
   return (
-    <>
-    <section className='bg-red-200 h-screen'>
-      <div className='bg-blue-300 content-center justify-center justify-items-center h-full'>
-        <div>
-          <h1 className='text-4xl font-bold text-center'>Lupa Maya</h1>
-          <p className='text-xl font-semibold text-center'>Descubre la belleza de los glifos de la cultura maya</p>
-        </div>
-      </div>
-    </section>
-    </>
+    <Routes> 
+      <Route path="/" element={<Navigate to="/map" replace/>} />
+      <Route path="/map" element={<LevelMap />} />
+      <Route path="/level/:id" element={<LevelPlay />} />
+    </Routes>
   )
 }
 
