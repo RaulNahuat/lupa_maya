@@ -18,9 +18,14 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login isAdminMode={isAdminMode} />} />
           <Route path="/register" element={<Register isAdminMode={isAdminMode} />} />
+
+          {/* ADMIN */}
           <Route path="/dashboard" element={<Dashboard />} />
+
+          {/* PLAYER */}
           <Route path="/map" element={<LevelMap />} />
           <Route path="/level/:id" element={<LevelPlay />} />
+
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>

@@ -5,10 +5,10 @@ import './index.css'
 import App from './App.jsx'
 
 import { registerSW } from 'virtual:pwa-register'
-import { initSyncSyncService } from './services/syncService'
+import { initSyncService } from './services/syncService'
 
 registerSW({ immediate: true })
-initSyncSyncService();
+initSyncService();
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

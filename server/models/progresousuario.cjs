@@ -17,7 +17,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     usuario_id: {
       type: DataTypes.BIGINT,
-      allowNull: false
+      // allowNull: true para soportar usuarios registrados offline que aún
+      // no tienen ID del servidor. syncService propaga el ID real una vez
+      // que el usuario se sincroniza.
+      allowNull: true
     },
     nivel_id: {
       type: DataTypes.BIGINT,
@@ -64,9 +67,13 @@ module.exports = (sequelize, DataTypes) => {
     createdAt: false,
     updatedAt: 'updated_at',
     indexes: [
+      // El unique ya no puede ser (usuario_id, nivel_id) porque usuario_id
+      // puede ser NULL mientras el usuario no se haya sincronizado.
+      // local_id es el identificador único confiable desde el cliente.
       {
         unique: true,
-        fields: ['usuario_id', 'nivel_id']
+        fields: ['local_id'],
+        name: 'progreso_usuarios_local_id_unique'
       }
     ]
   });

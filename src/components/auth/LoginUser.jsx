@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import PinPad from './PinPad';
 import PrimaryButton from '../PrimaryButton';
+import { useNavigate } from "react-router-dom";
+import { useGameStore } from '../../store/game/useGameStore';
 
 const LoginUser = () => {
+  const navigate = useNavigate();
   const [nombre, setNombre] = useState('');
   const [pin, setPin] = useState('');
+  const setCurrentUser = useGameStore((s) => s.setCurrentUser);
 
   const handleNumberPress = (num) => {
     if (pin.length < 4) {
@@ -16,9 +20,30 @@ const LoginUser = () => {
     setPin(prev => prev.slice(0, -1));
   };
 
+  //const handleSubmit = (e) => {
+    //e.preventDefault();
+    //console.log('Login Niño:', { nombre, pin });
+
+    // Redirigir al mapa de niveles
+    //navigate("/map");
+  //};
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Login Niño:', { nombre, pin });
+
+    const user = {
+      nombre: nombre,
+      pin: pin,
+      local_id: Date.now(),
+    };
+
+    console.log('Login Niño:', user);
+
+    // Guardar usuario en el store
+    setCurrentUser(user);
+
+    // Redirigir al mapa
+    navigate("/map");
   };
 
   return (
