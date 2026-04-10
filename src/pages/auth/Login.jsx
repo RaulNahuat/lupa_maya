@@ -2,11 +2,14 @@ import { Link } from 'react-router-dom';
 import LoginUser from '../../components/auth/LoginUser';
 import LoginAdmin from '../../components/auth/LoginAdmin';
 import mayaCharacter from '../../assets/maya-character.png';
+import { useAdmin } from '../../context/AdminContext';
+import Navbar from '../../components/Navbar';
 
-const Login = ({ isAdminMode }) => {
+const Login = () => {
+  const { isAdminMode } = useAdmin();
   return (
     <div className="min-h-screen bg-maya-cream flex items-center justify-center p-4 pt-24 relative overflow-hidden">
-
+      <Navbar />
       <div className="absolute top-[-10%] left-[-5%] w-64 h-64 bg-maya-gold/5 rounded-full blur-3xl"></div>
       <div className="absolute bottom-[-5%] right-[-5%] w-96 h-96 bg-maya-dark/5 rounded-full blur-3xl"></div>
 

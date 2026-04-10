@@ -8,6 +8,8 @@ import { registerSW } from 'virtual:pwa-register'
 import { initSyncService } from './services/syncService'
 import { initSocket } from './services/socketService'
 
+import { AdminProvider } from './context/AdminContext.jsx'
+
 registerSW({ immediate: true })
 initSyncService();
 initSocket();
@@ -15,7 +17,9 @@ initSocket();
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter> 
-      <App />
+      <AdminProvider>
+        <App />
+      </AdminProvider>
     </BrowserRouter>
   </StrictMode>,
 )

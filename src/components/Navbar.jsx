@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Scan, User, UserPlus, ChevronDown, ShieldCheck, Users } from 'lucide-react';
-
-const Navbar = ({ isAdminMode, setIsAdminMode }) => {
+import { useAdmin } from '../context/AdminContext';
+const Navbar = () => {
+  const { isAdminMode, setIsAdminMode } = useAdmin();
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
