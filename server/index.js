@@ -5,8 +5,11 @@ import { createRequire } from "module";
 
 import http from "http";
 import { Server } from "socket.io";
-import { handleSyncUsuarios } from "./controllers/usuariosController.js";
-import { handleSyncProgreso } from "./controllers/progresoController.js";
+import { handleSyncUsuarios } from "./controllers/pushController/UsuariosPushController.js";
+import { handleSyncProgreso } from "./controllers/pushController/progresoPushController.js";
+import { getUsuariosPull } from "./controllers/pullController/usuariosPullController.js";
+import { getNivelesPull } from "./controllers/pullController/nivelesPullController.js";
+import { getProgresoPull } from "./controllers/pullController/progresoPullController.js";
 
 dotenv.config();
 
@@ -44,18 +47,14 @@ app.post("/api/sync", async (req, res) => {
   const { entidad, accion } = req.body;
 
   try {
-
-    // Usuarios 
-    if (entidad === "usuarios" && accion === "CREAR") {
-      return await handleSyncUsuarios(req, res, db, io);
+    switch (`${entidad}:${accion}`) {
+      case "usuarios:CREAR":
+        return await handleSyncUsuarios(req, res, db, io);
+      case "progreso_usuarios:UPSERT":
+        return await handleSyncProgreso(req, res, db);
+      default:
+        return res.status(400).json({ success: false, message: "Entidad o acción no soportada" });
     }
-
-    // Progreso de usuarios
-    if (entidad === "progreso_usuarios" && accion === "UPSERT") {
-      return await handleSyncProgreso(req, res, db);
-    }
-
-    res.status(400).json({ success: false, message: "Entidad o acción no soportada" });
 
   } catch (error) {
     console.error("Error en sincronización:", error);
@@ -75,44 +74,9 @@ app.get("/api/sync/pull", async (req, res) => {
 
   try {
 
-    const cambiosRaw = await db.Usuario.findAll({
-      where: {
-        [Op.or]: [
-          { updated_at: { [Op.gt]: lastSyncDate } },
-          { deleted_at: { [Op.gt]: lastSyncDate } }
-        ]
-      },
-      paranoid: false
-    });
-
-    const usuarios = cambiosRaw.map(user => {
-      const data = user.toJSON();
-
-      if (!data.local_id) {
-        data.local_id = `legacy-${data.id}`;
-      }
-      return data;
-    });
-
-    const nivelesRaw = await db.Nivel.findAll({
-      where: { updated_at: { [Op.gt]: lastSyncDate } }
-    });
-
-    const niveles = nivelesRaw.map(n => n.toJSON());
-
-    // Progreso filtrado por usuario para no exponer datos de otros jugadores.
-    // Si no se envía usuario_local_id, devolver array vacío por seguridad.
-    let progreso_usuarios = [];
-
-    if (usuario_local_id) {
-      const progresosRaw = await db.ProgresoUsuario.findAll({
-        where: {
-          usuario_local_id,
-          updated_at: { [Op.gt]: lastSyncDate }
-        }
-      });
-      progreso_usuarios = progresosRaw.map(p => p.toJSON());
-    }
+    const usuarios = await getUsuariosPull(db, Op, lastSyncDate);
+    const niveles = await getNivelesPull(db, Op, lastSyncDate);
+    const progreso_usuarios = await getProgresoPull(db, Op, lastSyncDate, usuario_local_id);
 
     res.json({
       success: true,
