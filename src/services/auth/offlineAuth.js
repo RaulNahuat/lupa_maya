@@ -49,14 +49,38 @@ export const loginOffline = async (credenciales, esAdmin = false) => {
         }
     } else {
         const users = await db.usuarios.toArray();
-        const posibles = users.filter(u => u.nombre === credenciales.nombre);
+        const nBuscado = credenciales.nombre.trim().toLowerCase();
+        const pBuscado = String(credenciales.pin);
+        
+        const posibles = users.filter(u => {
+            const n = u.nombre?.trim().toLowerCase() || "";
+            const a = u.apellido?.trim().toLowerCase() || "";
+            const nombreCompleto = (n + " " + a).trim();
+            
+            return n === nBuscado || nombreCompleto === nBuscado;
+        });
+        
+        console.log("Usuarios en DB local:", users.length, "Posibles coincidencias:", posibles.length);
         
         let encontrado = null;
         for (const u of posibles) {
-            if (u.pin_hash && bcrypt.compareSync(credenciales.pin, u.pin_hash)) {
-                encontrado = u;
-                break;
-            } else if (u.pin === credenciales.pin) {
+            let esValido = false;
+            
+            if (u.pin === pBuscado) {
+                esValido = true;
+            } else if (u.pin_hash === pBuscado) {
+                esValido = true;
+            } else if (u.pin_hash) {
+                try {
+                    if (bcrypt.compareSync(pBuscado, u.pin_hash)) {
+                        esValido = true;
+                    }
+                } catch (e) {
+                    console.error("Error al comparar hash (es normal si era texto plano)", e);
+                }
+            }
+            
+            if (esValido) {
                 encontrado = u;
                 break;
             }

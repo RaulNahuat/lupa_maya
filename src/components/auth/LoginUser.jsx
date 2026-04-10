@@ -1,13 +1,16 @@
+import { useState } from 'react';
 import PinPad from './PinPad';
 import PrimaryButton from '../PrimaryButton';
 import { loginOffline } from '../../services/auth/offlineAuth';
 import { procesarColaSincronizacion } from '../../services/syncService';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+import { useGameStore } from '../../store/game/useGameStore';
 
 const LoginUser = () => {
+  const navigate = useNavigate();
   const [nombre, setNombre] = useState('');
   const [pin, setPin] = useState('');
-  const navigate = useNavigate();
+  const setCurrentUser = useGameStore((s) => s.setCurrentUser);
 
   const handleNumberPress = (num) => {
     if (pin.length < 4) {
@@ -24,9 +27,17 @@ const LoginUser = () => {
     try {
       const user = await loginOffline({ nombre, pin });
       console.log('Login Niño exitoso:', user);
+      
+      setCurrentUser({
+        ...user,
+        local_id: user.local_id || Date.now(),
+      });
+      
       procesarColaSincronizacion();
-      navigate('/dashboard');
+      navigate('/map');
+      
     } catch (error) {
+      console.error(error);
       alert(error);
     }
   };

@@ -2,7 +2,7 @@ import { Lock, Star } from "lucide-react"
 
 export default function LevelNode({ level, onClick, isActive }) {
   // Nodo bloqueado
-  if (!level.unlocked) {
+  if (!level.desbloqueado) {
     return (
       <button disabled className="flex flex-col items-center cursor-not-allowed">
         <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center shadow-md">
@@ -13,8 +13,8 @@ export default function LevelNode({ level, onClick, isActive }) {
   }
 
   // Nodo completado
-  if (level.completed) {
-    const stars = level.stars ?? 3
+  if (level.completado) {
+    const stars = level.estrellas ?? 3
     return (
       <button onClick={onClick} className="flex flex-col items-center gap-1 hover:scale-105 transition-transform duration-200">
         <div className="w-16 h-16 rounded-full bg-green-600 flex items-center justify-center shadow-md relative">
@@ -41,7 +41,7 @@ export default function LevelNode({ level, onClick, isActive }) {
     <button onClick={onClick} className="flex flex-col items-center hover:scale-105 transition-transform duration-200">
       <div className="w-16 h-16 rounded-full bg-amber-500 flex items-center justify-center shadow-md relative">
         <Star size={26} className="text-white fill-white" />
-        {/* Borde inferior decorativo tipo "moneda" */}
+        {/* Borde inferior decorativo */}
         <div className="absolute -bottom-1 w-14 h-3 rounded-full bg-amber-700 -z-10" />
       </div>
     </button>

@@ -38,20 +38,14 @@ module.exports = (sequelize, DataTypes) => {
     version: {
       type: DataTypes.INTEGER,
       defaultValue: 1
-    },
-    completado: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    },
-    desbloqueado: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    },
+    }
   }, {
     sequelize,
     modelName: 'Nivel',
     tableName: 'niveles',
-    timestamps: false
+    timestamps: true,
+    createdAt: false,
+    updatedAt: 'updated_at'
   });
 
   return Nivel;
