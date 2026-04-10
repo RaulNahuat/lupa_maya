@@ -19,17 +19,25 @@ export default function LevelPlay() {
 
   if (!level) return <p className="text-center mt-10">Cargando...</p>
 
+  if (!level.contenido) {
+    return (
+      <p className="text-center mt-10 text-red-500">
+        Este nivel aun no tiene contenido configurado.
+      </p>
+    )
+  }
+
   if (level.tipo === "APRENDIZAJE") {
     return <QuizLevel level={level} onComplete={completeLevel} />
   }
 
-  if (level.tipo === "BÚSQUEDA") {
+  if (level.tipo === "BUSQUEDA") {
     return <ScanLevel level={level} onComplete={completeLevel} />
   }
 
   return (
     <p className="text-center mt-10">
-      Tipo de nivel no implementado aún: {level.tipo}
+      Tipo de nivel no reconocido: {level.tipo}
     </p>
   )
 }
@@ -38,6 +46,7 @@ export default function LevelPlay() {
 // NIVEL DE APRENDIZAJE (Quiz)
 function QuizLevel({ level, onComplete }) {
   const navigate = useNavigate()
+  const { contenido } = level
 
   const [selected, setSelected] = useState(null)
   const [answered, setAnswered] = useState(false)
@@ -47,7 +56,7 @@ function QuizLevel({ level, onComplete }) {
   const handleAnswer = (option) => {
     if (answered) return
 
-    const correcto = option === level.content.correctAnswer
+    const correcto = option === contenido.correctAnswer
     setSelected(option)
     setAnswered(true)
     setEsCorrecta(correcto)
@@ -70,20 +79,12 @@ function QuizLevel({ level, onComplete }) {
   return (
     <div className="max-w-md mx-auto mt-10 text-center px-4">
       <h2 className="text-xl font-bold mb-4">
-        {level.content.question}
+        {contenido.question}
       </h2>
 
-      {level.glyph?.image && (
-        <img
-          src={level.glyph.image}
-          alt={level.glyph.name}
-          className="w-40 mx-auto mb-6"
-        />
-      )}
-
       <div className="flex flex-col gap-3">
-        {level.content.options.map((option) => {
-          const isCorrect = option === level.content.correctAnswer
+        {contenido.options.map((option) => {
+          const isCorrect = option === contenido.correctAnswer
           const isSelected = option === selected
 
           let style = "bg-blue-500"
@@ -108,7 +109,7 @@ function QuizLevel({ level, onComplete }) {
       {answered && (
         <div className="mt-4">
           <p className="font-bold text-lg">
-            {esCorrecta ? "¡Correcto! 🎉" : "Incorrecto, intenta de nuevo"}
+            {esCorrecta ? "¡Correcto!" : "Incorrecto, intenta de nuevo"}
           </p>
 
           {esCorrecta ? (
@@ -141,6 +142,8 @@ function ScanLevel({ level, onComplete }) {
   const canvasRef = useRef(null)
   const streamRef = useRef(null)
   const navigate = useNavigate()
+
+  const { contenido } = level
 
   const [scanned, setScanned] = useState(false)
   const [detectado, setDetectado] = useState(null) // resultado de la detección
@@ -197,7 +200,7 @@ function ScanLevel({ level, onComplete }) {
   const simulateDetection = () => {
     setTimeout(() => {
       // Simula que el glifo detectado coincide con el objetivo
-      setDetectado({ coincide: true, glifo: level.glyph })
+      setDetectado({ coincide: true, glifo: contenido.glifo })
       setScanned(true)
     }, 1000)
   }
@@ -243,7 +246,9 @@ function ScanLevel({ level, onComplete }) {
   return (
     <div className="text-center mt-6 px-4">
       <h2 className="text-xl font-bold mb-4">
-        {level.content?.instruction ?? "Encuentra el glifo indicado"}
+        {contenido.glifo?.nombre_maya
+          ? `Encuentra el glifo: ${contenido.glifo.nombre_maya}`
+          : "Encuentra el glifo indicado"}
       </h2>
 
       {/* Vista de cámara */}
@@ -271,9 +276,13 @@ function ScanLevel({ level, onComplete }) {
         <div className="mt-6">
           {detectado.coincide ? (
             <>
-              <p className="text-green-600 font-bold text-lg">¡Glifo correcto!</p>
-              <h3 className="text-lg font-bold mt-2">{detectado.glifo?.name}</h3>
-              <p className="text-gray-600">{detectado.glifo?.meaning}</p>
+              <p className="text-green-600 font-bold text-lg">Glifo correcto!</p>
+              {detectado.glifo?.nombre_maya && (
+                <h3 className="text-lg font-bold mt-2">{detectado.glifo.nombre_maya}</h3>
+              )}
+              {detectado.glifo?.significado_espanol && (
+                <p className="text-gray-600">{detectado.glifo.significado_espanol}</p>
+              )}
               <button
                 onClick={handleComplete}
                 className="mt-4 px-6 py-2 bg-green-500 text-white font-bold rounded-full"

@@ -6,6 +6,7 @@ export const useGameStore = create((set, get) => ({
   levels: [],
   currentUser: null,
 
+  // Guarda el usuario en el store (se llama después del login)
   setCurrentUser: (user) => set({ currentUser: user }),
 
   /**
@@ -16,10 +17,10 @@ export const useGameStore = create((set, get) => ({
   initLevels: async () => {
     const { currentUser } = get()
 
-    // Traer catálogo completo de niveles
+    // Traer catalogo completo ordenado por secuencia
     const niveles = await db.niveles.orderBy('orden_secuencia').toArray()
 
-    // Si hay usuario, traer su progreso
+    // Traer progreso del usuario si esta logueado
     let progresoMap = {}
     if (currentUser) {
       const progresos = await db.progreso_usuarios
@@ -32,31 +33,74 @@ export const useGameStore = create((set, get) => ({
       )
     }
 
-    // Relacionar los niveles con el progreso para determinar el estado de cada nivel
-    const levelsConProgreso = niveles.map((nivel, index) => {
-      const progreso = progresoMap[nivel.id]
+    // Armar cada nivel con su contenido segun el tipo
+    const levelsConContenido = await Promise.all(
+      niveles.map(async (nivel, index) => {
 
-      const completado = progreso?.completado ?? false
-      const estrellas = progreso?.estrellas ?? 0
+        let contenido = null
 
-      // Primer nivel siempre está desbloqueado
-      // Desbloquean el siguiente si el anterior fue completado
-      const anterior = index > 0 ? niveles[index - 1] : null
-      const anteriorCompletado = anterior
-        ? !!(progresoMap[anterior.id]?.completado)
-        : true
+        if (nivel.tipo === 'APRENDIZAJE') {
+          // Buscar la pregunta activa del nivel
+          const pregunta = await db.preguntas
+            .where('nivel_id')
+            .equals(nivel.id)
+            .first()
 
-      const desbloqueado = index === 0 || anteriorCompletado
+          if (pregunta) {
+            const opciones = await db.opciones_respuestas
+              .where('preguntas_id')
+              .equals(pregunta.id)
+              .toArray()
 
-      return {
-        ...nivel,
-        completado,
-        estrellas,
-        desbloqueado,
-      }
-    })
+            contenido = {
+              pregunta_id: pregunta.id,
+              question: pregunta.texto_pregunta,
+              options: opciones.map((o) => o.texto_opcion),
+              // La opcion correcta se identifica por el flag es_correcta
+              correctAnswer: opciones.find((o) => o.es_correcta)?.texto_opcion ?? null
+            }
+          }
+        }
 
-    set({ levels: levelsConProgreso })
+        if (nivel.tipo === 'BUSQUEDA') {
+          // Buscar el glifo objetivo del nivel (primer orden de aparicion)
+          const objetivo = await db.nivel_glifos_objetivos
+            .where('nivel_id')
+            .equals(nivel.id)
+            .first()
+
+          if (objetivo) {
+            contenido = {
+              glifo_id: objetivo.glifo_id,
+              glifo: objetivo.glifo ?? null,  // viene anidado del servidor
+              orden_aparicion: objetivo.orden_aparicion
+            }
+          }
+        }
+
+        // Calcular estado del jugador para este nivel
+        const progreso = progresoMap[nivel.id]
+        const completado = progreso?.completado ?? false
+        const estrellas = progreso?.estrellas ?? 0
+
+        const anterior = index > 0 ? niveles[index - 1] : null
+        const anteriorCompletado = anterior
+          ? !!(progresoMap[anterior.id]?.completado)
+          : true
+
+        const desbloqueado = index === 0 || anteriorCompletado
+
+        return {
+          ...nivel,
+          contenido,
+          completado,
+          estrellas,
+          desbloqueado,
+        }
+      })
+    )
+
+    set({ levels: levelsConContenido })
   },
 
   /**

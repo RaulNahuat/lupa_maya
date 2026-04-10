@@ -7,19 +7,21 @@ const API_SYNC_URL = `${import.meta.env.VITE_API_URL}/api/sync`;
  * Aplica una estrategia "el más reciente gana" para progreso:
  * si el registro local es más nuevo que el remoto, no se sobreescribe.
  */
-export const descargarCambios = async () => {
+export const descargarCambios = async (usuarioLocalId = null) => {
     let lastSync = 0;
 
     const config = await db.configuracion.get('lastSync');
     if (config) lastSync = config.valor;
 
+    const usuarioParam = usuarioLocalId ? `&usuario_local_id=${usuarioLocalId}` : '';
+
     let result;
     try {
-        const response = await fetch(`${API_SYNC_URL}/pull?lastSync=${lastSync}`);
+        const response = await fetch(`${API_SYNC_URL}/pull?lastSync=${lastSync}${usuarioParam}`);
         result = await response.json();
     } catch (error) {
-        console.warn("Pull sync fallido (sin conexión o error de red):", error);
-        return; // No abortar el ciclo completo; el push puede continuar
+        console.warn("Pull sync fallido (sin conexion o error de red):", error);
+        return;
     }
 
     if (!result.success) return;
@@ -27,6 +29,9 @@ export const descargarCambios = async () => {
     const {
         usuarios = [],
         niveles = [],
+        preguntas = [],
+        opciones_respuestas = [],
+        nivel_glifos_objetivos = [],
         progreso_usuarios = []
     } = result.cambios;
 
@@ -34,6 +39,9 @@ export const descargarCambios = async () => {
         'rw',
         db.usuarios,
         db.niveles,
+        db.preguntas,
+        db.opciones_respuestas,
+        db.nivel_glifos_objetivos,
         db.progreso_usuarios,
         db.configuracion,
         async () => {
@@ -55,10 +63,25 @@ export const descargarCambios = async () => {
                 await db.niveles.bulkPut(niveles);
             }
 
-            // PROGRESO 
+            // PREGUNTAS - contenido de niveles tipo APRENDIZAJE
+            if (preguntas.length > 0) {
+                await db.preguntas.bulkPut(preguntas);
+            }
+
+            // OPCIONES DE RESPUESTA
+            if (opciones_respuestas.length > 0) {
+                await db.opciones_respuestas.bulkPut(opciones_respuestas);
+            }
+
+            // GLIFOS OBJETIVO - contenido de niveles tipo BÚSQUEDA
+            if (nivel_glifos_objetivos.length > 0) {
+                await db.nivel_glifos_objetivos.bulkPut(nivel_glifos_objetivos);
+            }
+
+            // PROGRESO - estrategia "el más reciente gana"
             for (const remote of progreso_usuarios) {
 
-                // Si el registro remoto no tiene local_id no se puede hacer lookup local, se guarda directamente.
+                // Si el registro remoto no tiene local_id no se puede hacer lookup local, se guarda directamente
                 if (!remote.local_id) {
                     await db.progreso_usuarios.put({
                         ...remote,
@@ -69,7 +92,7 @@ export const descargarCambios = async () => {
 
                 const local = await db.progreso_usuarios.get(remote.local_id);
 
-                // Si el local es más nuevo, no sobreescribir
+                // Si el local es mas nuevo, no sobreescribir
                 if (local && new Date(local.updated_at) > new Date(remote.updated_at)) {
                     continue;
                 }
@@ -89,15 +112,10 @@ export const descargarCambios = async () => {
 };
 
 /**
- * Push: sube los ítems PENDIENTES de la cola al servidor, uno por uno.
- * Por cada ítem procesado con éxito:
- *   - Marca la entrada de la cola como ENVIADO.
- *   - Actualiza sync_status de la entidad correspondiente en IndexedDB.
- *   - Si la entidad es un usuario, propaga su ID real del servidor a todos
- *     los registros de progreso que estaban con usuario_id: null.
+ * Sube un item de la cola al servidor y actualiza el estado local.
+ * Si es un usuario recien sincronizado, propaga su ID real al progreso pendiente.
  */
 const procesarItem = async (item) => {
-    console.log("Enviando ítem:", JSON.stringify(item, null, 2))
     const response = await fetch(API_SYNC_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -151,19 +169,18 @@ const procesarItem = async (item) => {
         }
     );
 
-    console.log(`Ítem ${item.id} (${item.entidad}) subido con éxito.`);
+    console.log(`Item ${item.id} (${item.entidad}) subido con exito.`);
 };
 
 /**
- * Ciclo completo de sincronización: pull primero, push después.
- * Los ítems de usuario se procesan antes que los de progreso para
- * garantizar que el usuario_id real esté disponible cuando se
- * envíe el progreso.
+ * Ciclo completo: pull primero, push despues.
+ * Usuarios se procesan antes que progreso para garantizar
+ * que el usuario_id real este disponible al enviar el progreso.
  */
-export const procesarColaSincronizacion = async () => {
-    console.log("Iniciando ciclo de sincronización...");
+export const procesarColaSincronizacion = async (usuarioLocalId = null) => {
+    console.log("Iniciando ciclo de sincronizacion...");
 
-    await descargarCambios();
+    await descargarCambios(usuarioLocalId);
 
     const items = await db.cola_sincronizacion
         .where('estado')
@@ -186,18 +203,18 @@ export const procesarColaSincronizacion = async () => {
         try {
             await procesarItem(item);
         } catch (error) {
-            console.error(`Error subiendo ítem ${item.id} (${item.entidad}):`, error);
+            console.error(`Error subiendo item ${item.id} (${item.entidad}):`, error);
         }
     }
 };
 
-export const initSyncService = () => {
+export const initSyncService = (usuarioLocalId = null) => {
     window.addEventListener('online', () => {
-        console.log("Conexión restaurada. Sincronizando...");
-        procesarColaSincronizacion();
+        console.log("Conexion restaurada. Sincronizando...");
+        procesarColaSincronizacion(usuarioLocalId);
     });
 
     if (navigator.onLine) {
-        procesarColaSincronizacion();
+        procesarColaSincronizacion(usuarioLocalId);
     }
 };
