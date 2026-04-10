@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import AdminHeader from '../../components/admin/AdminHeader';
 import GlyphSearchBar from '../../components/admin/GlyphSearchBar';

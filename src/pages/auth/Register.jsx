@@ -5,6 +5,7 @@ import SecondaryButton from '../../components/SecondaryButton';
 import mayaCharacter from '../../assets/maya-character.png';
 import { registroOffline } from '../../services/auth/offlineAuth';
 import { procesarColaSincronizacion } from '../../services/syncService';
+import Navbar from "../../components/Navbar";
 
 const Register = () => {
   const [pin, setPin] = useState('');
@@ -47,7 +48,7 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-maya-cream flex items-center justify-center p-4 pt-24 relative overflow-hidden">
-
+      <Navbar />
       <div className="absolute top-[-10%] left-[-5%] w-64 h-64 bg-[#02845E]/5 rounded-full blur-3xl"></div>
       <div className="absolute bottom-[-5%] right-[-5%] w-96 h-96 bg-maya-dark/5 rounded-full blur-3xl"></div>
 
