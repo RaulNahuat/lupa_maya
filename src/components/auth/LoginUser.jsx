@@ -22,7 +22,7 @@ const LoginUser = () => {
     setPin(prev => prev.slice(0, -1));
   };
 
-  const handleSubmit = async (e) => {
+  /*const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const user = await loginOffline({ nombre, pin });
@@ -36,6 +36,31 @@ const LoginUser = () => {
       procesarColaSincronizacion();
       navigate('/map');
       
+    } catch (error) {
+      console.error(error);
+      alert(error);
+    }
+  };*/
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const user = await loginOffline({ nombre, pin });
+      console.log('Login Niño exitoso:', user);
+
+      // Si el usuario no tiene local_id algo fallo en el registro
+      if (!user.local_id) {
+        alert('Error: usuario sin identificador local. Por favor regístrate de nuevo.');
+        return;
+      }
+
+      setCurrentUser(user);
+
+      // Pasar el local_id para que el pull filtre el progreso de este usuario
+      procesarColaSincronizacion(user.local_id);
+
+      navigate('/map');
+
     } catch (error) {
       console.error(error);
       alert(error);
