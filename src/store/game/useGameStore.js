@@ -1,6 +1,7 @@
 import { create } from "zustand"
 import { db } from "../../data/db"
 import { guardarProgreso } from "../../services/player/progresoService"
+import { procesarColaSincronizacion } from "../../services/syncService"
 
 export const useGameStore = create((set, get) => ({
   levels: [],
@@ -136,5 +137,7 @@ export const useGameStore = create((set, get) => ({
     })
 
     set({ levels: updatedLevels })
+
+    procesarColaSincronizacion(currentUser.local_id);
   },
 }))

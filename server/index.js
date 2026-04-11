@@ -53,7 +53,7 @@ app.post("/api/sync", async (req, res) => {
       case "usuarios:CREAR":
         return await handleSyncUsuarios(req, res, db, io);
       case "progreso_usuarios:UPSERT":
-        return await handleSyncProgreso(req, res, db);
+        return await handleSyncProgreso(req, res, db, io);
       default:
         return res.status(400).json({ success: false, message: "Entidad o acción no soportada" });
     }

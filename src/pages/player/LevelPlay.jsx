@@ -79,7 +79,7 @@ function QuizLevel({ level, onComplete }) {
   const handleContinue = async () => {
     const estrellas = calcularEstrellas(intentos)
     await onComplete(level.id, estrellas, intentos)
-    navigate("/")
+    navigate("/map")
   }
 
   return (
@@ -240,7 +240,7 @@ function ScanLevel({ level, onComplete }) {
       <div className="max-w-md mx-auto mt-10 text-center px-4">
         <p className="text-red-500 font-semibold">{camaraError}</p>
         <button
-          onClick={() => navigate("/src/pages/player/LevelMap.jsx")}
+          onClick={() => navigate("/map")}
           className="mt-6 px-4 py-2 bg-gray-500 text-white rounded"
         >
           Volver al mapa

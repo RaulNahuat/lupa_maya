@@ -7,11 +7,13 @@ import SecondaryButton from '../../components/SecondaryButton';
 import mayaCharacter from '../../assets/maya-character.png';
 import { registroOffline } from '../../services/auth/offlineAuth';
 import { procesarColaSincronizacion } from '../../services/syncService';
+import { useGameStore } from '../../store/game/useGameStore';
 import Navbar from "../../components/Navbar";
 
 const Register = () => {
   const { loginUser } = useAuth();
   const { showToast } = useToast();
+  const initLevels = useGameStore(s => s.initLevels);
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const navigate = useNavigate();
@@ -35,10 +37,11 @@ const Register = () => {
       
       showToast('¡Cuenta creada!', 'Bienvenido a Lupa Maya.', 'success');
       
-      // Iniciar sesión automáticamente
       loginUser(nuevoUsuario);
 
-      procesarColaSincronizacion();
+      await procesarColaSincronizacion(nuevoUsuario.local_id);
+      await initLevels(nuevoUsuario);
+
       navigate('/map');
     } catch (error) {
       console.error('Error al registrar usuario:', error);

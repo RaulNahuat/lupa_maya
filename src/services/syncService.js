@@ -172,40 +172,53 @@ const procesarItem = async (item) => {
     console.log(`Item ${item.id} (${item.entidad}) subido con exito.`);
 };
 
+let isSyncing = false;
+
 /**
  * Ciclo completo: pull primero, push despues.
  * Usuarios se procesan antes que progreso para garantizar
  * que el usuario_id real este disponible al enviar el progreso.
  */
 export const procesarColaSincronizacion = async (usuarioLocalId = null) => {
-    console.log("Iniciando ciclo de sincronizacion...");
-
-    await descargarCambios(usuarioLocalId);
-
-    const items = await db.cola_sincronizacion
-        .where('estado')
-        .equals('PENDIENTE')
-        .toArray();
-
-    if (items.length === 0) {
-        console.log("No hay datos locales para subir.");
+    if (isSyncing) {
+        console.log("Sincronización ya en curso, ignorando llamada duplicada.");
         return;
     }
+    
+    isSyncing = true;
+    console.log("Iniciando ciclo de sincronizacion...");
 
-    const porEntidad = (entidad) => items.filter((i) => i.entidad === entidad);
-    const ordenados = [
-        ...porEntidad('usuarios'),
-        ...porEntidad('progreso_usuarios'),
-        ...items.filter((i) => i.entidad !== 'usuarios' && i.entidad !== 'progreso_usuarios')
-    ];
+    try {
+        await descargarCambios(usuarioLocalId);
 
-    for (const item of ordenados) {
-        try {
-            await procesarItem(item);
-        } catch (error) {
-            console.error(`Error subiendo item ${item.id} (${item.entidad}):`, error);
+        const items = await db.cola_sincronizacion
+            .where('estado')
+            .equals('PENDIENTE')
+            .toArray();
+
+        if (items.length === 0) {
+            console.log("No hay datos locales para subir.");
+            return;
         }
+
+        const porEntidad = (entidad) => items.filter((i) => i.entidad === entidad);
+        const ordenados = [
+            ...porEntidad('usuarios'),
+            ...porEntidad('progreso_usuarios'),
+            ...items.filter((i) => i.entidad !== 'usuarios' && i.entidad !== 'progreso_usuarios')
+        ];
+
+        for (const item of ordenados) {
+            try {
+                await procesarItem(item);
+            } catch (error) {
+                console.error(`Error subiendo item ${item.id} (${item.entidad}):`, error);
+            }
+        }
+    } catch (err) {
+        console.error("Error crítico en el proceso de sincronización:", err);
+    } finally {
+        isSyncing = false;
+        console.log("Ciclo de sincronizacion finalizado.");
     }
 };
-
-// Evento de inicialización movido al AuthContext para tener alcance (scope) del usuario actual

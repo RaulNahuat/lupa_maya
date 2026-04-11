@@ -1,46 +1,59 @@
-export async function handleSyncProgreso(req, res, db) {
+export async function handleSyncProgreso(req, res, db, io) {
   const { datos } = req.body;
 
-  // Buscar por local_id primero para manejar casos donde el cliente aún no tiene un usuario_id asignado por el servidor.
-  let existente = null;
-
-  if (datos.local_id) {
-    existente = await db.ProgresoUsuario.findOne({
-      where: { local_id: datos.local_id }
-    });
+  let usuarioIdReal = datos.usuario_id;
+  if (!usuarioIdReal && datos.usuario_local_id) {
+    const user = await db.Usuario.findOne({ where: { local_id: datos.usuario_local_id } });
+    if (user) {
+      usuarioIdReal = user.id;
+      console.log(`ID resuelto para ${datos.usuario_local_id} -> ${usuarioIdReal}`);
+    }
   }
 
-  if (!existente && datos.usuario_id) {
-    existente = await db.ProgresoUsuario.findOne({
-      where: {
-        usuario_id: datos.usuario_id,
-        nivel_id: datos.nivel_id
-      }
-    });
-  }
+  let existente = await db.ProgresoUsuario.findOne({
+    where: { local_id: datos.local_id }
+  });
 
   if (existente) {
     await existente.update({
+      usuario_id: usuarioIdReal || existente.usuario_id,
+      usuario_local_id: datos.usuario_local_id || existente.usuario_local_id,
       completado: datos.completado,
-      estrellas: datos.estrellas,
+      estrellas: Math.max(existente.estrellas, datos.estrellas),
       intentos: datos.intentos,
       ultimo_intento: datos.ultimo_intento,
       updated_at: new Date()
     });
 
-    return res.json({ success: true, data: existente.toJSON() });
+    if (io) io.emit("hay_cambios");
+
+    return res.json({ success: true, message: 'Actualizado', data: existente.toJSON() });
   }
 
-  const nuevo = await db.ProgresoUsuario.create({
-    local_id: datos.local_id,
-    usuario_id: datos.usuario_id || null,
-    usuario_local_id: datos.usuario_local_id || null,
-    nivel_id: datos.nivel_id,
-    completado: datos.completado,
-    estrellas: datos.estrellas,
-    intentos: datos.intentos,
-    ultimo_intento: datos.ultimo_intento
-  });
+  try {
+    const nuevo = await db.ProgresoUsuario.create({
+      local_id: datos.local_id,
+      usuario_id: usuarioIdReal || null,
+      usuario_local_id: datos.usuario_local_id || null,
+      nivel_id: datos.nivel_id,
+      completado: datos.completado,
+      estrellas: datos.estrellas,
+      intentos: datos.intentos,
+      ultimo_intento: datos.ultimo_intento
+    });
 
-  return res.json({ success: true, data: nuevo.toJSON() });
+    if (io) io.emit("hay_cambios");
+
+    return res.json({ success: true, message: 'Creado', data: nuevo.toJSON() });
+  } catch (error) {
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      const reintento = await db.ProgresoUsuario.findOne({ where: { local_id: datos.local_id } });
+      if (reintento) {
+        await reintento.update({ estrellas: Math.max(reintento.estrellas, datos.estrellas) });
+        if (io) io.emit("hay_cambios");
+        return res.json({ success: true, message: 'Actualizado tras colisión', data: reintento.toJSON() });
+      }
+    }
+    throw error;
+  }
 }

@@ -6,6 +6,7 @@ import { procesarColaSincronizacion } from '../../services/syncService';
 import { useNavigate } from "react-router-dom";
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { useGameStore } from '../../store/game/useGameStore';
 
 const LoginUser = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const LoginUser = () => {
   const [pin, setPin] = useState('');
   const { loginUser } = useAuth();
   const { showToast } = useToast();
+  const initLevels = useGameStore(s => s.initLevels);
 
   const handleNumberPress = (num) => {
     if (pin.length < 4) {
@@ -42,7 +44,10 @@ const LoginUser = () => {
       
       loginUser(user);
       showToast('¡Bienvenido!', `Hola ${user.nombre}, prepárate para jugar.`, 'success');
+      
       await procesarColaSincronizacion(user.local_id);
+      await initLevels(user);
+      
       navigate('/map');
       
     } catch (error) {

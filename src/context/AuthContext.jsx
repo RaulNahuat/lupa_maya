@@ -1,12 +1,14 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { db } from "../data/db";
 import { procesarColaSincronizacion } from "../services/syncService";
+import { useGameStore } from "../store/game/useGameStore";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const initLevels = useGameStore(s => s.initLevels);
 
     useEffect(() => {
         const initSession = async () => {
@@ -19,11 +21,12 @@ export const AuthProvider = ({ children }) => {
                 
                 if (userExists) {
                     setCurrentUser(userExists);
-                    
-                    // Al restaurar sesión exitosamente, jalar cambios 
-                    // e impulsar cola pendiente
+
                     if (navigator.onLine) {
-                        procesarColaSincronizacion(userExists.local_id);
+                        await procesarColaSincronizacion(userExists.local_id);
+                        initLevels(userExists);
+                    } else {
+                        initLevels(userExists);
                     }
                 } else {
                     // Si fue eliminado de la DB, limpiar la sesión
@@ -35,21 +38,21 @@ export const AuthProvider = ({ children }) => {
         };
 
         initSession();
-    }, []);
+    }, [initLevels]);
 
-    // Listener para restauración de red acoplado a la sesión actual
     useEffect(() => {
         if (!currentUser) return;
 
-        const handleOnline = () => {
+        const handleOnline = async () => {
             console.log("Conexion restaurada. Sincronizando para el usuario actual...");
-            procesarColaSincronizacion(currentUser.local_id);
+            await procesarColaSincronizacion(currentUser.local_id);
+            initLevels(currentUser);
         };
 
         window.addEventListener('online', handleOnline);
 
         return () => window.removeEventListener('online', handleOnline);
-    }, [currentUser]);
+    }, [currentUser, initLevels]);
 
     const loginUser = (user) => {
         const userWithId = {...user, local_id: user.local_id || Date.now() };
