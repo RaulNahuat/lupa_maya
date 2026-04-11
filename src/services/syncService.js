@@ -208,13 +208,4 @@ export const procesarColaSincronizacion = async (usuarioLocalId = null) => {
     }
 };
 
-export const initSyncService = (usuarioLocalId = null) => {
-    window.addEventListener('online', () => {
-        console.log("Conexion restaurada. Sincronizando...");
-        procesarColaSincronizacion(usuarioLocalId);
-    });
-
-    if (navigator.onLine) {
-        procesarColaSincronizacion(usuarioLocalId);
-    }
-};
+// Evento de inicialización movido al AuthContext para tener alcance (scope) del usuario actual

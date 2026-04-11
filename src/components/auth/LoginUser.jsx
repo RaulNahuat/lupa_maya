@@ -24,7 +24,7 @@ const LoginUser = () => {
     setPin(prev => prev.slice(0, -1));
   };
 
-  /*const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!nombre.trim()) {
@@ -42,40 +42,15 @@ const LoginUser = () => {
       
       loginUser(user);
       showToast('¡Bienvenido!', `Hola ${user.nombre}, prepárate para jugar.`, 'success');
-      
-      procesarColaSincronizacion();
+      await procesarColaSincronizacion(user.local_id);
       navigate('/map');
       
     } catch (error) {
       console.error(error);
       showToast('Error de acceso', String(error), 'error');
     }
-  };*/
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const user = await loginOffline({ nombre, pin });
-      console.log('Login Niño exitoso:', user);
-
-      // Si el usuario no tiene local_id algo fallo en el registro
-      if (!user.local_id) {
-        alert('Error: usuario sin identificador local. Por favor regístrate de nuevo.');
-        return;
-      }
-
-      setCurrentUser(user);
-
-      // Pasar el local_id para que el pull filtre el progreso de este usuario
-      procesarColaSincronizacion(user.local_id);
-
-      navigate('/map');
-
-    } catch (error) {
-      console.error(error);
-      alert(error);
-    }
   };
+
 
   return (
     <div className="w-full flex flex-col items-center">
@@ -86,11 +61,11 @@ const LoginUser = () => {
 
       <form onSubmit={handleSubmit} className="w-full space-y-3">
         <div className="space-y-1">
-          <input 
-            type="text" 
+          <input
+            type="text"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            placeholder="Nombre y apellido" 
+            placeholder="Nombre y apellido"
             className="w-full px-4 py-2 rounded-2xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-maya-gold outline-none transition-all placeholder:text-gray-400 text-maya-dark text-center font-bold shadow-sm"
           />
         </div>
@@ -98,19 +73,18 @@ const LoginUser = () => {
         {/* PIN Display */}
         <div className="flex justify-center gap-2 my-1">
           {[...Array(4)].map((_, i) => (
-            <div 
+            <div
               key={i}
-              className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-300 ${
-                pin.length > i ? 'bg-maya-gold border-maya-gold scale-110' : 'border-gray-200'
-              }`}
+              className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-300 ${pin.length > i ? 'bg-maya-gold border-maya-gold scale-110' : 'border-gray-200'
+                }`}
             />
           ))}
         </div>
 
         <PinPad onNumberPress={handleNumberPress} onDelete={handleDelete} />
 
-        <PrimaryButton 
-          type="submit" 
+        <PrimaryButton
+          type="submit"
           className="mt-2"
         >
           ¡A jugar!

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { db } from "../data/db";
+import { procesarColaSincronizacion } from "../services/syncService";
 
 const AuthContext = createContext();
 
@@ -18,6 +19,12 @@ export const AuthProvider = ({ children }) => {
                 
                 if (userExists) {
                     setCurrentUser(userExists);
+                    
+                    // Al restaurar sesión exitosamente, jalar cambios 
+                    // e impulsar cola pendiente
+                    if (navigator.onLine) {
+                        procesarColaSincronizacion(userExists.local_id);
+                    }
                 } else {
                     // Si fue eliminado de la DB, limpiar la sesión
                     localStorage.removeItem('lupa_session');
@@ -29,6 +36,20 @@ export const AuthProvider = ({ children }) => {
 
         initSession();
     }, []);
+
+    // Listener para restauración de red acoplado a la sesión actual
+    useEffect(() => {
+        if (!currentUser) return;
+
+        const handleOnline = () => {
+            console.log("Conexion restaurada. Sincronizando para el usuario actual...");
+            procesarColaSincronizacion(currentUser.local_id);
+        };
+
+        window.addEventListener('online', handleOnline);
+
+        return () => window.removeEventListener('online', handleOnline);
+    }, [currentUser]);
 
     const loginUser = (user) => {
         const userWithId = {...user, local_id: user.local_id || Date.now() };

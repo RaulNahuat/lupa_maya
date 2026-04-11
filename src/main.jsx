@@ -5,7 +5,6 @@ import './index.css'
 import App from './App.jsx'
 
 import { registerSW } from 'virtual:pwa-register'
-import { initSyncService } from './services/syncService'
 import { initSocket } from './services/socketService'
 
 import { AuthProvider } from './context/AuthContext.jsx'
@@ -14,7 +13,6 @@ import { ToastProvider } from './context/ToastContext.jsx'
 import ToastContainer from './components/ToastContainer.jsx'
 
 registerSW({ immediate: true })
-initSyncService();
 initSocket();
 
 createRoot(document.getElementById('root')).render(
