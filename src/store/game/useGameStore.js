@@ -4,19 +4,13 @@ import { guardarProgreso } from "../../services/player/progresoService"
 
 export const useGameStore = create((set, get) => ({
   levels: [],
-  currentUser: null,
-
-  // Guarda el usuario en el store (se llama después del login)
-  setCurrentUser: (user) => set({ currentUser: user }),
 
   /**
    * Carga el catálogo de niveles desde IndexedDB y los cruza con el
    * progreso del usuario para determinar cuáles están completados y
    * desbloqueados
    */
-  initLevels: async () => {
-    const { currentUser } = get()
-
+  initLevels: async (currentUser) => {
     // Traer catalogo completo ordenado por secuencia
     const niveles = await db.niveles.orderBy('orden_secuencia').toArray()
 
@@ -107,11 +101,10 @@ export const useGameStore = create((set, get) => ({
    * Marca un nivel como completado para el usuario actual
    * Guarda el progreso en IndexedDB y lo encola para sincronización
    */
-  completeLevel: async (nivelId, estrellas, intentos) => {
-    const { currentUser, levels } = get()
+  completeLevel: async (currentUser, nivelId, estrellas, intentos) => {
+    const { levels } = get()
 
     if (!currentUser) {
-      console.error("completeLevel: no hay usuario en el store")
       return
     }
 

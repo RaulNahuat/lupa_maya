@@ -1,22 +1,25 @@
 import { useEffect, useState, useRef } from "react"
+import { useAuth } from "../../context/AuthContext"
 import { useGameStore } from "../../store/game/useGameStore"
 import { useNavigate } from "react-router-dom"
 import LevelNode from "../../components/game/LevelNode"
-import { Map, Play, Award, Flame, Star, User } from "lucide-react"
+import ModalConfirmation from "../../components/ModalConfirmation"
+import { Map, Play, Award, Flame, Star, User, LogOut } from "lucide-react"
 
 export default function LevelMap() {
   const levels = useGameStore((s) => s.levels)
   const initLevels = useGameStore((s) => s.initLevels)
-  const currentUser = useGameStore((s) => s.currentUser)
+  const { currentUser, logoutUser } = useAuth()
   const navigate = useNavigate()
 
   const [activeLevel, setActiveLevel] = useState(null)
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
 
   const scrollRef = useRef(null)
 
   useEffect(() => {
     if (currentUser) {
-      initLevels()
+      initLevels(currentUser)
     }
   }, [currentUser, initLevels])
 
@@ -54,9 +57,13 @@ export default function LevelMap() {
       {/* HEADER */}
       <header className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-amber-100 border-2 border-amber-400 flex items-center justify-center">
-            <User size={20} className="text-amber-600" />
-          </div>
+          <button 
+            onClick={() => setShowLogoutModal(true)}
+            className="w-10 h-10 rounded-full bg-amber-100 border-2 border-amber-400 flex items-center justify-center transition-colors hover:bg-amber-200 active:scale-95"
+            title="Cerrar sesión"
+          >
+            <LogOut size={18} className="text-amber-600 ml-0.5" />
+          </button>
 
           <div>
             <p className="font-bold text-gray-800 leading-tight">
@@ -151,6 +158,20 @@ export default function LevelMap() {
           <span className="text-xs font-medium">Logros</span>
         </button>
       </nav>
+
+      {/* MODAL DE CERRAR SESIÓN */}
+      <ModalConfirmation 
+        isOpen={showLogoutModal}
+        title="¿Ya te vas?"
+        message="Se cerrará tu sesión, pero tu progreso está guardado."
+        confirmText="Cerrar sesión"
+        cancelText="Seguir jugando"
+        onConfirm={() => {
+          logoutUser()
+          navigate('/login')
+        }}
+        onCancel={() => setShowLogoutModal(false)}
+      />
     </div>
   )
 }

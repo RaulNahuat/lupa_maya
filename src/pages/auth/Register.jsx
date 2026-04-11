@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import PinPad from '../../components/auth/PinPad';
 import SecondaryButton from '../../components/SecondaryButton';
 import mayaCharacter from '../../assets/maya-character.png';
@@ -8,6 +10,8 @@ import { procesarColaSincronizacion } from '../../services/syncService';
 import Navbar from "../../components/Navbar";
 
 const Register = () => {
+  const { loginUser } = useAuth();
+  const { showToast } = useToast();
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const navigate = useNavigate();
@@ -18,7 +22,7 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     if (pin !== confirmPin) {
-      alert('Los PIN no coinciden');
+      showToast('PIN no coincide', 'Asegúrate de escribir el mismo PIN en ambos pasos.', 'warning');
       return;
     }
     try {
@@ -28,11 +32,17 @@ const Register = () => {
         pin,
         rol: 'NINO',
       });
-      console.log('Usuario registrado:', nuevoUsuario);
+      
+      showToast('¡Cuenta creada!', 'Bienvenido a Lupa Maya.', 'success');
+      
+      // Iniciar sesión automáticamente
+      loginUser(nuevoUsuario);
+
       procesarColaSincronizacion();
-      navigate('/dashboard');
+      navigate('/map');
     } catch (error) {
       console.error('Error al registrar usuario:', error);
+      showToast('Error de registro', String(error), 'error');
     }
   };
 
@@ -74,14 +84,14 @@ const Register = () => {
               type="text"
               name="nombre"
               required
-              placeholder="¿Cómo te llamas?"
+              placeholder="Escribe tu primer nombre"
               className="w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-[#02845E] outline-none transition-all placeholder:text-gray-400 text-maya-dark text-center font-bold shadow-sm"
             />
             <input
               type="text"
               name="apellido"
               required
-              placeholder="¿Cuál es tu apellido?"
+              placeholder="Escribe tu primer apellido"
               className="w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-[#02845E] outline-none transition-all placeholder:text-gray-400 text-maya-dark text-center font-bold shadow-sm"
             />
           </div>

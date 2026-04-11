@@ -1,2 +1,0 @@
-Para los estados globales de la aplicación, por ejemplo:
-estado del usuario, estado del juego, estado de las recompensas

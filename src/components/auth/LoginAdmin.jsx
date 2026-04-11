@@ -3,21 +3,41 @@ import PrimaryButton from '../PrimaryButton';
 import { loginOffline } from '../../services/auth/offlineAuth';
 import { procesarColaSincronizacion } from '../../services/syncService';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 
 const LoginAdmin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const { loginUser } = useAuth();
+  const { showToast } = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!email.trim()) {
+      showToast('Faltan datos', 'Por favor, escribe tu correo electrónico.', 'warning');
+      return;
+    }
+    if (!password.trim()) {
+      showToast('Faltan datos', 'Por favor, escribe tu contraseña.', 'warning');
+      return;
+    }
+
     try {
       const user = await loginOffline({ email, password }, true);
       console.log('Login Admin exitoso:', user);
+
+      loginUser(user);
+
+      showToast('¡Bienvenido!', `Hola ${user.nombre}, suerte en tu jornada.`, 'success');
+
       procesarColaSincronizacion();
-      navigate('/dashboard');
+      
+      navigate('/admin/glyphs');
     } catch (error) {
-      alert(error);
+      showToast('Error de acceso', String(error), 'error');
     }
   };
 

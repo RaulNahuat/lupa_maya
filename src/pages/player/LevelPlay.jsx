@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom"
 import { useGameStore } from "../../store/game/useGameStore"
+import { useAuth } from "../../context/AuthContext"
 import { useEffect, useRef, useState } from "react"
 
 // Estrellas según intentos
@@ -14,6 +15,11 @@ export default function LevelPlay() {
 
   const levels = useGameStore((s) => s.levels)
   const completeLevel = useGameStore((s) => s.completeLevel)
+  const { currentUser } = useAuth()
+
+  const handleCompleteLevel = async (nivelId, estrellas, intentos) => {
+    await completeLevel(currentUser, nivelId, estrellas, intentos)
+  }
 
   const level = levels.find((l) => l.id === Number(id))
 
@@ -28,11 +34,11 @@ export default function LevelPlay() {
   }
 
   if (level.tipo === "APRENDIZAJE") {
-    return <QuizLevel level={level} onComplete={completeLevel} />
+    return <QuizLevel level={level} onComplete={handleCompleteLevel} />
   }
 
   if (level.tipo === "BUSQUEDA") {
-    return <ScanLevel level={level} onComplete={completeLevel} />
+    return <ScanLevel level={level} onComplete={handleCompleteLevel} />
   }
 
   return (
