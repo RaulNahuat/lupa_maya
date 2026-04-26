@@ -58,7 +58,7 @@ export default function LevelMap() {
   // Sync terminó pero Dexie sigue vacío — no hay niveles configurados
   if (levels.length === 0 && syncReady) {
     return (
-      <p className="text-center mt-10 text-gray-400">
+      <p className="text-center mt-10 text-black">
         No hay niveles disponibles aún.
       </p>
     )
@@ -80,7 +80,7 @@ export default function LevelMap() {
       <div className="w-full md:w-[390px] md:max-h-[844px] min-h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
 
         {/* HEADER */}
-        <header className="shrink-0 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
+        <header className="shrink-0 bg-white border-b border-gray-100 px-5 py-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowLogoutModal(true)}
@@ -91,10 +91,10 @@ export default function LevelMap() {
             </button>
 
             <div>
-              <p className="font-bold text-gray-800 leading-tight">
+              <p className="font-bold text-black leading-tight text-lg">
                 {currentUser.nombre}
               </p>
-              <p className="text-xs text-amber-600 font-medium">
+              <p className="text-dark-gold font-medium text-xs">
                 Nivel {nivelActual.numero ?? nivelActual.id}
               </p>
             </div>
@@ -102,14 +102,14 @@ export default function LevelMap() {
 
           <div className="flex items-center gap-2">
             {/* TODO: implementar lógica de racha */}
-            <div className="flex items-center gap-1 bg-orange-50 border border-orange-200 rounded-full px-3 py-1">
-              <Flame size={16} className="text-orange-500" />
+            <div className="flex items-center gap-1 bg-orange-50 border border-orange rounded-full px-3 py-1">
+              <Flame size={16} className="text-orange" />
               <span className="text-sm font-bold text-gray-700">—</span>
             </div>
 
             <div className="flex items-center gap-1 bg-green-50 border border-green-200 rounded-full px-3 py-1">
-              <Star size={16} className="text-green-500" />
-              <span className="text-sm font-bold text-gray-700">{totalEstrellas}</span>
+              <Star size={16} className="text-light-green" />
+              <span className="text-sm font-bold text-light-green">{totalEstrellas}</span>
             </div>
           </div>
         </header>
@@ -140,18 +140,18 @@ export default function LevelMap() {
                 >
                   {isCurrentActive && (
                     <div className="mb-2 bg-white rounded-2xl shadow-lg p-4 w-44 flex flex-col items-center gap-3">
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                      <p className="text-md font-bold text-brown uppercase tracking-wider">
                         Nivel {level.numero ?? level.id}
                       </p>
                       <p className="text-xl font-extrabold text-gray-800 text-center">
                         {level.nombre ?? level.name}
                       </p>
-                      <div className="w-full bg-amber-800 rounded-full p-[3px]">
+                      <div className="w-full bg-gold rounded-xl p-[2px]">
                         <button
                           onClick={() => navigate(`/level/${level.id}`)}
-                          className="w-full bg-amber-500 text-white font-bold rounded-full py-2 px-4 flex items-center justify-center gap-2"
+                          className="w-full bg-dark-gold text-white text-md font-bold rounded-lg py-2 px-6 flex items-center justify-center gap-2"
                         >
-                          <Play size={13} className="fill-white" />
+                          <Play size={18} className="fill-white" />
                           {level.completado ? "REPETIR" : "INICIAR"}
                         </button>
                       </div>
