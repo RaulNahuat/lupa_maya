@@ -8,6 +8,7 @@ import { Server } from "socket.io";
 import { handleSyncUsuarios } from "./controllers/pushController/UsuariosPushController.js";
 import { handleSyncProgreso } from "./controllers/pushController/progresoPushController.js";
 import { getUsuariosPull } from "./controllers/pullController/usuariosPullController.js";
+import { getAdminsPull } from "./controllers/pullController/adminsPullController.js";
 import { getNivelesPull } from "./controllers/pullController/nivelesPullController.js";
 import { getProgresoPull } from "./controllers/pullController/progresoPullController.js";
 import { getPreguntasPull } from "./controllers/pullController/preguntasPullController.js";
@@ -65,7 +66,6 @@ app.post("/api/sync", async (req, res) => {
   }
 });
 
-
 // PULL SYNC
 // Devuelve los cambios del servidor desde la última sincronización del cliente.
 // Requiere usuario_local_id para filtrar el progreso solo del usuario que pide.
@@ -78,6 +78,7 @@ app.get("/api/sync/pull", async (req, res) => {
   try {
 
     const usuarios = await getUsuariosPull(db, Op, lastSyncDate);
+    const admins = await getAdminsPull(db, Op, lastSyncDate);
     const niveles = await getNivelesPull(db, Op, lastSyncDate);
     const { preguntas, opciones_respuestas } = await getPreguntasPull(db, Op, lastSyncDate);
     const nivel_glifos_objetivos = await getGlifosObjetivoPull(db);
@@ -87,7 +88,8 @@ app.get("/api/sync/pull", async (req, res) => {
     res.json({
       success: true,
       cambios: { 
-        usuarios, 
+        usuarios,
+        admins,
         niveles, 
         preguntas, 
         opciones_respuestas, 

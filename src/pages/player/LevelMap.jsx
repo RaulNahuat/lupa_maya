@@ -80,7 +80,7 @@ export default function LevelMap() {
       <div className="w-full md:w-[390px] md:max-h-[844px] min-h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
 
         {/* HEADER */}
-        <header className="flex-shrink-0 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
+        <header className="shrink-0 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowLogoutModal(true)}
@@ -180,7 +180,7 @@ export default function LevelMap() {
           </div>
         </div>
 
-        <BottomNav className="flex-shrink-0" />
+        <BottomNav className="shrink-0" />
 
         {/* MODAL DE CERRAR SESIÓN */}
         <ModalConfirmation

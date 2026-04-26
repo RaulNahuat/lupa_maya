@@ -37,7 +37,7 @@ export const registroOffline = async (usuarioData) => {
 
 export const loginOffline = async (credenciales, esAdmin = false) => {
     if (esAdmin) {
-        const user = await db.usuarios.where('email').equals(credenciales.email).first();
+        const user = await db.admins.where('email').equals(credenciales.email).first();
         if (!user) throw 'Usuario no encontrado';
         
         if (user.password_hash && bcrypt.compareSync(credenciales.password, user.password_hash)) {
@@ -49,15 +49,12 @@ export const loginOffline = async (credenciales, esAdmin = false) => {
         }
     } else {
         const users = await db.usuarios.toArray();
-        const nBuscado = credenciales.nombre.trim().toLowerCase();
+        const nBuscado = credenciales.username.trim().toLowerCase();
         const pBuscado = String(credenciales.pin);
         
         const posibles = users.filter(u => {
-            const n = u.nombre?.trim().toLowerCase() || "";
-            const a = u.apellido?.trim().toLowerCase() || "";
-            const nombreCompleto = (n + " " + a).trim();
-            
-            return n === nBuscado || nombreCompleto === nBuscado;
+            const username = u.username?.trim().toLowerCase() || "";
+            return username === nBuscado;
         });
         
         console.log("Usuarios en DB local:", users.length, "Posibles coincidencias:", posibles.length);
