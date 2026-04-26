@@ -31,7 +31,7 @@ const LoginAdmin = () => {
 
       loginUser(user);
 
-      showToast('¡Bienvenido!', `Hola ${user.nombre}, suerte en tu jornada.`, 'success');
+      showToast('¡Bienvenido!', `Hola Administrador, suerte en tu jornada.`, 'success');
 
       procesarColaSincronizacion();
       

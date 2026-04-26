@@ -31,8 +31,12 @@ const Register = () => {
       const nuevoUsuario = await registroOffline({
         nombre: e.target.nombre.value,
         apellido: e.target.apellido.value,
+        username: e.target.username.value,
+        escuela: e.target.escuela.value,
+        lugar_procedencia: e.target.lugar_procedencia.value,
+        genero: e.target.genero.value,
+        grado: e.target.grado.value,
         pin,
-        rol: 'NINO',
       });
       
       showToast('¡Cuenta creada!', 'Bienvenido a Lupa Maya.', 'success');
@@ -83,20 +87,62 @@ const Register = () => {
 
         <form className="w-full space-y-4" onSubmit={handleRegister}>
           <div className="space-y-3">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                name="nombre"
+                required
+                placeholder="Nombre"
+                className="w-1/2 px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-[#02845E] outline-none transition-all placeholder:text-gray-400 text-maya-dark text-center font-bold shadow-sm"
+              />
+              <input
+                type="text"
+                name="apellido"
+                required
+                placeholder="Apellido"
+                className="w-1/2 px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-[#02845E] outline-none transition-all placeholder:text-gray-400 text-maya-dark text-center font-bold shadow-sm"
+              />
+            </div>
             <input
               type="text"
-              name="nombre"
+              name="username"
               required
-              placeholder="Escribe tu primer nombre"
+              placeholder="Usuario (Username único)"
               className="w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-[#02845E] outline-none transition-all placeholder:text-gray-400 text-maya-dark text-center font-bold shadow-sm"
             />
             <input
               type="text"
-              name="apellido"
+              name="escuela"
               required
-              placeholder="Escribe tu primer apellido"
+              placeholder="Escuela"
               className="w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-[#02845E] outline-none transition-all placeholder:text-gray-400 text-maya-dark text-center font-bold shadow-sm"
             />
+            <input
+              type="text"
+              name="lugar_procedencia"
+              required
+              placeholder="Lugar de procedencia"
+              className="w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-[#02845E] outline-none transition-all placeholder:text-gray-400 text-maya-dark text-center font-bold shadow-sm"
+            />
+            <div className="flex gap-2">
+              <select
+                name="genero"
+                required
+                defaultValue=""
+                className="w-1/2 px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-[#02845E] outline-none transition-all text-gray-400 font-bold shadow-sm"
+              >
+                <option value="" disabled>Género</option>
+                <option value="Masculino" className="text-maya-dark">Masculino</option>
+                <option value="Femenino" className="text-maya-dark">Femenino</option>
+              </select>
+              <input
+                type="text"
+                name="grado"
+                required
+                placeholder="Grado"
+                className="w-1/2 px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-[#02845E] outline-none transition-all placeholder:text-gray-400 text-maya-dark text-center font-bold shadow-sm"
+              />
+            </div>
           </div>
 
           <div className="space-y-4 flex flex-col items-center pt-4">

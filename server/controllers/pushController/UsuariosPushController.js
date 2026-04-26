@@ -17,10 +17,12 @@ export async function handleSyncUsuarios(req, res, db, io) {
     const nuevo = await db.Usuario.create({
       nombre: datos.nombre,
       apellido: datos.apellido || "Pendiente",
-      email: datos.email || null,
+      username: datos.username,
+      escuela: datos.escuela || "Sin asignar",
+      lugar_procedencia: datos.lugar_procedencia || "Sin asignar",
+      genero: datos.genero || "Femenino",
+      grado: datos.grado || "1er Grado",
       pin_hash: datos.pin_hash || datos.pin || null,
-      password_hash: datos.password_hash || datos.password || null,
-      rol: datos.rol || "NINO",
       local_id: datos.local_id
     });
 

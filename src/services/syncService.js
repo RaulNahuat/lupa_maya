@@ -28,6 +28,7 @@ export const descargarCambios = async (usuarioLocalId = null) => {
 
     const {
         usuarios = [],
+        admins = [],
         niveles = [],
         preguntas = [],
         opciones_respuestas = [],
@@ -38,6 +39,7 @@ export const descargarCambios = async (usuarioLocalId = null) => {
     await db.transaction(
         'rw',
         db.usuarios,
+        db.admins,
         db.niveles,
         db.preguntas,
         db.opciones_respuestas,
@@ -53,6 +55,18 @@ export const descargarCambios = async (usuarioLocalId = null) => {
                 } else {
                     await db.usuarios.put({
                         ...user,
+                        sync_status: 'SINCRONIZADO'
+                    });
+                }
+            }
+
+            // ADMINS
+            for (const admin of admins) {
+                if (admin.deleted_at) {
+                    await db.admins.delete(admin.local_id);
+                } else {
+                    await db.admins.put({
+                        ...admin,
                         sync_status: 'SINCRONIZADO'
                     });
                 }

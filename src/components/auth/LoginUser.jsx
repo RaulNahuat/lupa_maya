@@ -10,7 +10,7 @@ import { useGameStore } from '../../store/game/useGameStore';
 
 const LoginUser = () => {
   const navigate = useNavigate();
-  const [nombre, setNombre] = useState('');
+  const [username, setUsername] = useState('');
   const [pin, setPin] = useState('');
   const { loginUser } = useAuth();
   const { showToast } = useToast();
@@ -29,8 +29,8 @@ const LoginUser = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!nombre.trim()) {
-      showToast('Faltan datos', 'Por favor, escribe tu nombre y apellido.', 'warning');
+    if (!username.trim()) {
+      showToast('Faltan datos', 'Por favor, escribe tu usuario.', 'warning');
       return;
     }
 
@@ -40,7 +40,7 @@ const LoginUser = () => {
     }
 
     try {
-      const user = await loginOffline({ nombre, pin });
+      const user = await loginOffline({ username, pin });
       
       loginUser(user);
       showToast('¡Bienvenido!', `Hola ${user.nombre}, prepárate para jugar.`, 'success');
@@ -68,9 +68,9 @@ const LoginUser = () => {
         <div className="space-y-1">
           <input
             type="text"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            placeholder="Nombre y apellido"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Usuario"
             className="w-full px-4 py-2 rounded-2xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-maya-gold outline-none transition-all placeholder:text-gray-400 text-maya-dark text-center font-bold shadow-sm"
           />
         </div>

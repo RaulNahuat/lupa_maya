@@ -29,28 +29,35 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
 
-    //Para iniciar sesion con el perfil de admins
-    email: {
-      type: DataTypes.STRING(120),
-      allowNull: true,
-      unique: true,
-      validate: { isEmail: true }
+    //Nuevos campos para registro de Niño
+    username: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      unique: true
     },
-    password_hash: {
-      type: DataTypes.STRING(255),
-      allowNull: true
+    escuela: {
+      type: DataTypes.STRING(150),
+      allowNull: false
     },
+    lugar_procedencia: {
+      type: DataTypes.STRING(150),
+      allowNull: false
+    },
+    genero: {
+      type: DataTypes.ENUM('Masculino', 'Femenino'),
+      allowNull: false
+    },
+    grado: {
+      type: DataTypes.STRING(50),
+      allowNull: false
+    },
+
     //Para iniciar sesion con el perfil de niño
     pin_hash: {
       type: DataTypes.STRING(255),
       allowNull: true
     },
 
-    rol: {
-      type: DataTypes.ENUM('NINO', 'ADMIN'),
-      allowNull: false,
-      defaultValue: 'NINO'
-    },
     deleted_at: {
       type: DataTypes.DATE,
       allowNull: true
