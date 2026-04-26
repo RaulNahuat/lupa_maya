@@ -12,6 +12,7 @@ import { getNivelesPull } from "./controllers/pullController/nivelesPullControll
 import { getProgresoPull } from "./controllers/pullController/progresoPullController.js";
 import { getPreguntasPull } from "./controllers/pullController/preguntasPullController.js";
 import { getGlifosObjetivoPull } from "./controllers/pullController/glifosObjetivoPullController.js";
+import { getGlifosPull } from "./controllers/pullController/glifosPullController.js";
 
 dotenv.config();
 
@@ -81,6 +82,7 @@ app.get("/api/sync/pull", async (req, res) => {
     const { preguntas, opciones_respuestas } = await getPreguntasPull(db, Op, lastSyncDate);
     const nivel_glifos_objetivos = await getGlifosObjetivoPull(db);
     const progreso_usuarios = await getProgresoPull(db, Op, lastSyncDate, usuario_local_id);
+    const glifos = await getGlifosPull(db, Op, lastSyncDate);
 
     res.json({
       success: true,
@@ -89,7 +91,8 @@ app.get("/api/sync/pull", async (req, res) => {
         niveles, 
         preguntas, 
         opciones_respuestas, 
-        nivel_glifos_objetivos, 
+        nivel_glifos_objetivos,
+        glifos, 
         progreso_usuarios 
       },
       serverTime: new Date().getTime()
