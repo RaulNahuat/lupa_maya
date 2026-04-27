@@ -5,8 +5,6 @@ export async function handleSyncUsuarios(req, res, db, io) {
     where: { local_id: datos.local_id }
   });
 
-  // Si ya existe, devolver el registro con su ID real para que el cliente
-  // pueda propagar el usuario_id a los registros de progreso pendientes.
   if (existente) {
     return res.status(200).json({
       success: true,
@@ -15,17 +13,27 @@ export async function handleSyncUsuarios(req, res, db, io) {
     });
   }
 
-  const nuevo = await db.Usuario.create({
-    nombre: datos.nombre,
-    apellido: datos.apellido || "Pendiente",
-    email: datos.email || null,
-    pin_hash: datos.pin_hash || datos.pin || null,
-    password_hash: datos.password_hash || datos.password || null,
-    rol: datos.rol || "NINO",
-    local_id: datos.local_id
-  });
+  try {
+    const nuevo = await db.Usuario.create({
+      nombre: datos.nombre,
+      apellido: datos.apellido || "Pendiente",
+      username: datos.username,
+      escuela: datos.escuela || "Sin asignar",
+      lugar_procedencia: datos.lugar_procedencia || "Sin asignar",
+      genero: datos.genero || "Femenino",
+      grado: datos.grado || "1er Grado",
+      pin_hash: datos.pin_hash || datos.pin || null,
+      local_id: datos.local_id
+    });
 
-  io.emit("hay_cambios");
+    io.emit("hay_cambios");
 
-  return res.status(201).json({ success: true, data: nuevo });
+    return res.status(201).json({ success: true, message: "Creado", data: nuevo });
+  } catch (error) {
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      const reintento = await db.Usuario.findOne({ where: { local_id: datos.local_id } });
+      return res.status(200).json({ success: true, message: "Ya existe (colisión)", data: reintento });
+    }
+    throw error;
+  }
 }

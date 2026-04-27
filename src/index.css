@@ -9,6 +9,19 @@
   --color-maya-green-light: #E6F9F3;
   --color-maya-gray: #718096;
 
+  --color-cream-background: #FFF8F0;
+  --color-black: #2B2B2B;
+  --color-green: #064E3B;
+  --color-light-green: #2E8B57;
+  --color-brown: #7A5000;
+  --color-red: #DE393E;
+  --color-gold: #D4AF37;
+  --color-dark-gold: #C88F12;
+  --color-yellow: #FBBF24;
+  --color-orange: #F59E0B;
+  --color-light-gray: #E5E7EB;
+  --color-gray: #6B7280;
+
   --font-maya: "Outfit", "Inter", "system-ui", "sans-serif";
   --radius-4xl: 2rem;
 }
@@ -27,4 +40,9 @@
   #root {
     @apply w-full;
   }
+}
+
+@keyframes levelPulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.10); }
 }

@@ -4,11 +4,15 @@ import { useGameStore } from "../../store/game/useGameStore"
 import { useNavigate } from "react-router-dom"
 import LevelNode from "../../components/game/LevelNode"
 import ModalConfirmation from "../../components/ModalConfirmation"
-import { Map, Play, Award, Flame, Star, User, LogOut } from "lucide-react"
+import BottomNav from "../../components/game/BottomNav"
+import { Play, Flame, Star, LogOut } from "lucide-react"
 
 export default function LevelMap() {
   const levels = useGameStore((s) => s.levels)
   const initLevels = useGameStore((s) => s.initLevels)
+  const syncAndReload = useGameStore((s) => s.syncAndReload)
+  const syncReady = useGameStore((s) => s.syncReady)
+
   const { currentUser, logoutUser } = useAuth()
   const navigate = useNavigate()
 
@@ -18,10 +22,17 @@ export default function LevelMap() {
   const scrollRef = useRef(null)
 
   useEffect(() => {
-    if (currentUser) {
-      initLevels(currentUser)
-    }
-  }, [currentUser, initLevels])
+    if (!currentUser) return
+
+    // Cargar desde Dexie inmediatamente con lo que haya disponible
+    // para que el mapa no quede en blanco mientras espera el sync.
+    initLevels(currentUser)
+
+    // Sync en paralelo — cuando termine recarga los niveles automáticamente
+    // con el contenido actualizado del servidor.
+    syncAndReload(currentUser)
+
+  }, [currentUser])
 
   // Scroll automático al nivel actual
   useEffect(() => {
@@ -34,12 +45,25 @@ export default function LevelMap() {
     return <p className="text-center mt-10 text-gray-400">Cargando usuario...</p>
   }
 
-  if (levels.length === 0) {
-    return <p className="text-center mt-10 text-gray-400">Cargando niveles...</p>
+  // Spinner solo si no hay niveles en Dexie Y el sync aún no terminó
+  if (levels.length === 0 && !syncReady) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-amber-50">
+        <div className="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full animate-spin" />
+        <p className="text-gray-400 text-sm">Cargando niveles...</p>
+      </div>
+    )
   }
 
-  // Primer nivel desbloqueado que no ha sido completado (nivel actual)
-  // Si todos están completados, mostrar el último
+  // Sync terminó pero Dexie sigue vacío — no hay niveles configurados
+  if (levels.length === 0 && syncReady) {
+    return (
+      <p className="text-center mt-10 text-black">
+        No hay niveles disponibles aún.
+      </p>
+    )
+  }
+
   const nivelActual =
     levels.find((l) => l.desbloqueado && !l.completado) ??
     levels[levels.length - 1]
@@ -52,126 +76,126 @@ export default function LevelMap() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-amber-50">
+    <div className="md:min-h-screen md:bg-gray-600 md:flex md:items-center md:justify-center">
+      <div className="w-full md:w-[390px] md:max-h-[844px] min-h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
 
-      {/* HEADER */}
-      <header className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => setShowLogoutModal(true)}
-            className="w-10 h-10 rounded-full bg-amber-100 border-2 border-amber-400 flex items-center justify-center transition-colors hover:bg-amber-200 active:scale-95"
-            title="Cerrar sesión"
-          >
-            <LogOut size={18} className="text-amber-600 ml-0.5" />
-          </button>
+        {/* HEADER */}
+        <header className="shrink-0 bg-white border-b border-gray-100 px-5 py-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowLogoutModal(true)}
+              className="w-10 h-10 rounded-full bg-amber-100 border-2 border-amber-400 flex items-center justify-center transition-colors hover:bg-amber-200 active:scale-95"
+              title="Cerrar sesión"
+            >
+              <LogOut size={18} className="text-amber-600 ml-0.5" />
+            </button>
 
-          <div>
-            <p className="font-bold text-gray-800 leading-tight">
-              {currentUser.nombre}
-            </p>
+            <div>
+              <p className="font-bold text-black leading-tight text-lg">
+                {currentUser.nombre}
+              </p>
+              <p className="text-dark-gold font-medium text-xs">
+                Nivel {nivelActual.numero ?? nivelActual.id}
+              </p>
+            </div>
+          </div>
 
-            <p className="text-xs text-amber-600 font-medium">
-              Nivel {nivelActual.numero ?? nivelActual.id}
-            </p>
+          <div className="flex items-center gap-2">
+            {/* TODO: implementar lógica de racha */}
+            <div className="flex items-center gap-1 bg-orange-50 border border-orange rounded-full px-3 py-1">
+              <Flame size={16} className="text-orange" />
+              <span className="text-sm font-bold text-gray-700">—</span>
+            </div>
+
+            <div className="flex items-center gap-1 bg-green-50 border border-green-200 rounded-full px-3 py-1">
+              <Star size={16} className="text-light-green" />
+              <span className="text-sm font-bold text-light-green">{totalEstrellas}</span>
+            </div>
+          </div>
+        </header>
+
+        {/* Indicador sutil de sync en curso — desaparece cuando termina */}
+        {!syncReady && (
+          <div className="flex-shrink-0 bg-amber-100 text-amber-700 text-xs text-center py-1">
+            Sincronizando contenido...
+          </div>
+        )}
+
+        {/* MAPA */}
+        <div className="flex-1 overflow-y-auto py-6" ref={scrollRef}>
+          <div className="flex flex-col gap-8">
+            {[...levels].reverse().map((level) => {
+              const isCurrentActive = activeLevel?.id === level.id
+              const pos = level.orden_secuencia % 3
+
+              const alignment =
+                pos === 1 ? "items-start pl-20"
+                : pos === 2 ? "items-center"
+                : "items-end pr-20"
+
+              return (
+                <div
+                  key={level.id}
+                  className={`w-full flex flex-col ${alignment}`}
+                >
+                  {isCurrentActive && (
+                    <div className="mb-2 bg-white rounded-2xl shadow-lg p-4 w-44 flex flex-col items-center gap-3">
+                      <p className="text-md font-bold text-brown uppercase tracking-wider">
+                        Nivel {level.numero ?? level.id}
+                      </p>
+                      <p className="text-xl font-extrabold text-gray-800 text-center">
+                        {level.nombre ?? level.name}
+                      </p>
+                      <div className="w-full bg-gold rounded-xl p-[2px]">
+                        <button
+                          onClick={() => navigate(`/level/${level.id}`)}
+                          className="w-full bg-dark-gold text-white text-md font-bold rounded-lg py-2 px-6 flex items-center justify-center gap-2"
+                        >
+                          <Play size={18} className="fill-white" />
+                          {level.completado ? "REPETIR" : "INICIAR"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {isCurrentActive && (
+                    <div
+                      className="w-0 h-0 mb-1.5"
+                      style={{
+                        borderLeft: "10px solid transparent",
+                        borderRight: "10px solid transparent",
+                        borderTop: "12px solid #e5e7eb",
+                      }}
+                    />
+                  )}
+
+                  <LevelNode
+                    level={level}
+                    onClick={() => handleNodeClick(level)}
+                    isActive={isCurrentActive}
+                  />
+                </div>
+              )
+            })}
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* TODO: implementar lógica de racha cuando esté disponible */}
-          <div className="flex items-center gap-1 bg-orange-50 border border-orange-200 rounded-full px-3 py-1">
-            <Flame size={16} className="text-orange-500" />
-            <span className="text-sm font-bold text-gray-700">—</span>
-          </div>
+        <BottomNav className="shrink-0" />
 
-          <div className="flex items-center gap-1 bg-green-50 border border-green-200 rounded-full px-3 py-1">
-            <Star size={16} className="text-green-500" />
-            <span className="text-sm font-bold text-gray-700">{totalEstrellas}</span>
-          </div>
-        </div>
-      </header>
-
-      {/* MAPA */}
-      <div className="flex-1 overflow-y-auto py-8" ref={scrollRef}>
-        <div className="flex flex-col gap-8">
-          {[...levels].reverse().map((level) => {
-            const isCurrentActive = activeLevel?.id === level.id
-            const isLeft = level.orden_secuencia % 2 !== 0
-
-            return (
-              <div
-                key={level.id}
-                className={`w-full flex flex-col ${
-                  isLeft ? "items-start pl-10" : "items-end pr-10"
-                }`}
-              >
-                {/* Popup al seleccionar un nodo */}
-                {isCurrentActive && (
-                  <div className="mb-2 bg-white rounded-2xl shadow-lg p-4 w-48 flex flex-col items-center gap-3">
-                    <p className="text-xs font-bold text-gray-400 uppercase">
-                      Nivel {level.numero ?? level.id}
-                    </p>
-
-                    <p className="text-xl font-extrabold text-gray-800 text-center">
-                      {level.nombre ?? level.name}
-                    </p>
-
-                    <button
-                      onClick={() => navigate(`/level/${level.id}`)}
-                      className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-full py-2 px-4 flex items-center justify-center gap-2 shadow-md"
-                    >
-                      <Play size={14} className="fill-white" />
-                      {level.completado ? "REPETIR" : "INICIAR"}
-                    </button>
-                  </div>
-                )}
-
-                <LevelNode
-                  level={level}
-                  onClick={() => handleNodeClick(level)}
-                  isActive={isCurrentActive}
-                />
-              </div>
-            )
-          })}
-        </div>
+        {/* MODAL DE CERRAR SESIÓN */}
+        <ModalConfirmation
+          isOpen={showLogoutModal}
+          title="¿Ya te vas?"
+          message="Se cerrará tu sesión, pero tu progreso está guardado."
+          confirmText="Cerrar sesión"
+          cancelText="Seguir jugando"
+          onConfirm={() => {
+            logoutUser()
+            navigate('/login')
+          }}
+          onCancel={() => setShowLogoutModal(false)}
+        />
       </div>
-
-      {/* BOTTOM NAV */}
-      <nav className="bg-white border-t border-gray-100 px-6 py-2 flex items-center justify-between">
-        <button className="flex flex-col items-center gap-1 text-amber-500">
-          <Map size={22} />
-          <span className="text-xs font-bold">Camino</span>
-        </button>
-
-        <button
-          onClick={() => navigate("/scan")}
-          className="w-14 h-14 -mt-6 rounded-full bg-amber-500 border-4 border-amber-50 flex items-center justify-center shadow-lg"
-        >
-          <Play size={22} className="text-white fill-white ml-0.5" />
-        </button>
-
-        <button
-          onClick={() => navigate("/rewards")}
-          className="flex flex-col items-center gap-1 text-gray-400"
-        >
-          <Award size={22} />
-          <span className="text-xs font-medium">Logros</span>
-        </button>
-      </nav>
-
-      {/* MODAL DE CERRAR SESIÓN */}
-      <ModalConfirmation 
-        isOpen={showLogoutModal}
-        title="¿Ya te vas?"
-        message="Se cerrará tu sesión, pero tu progreso está guardado."
-        confirmText="Cerrar sesión"
-        cancelText="Seguir jugando"
-        onConfirm={() => {
-          logoutUser()
-          navigate('/login')
-        }}
-        onCancel={() => setShowLogoutModal(false)}
-      />
     </div>
   )
 }

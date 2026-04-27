@@ -7,11 +7,13 @@ import SecondaryButton from '../../components/SecondaryButton';
 import mayaCharacter from '../../assets/maya-character.png';
 import { registroOffline } from '../../services/auth/offlineAuth';
 import { procesarColaSincronizacion } from '../../services/syncService';
+import { useGameStore } from '../../store/game/useGameStore';
 import Navbar from "../../components/Navbar";
 
 const Register = () => {
   const { loginUser } = useAuth();
   const { showToast } = useToast();
+  const initLevels = useGameStore(s => s.initLevels);
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const navigate = useNavigate();
@@ -29,16 +31,21 @@ const Register = () => {
       const nuevoUsuario = await registroOffline({
         nombre: e.target.nombre.value,
         apellido: e.target.apellido.value,
+        username: e.target.username.value,
+        escuela: e.target.escuela.value,
+        lugar_procedencia: e.target.lugar_procedencia.value,
+        genero: e.target.genero.value,
+        grado: e.target.grado.value,
         pin,
-        rol: 'NINO',
       });
       
       showToast('¡Cuenta creada!', 'Bienvenido a Lupa Maya.', 'success');
       
-      // Iniciar sesión automáticamente
       loginUser(nuevoUsuario);
 
-      procesarColaSincronizacion();
+      await procesarColaSincronizacion(nuevoUsuario.local_id);
+      await initLevels(nuevoUsuario);
+
       navigate('/map');
     } catch (error) {
       console.error('Error al registrar usuario:', error);
@@ -80,20 +87,67 @@ const Register = () => {
 
         <form className="w-full space-y-4" onSubmit={handleRegister}>
           <div className="space-y-3">
+            <div className="flex gap-3">
+              <input
+                type="text"
+                name="nombre"
+                required
+                placeholder="Nombre"
+                className="w-1/2 px-4 py-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-[#02845E] focus:ring-4 focus:ring-[#02845E]/10 outline-none transition-all placeholder:text-gray-400 text-maya-dark font-semibold shadow-sm hover:border-gray-200"
+              />
+              <input
+                type="text"
+                name="apellido"
+                required
+                placeholder="Apellido"
+                className="w-1/2 px-4 py-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-[#02845E] focus:ring-4 focus:ring-[#02845E]/10 outline-none transition-all placeholder:text-gray-400 text-maya-dark font-semibold shadow-sm hover:border-gray-200"
+              />
+            </div>
             <input
               type="text"
-              name="nombre"
+              name="username"
               required
-              placeholder="Escribe tu primer nombre"
-              className="w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-[#02845E] outline-none transition-all placeholder:text-gray-400 text-maya-dark text-center font-bold shadow-sm"
+              placeholder="Usuario (Username único)"
+              className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-[#02845E] focus:ring-4 focus:ring-[#02845E]/10 outline-none transition-all placeholder:text-gray-400 text-maya-dark font-semibold shadow-sm hover:border-gray-200"
             />
             <input
               type="text"
-              name="apellido"
+              name="escuela"
               required
-              placeholder="Escribe tu primer apellido"
-              className="w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-[#02845E] outline-none transition-all placeholder:text-gray-400 text-maya-dark text-center font-bold shadow-sm"
+              placeholder="Escuela"
+              className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-[#02845E] focus:ring-4 focus:ring-[#02845E]/10 outline-none transition-all placeholder:text-gray-400 text-maya-dark font-semibold shadow-sm hover:border-gray-200"
             />
+            <input
+              type="text"
+              name="lugar_procedencia"
+              required
+              placeholder="Lugar de procedencia"
+              className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-[#02845E] focus:ring-4 focus:ring-[#02845E]/10 outline-none transition-all placeholder:text-gray-400 text-maya-dark font-semibold shadow-sm hover:border-gray-200"
+            />
+            <div className="flex gap-3">
+              <div className="relative w-1/2">
+                <select
+                  name="genero"
+                  required
+                  defaultValue=""
+                  className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-[#02845E] focus:ring-4 focus:ring-[#02845E]/10 outline-none transition-all text-maya-dark font-semibold shadow-sm hover:border-gray-200 appearance-none"
+                >
+                  <option value="" disabled className="text-gray-400">Género</option>
+                  <option value="Masculino" className="text-maya-dark">Masculino</option>
+                  <option value="Femenino" className="text-maya-dark">Femenino</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
+                  <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                </div>
+              </div>
+              <input
+                type="text"
+                name="grado"
+                required
+                placeholder="Grado"
+                className="w-1/2 px-4 py-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-[#02845E] focus:ring-4 focus:ring-[#02845E]/10 outline-none transition-all placeholder:text-gray-400 text-maya-dark font-semibold shadow-sm hover:border-gray-200"
+              />
+            </div>
           </div>
 
           <div className="space-y-4 flex flex-col items-center pt-4">

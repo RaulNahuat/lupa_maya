@@ -4,7 +4,8 @@ export const db = new Dexie("lupa_maya_db");
 
 // Versión 1: esquema en desarrollo (incluye todos los índices necesarios)
 db.version(1).stores({
-    usuarios: 'local_id, email, rol, sync_status',
+    admins: 'local_id, email, sync_status',
+    usuarios: 'local_id, username, sync_status',
     cola_sincronizacion: '++id, estado, entidad',
     configuracion: 'clave',
     niveles: 'id, grupo_id, numero, tipo, orden_secuencia',

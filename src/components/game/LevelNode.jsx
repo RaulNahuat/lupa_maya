@@ -1,34 +1,46 @@
-import { Lock, Star } from "lucide-react"
+import { Lock, Star, Brain, Search } from "lucide-react"
 
 export default function LevelNode({ level, onClick, isActive }) {
-  // Nodo bloqueado
+  const Icon = level.tipo === "BUSQUEDA" ? Search : Brain
+
+  // Bloqueado
   if (!level.desbloqueado) {
     return (
       <button disabled className="flex flex-col items-center cursor-not-allowed">
-        <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center shadow-md">
-          <Lock size={24} className="text-white" />
+        <div
+          className="w-22 h-22 rounded-full bg-light-gray flex items-center justify-center"
+          style={{ boxShadow: "0 6px 0 #6B7280" }}
+        >
+          <Lock size={34} className="text-white" />
         </div>
       </button>
     )
   }
 
-  // Nodo completado
+  // Desbloqueado y completado
   if (level.completado) {
     const stars = level.estrellas ?? 3
     return (
-      <button onClick={onClick} className="flex flex-col items-center gap-1 hover:scale-105 transition-transform duration-200">
-        <div className="w-16 h-16 rounded-full bg-green-600 flex items-center justify-center shadow-md relative">
-          <Star size={26} className="text-white fill-white" />
-          {/* Borde inferior decorativo */}
-          <div className="absolute -bottom-1 w-14 h-3 rounded-full bg-green-800 -z-10" />
+      <button
+        onClick={onClick}
+        className="flex flex-col items-center gap-1.5 hover:scale-105 transition-transform duration-200"
+      >
+        <div
+          className="w-22 h-22 rounded-full bg-light-green flex items-center justify-center"
+          style={{ boxShadow: "0 6px 0 #064E3B" }}
+        >
+          <Icon size={38} className="text-white" strokeWidth={2} />
         </div>
-        {/* Estrellas del nivel */}
-        <div className="bg-white rounded-full px-2 py-0.5 flex gap-0.5 shadow-sm border border-gray-100 -mt-1">
+        <div className="bg-white rounded-full px-2 py-0.5 flex gap-1 shadow-sm border border-light-gray">
           {[1, 2, 3].map((s) => (
             <Star
               key={s}
-              size={12}
-              className={s <= stars ? "text-amber-400 fill-amber-400" : "text-gray-300 fill-gray-200"}
+              size={13}
+              className={
+                s <= stars
+                  ? "text-yellow fill-yellow"
+                  : "text-gray fill-gray"
+              }
             />
           ))}
         </div>
@@ -36,13 +48,18 @@ export default function LevelNode({ level, onClick, isActive }) {
     )
   }
 
-  // Nodo activo (desbloqueado, no completado)
+  // Desbloqueado pero no completado
   return (
-    <button onClick={onClick} className="flex flex-col items-center hover:scale-105 transition-transform duration-200">
-      <div className="w-16 h-16 rounded-full bg-amber-500 flex items-center justify-center shadow-md relative">
-        <Star size={26} className="text-white fill-white" />
-        {/* Borde inferior decorativo */}
-        <div className="absolute -bottom-1 w-14 h-3 rounded-full bg-amber-700 -z-10" />
+    <button
+      onClick={onClick}
+      className="flex flex-col items-center"
+      style={{ animation: "levelPulse 1.8s ease-in-out infinite" }}
+    >
+      <div
+        className="w-22 h-22 rounded-full bg-yellow flex items-center justify-center"
+        style={{ boxShadow: "0 6px 0 #C88F12" }}
+      >
+        <Icon size={38} className="text-white" strokeWidth={2} />
       </div>
     </button>
   )

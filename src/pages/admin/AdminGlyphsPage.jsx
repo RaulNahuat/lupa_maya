@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import AdminHeader from '../../components/admin/AdminHeader';
 import GlyphSearchBar from '../../components/admin/GlyphSearchBar';
@@ -6,21 +6,35 @@ import FilterTabs from '../../components/admin/FilterTabs';
 import GlyphCard from '../../components/admin/GlyphCard';
 import AdminBottomNav from '../../components/admin/AdminBottomNav';
 import PrimaryButton from '../../components/PrimaryButton';
-
-const MOCK_GLYPHS = [
-  { id: 1, name: "K'in", meaning: "Sol", level: "BÁSICO", image: null },
-  { id: 2, name: "Aak", meaning: "Tortuga", level: "INTERMEDIO", image: null },
-  { id: 3, name: "Ek", meaning: "Estrella", level: "AVANZADO", image: null },
-];
+import { db } from '../../data/db';
 
 const AdminGlyphsPage = () => {
+  const [glyphs, setGlyphs] = useState([]);
   const [activeFilter, setActiveFilter] = useState('TODOS');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredGlyphs = MOCK_GLYPHS.filter(glyph => {
-    const matchesFilter = activeFilter === 'TODOS' || glyph.level === activeFilter;
-    const matchesSearch = glyph.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          glyph.meaning.toLowerCase().includes(searchQuery.toLowerCase());
+  useEffect(() => {
+    const fetchGlyphs = async () => {
+      setIsLoading(true);
+      try {
+        const data = await db.glifos.toArray();
+        setGlyphs(data);
+      } catch (error) {
+        console.error("Error al obtener glifos de la BD local:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchGlyphs();
+  }, []);
+
+  const filteredGlyphs = glyphs.filter(glyph => {
+    const normalizedLevel = (glyph.level === 'BASICO' ? 'BÁSICO' : glyph.level) || 'BÁSICO';
+    const matchesFilter = activeFilter === 'TODOS' || normalizedLevel === activeFilter;
+    const matchesSearch = (glyph.nombre_maya || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          (glyph.significado_es || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
@@ -46,11 +60,21 @@ const AdminGlyphsPage = () => {
         </div>
 
         <div className="mt-4">
-          {filteredGlyphs.length > 0 ? (
+          {isLoading ? (
+            <div className="text-center py-10 opacity-40">
+              <span className="font-bold uppercase tracking-widest animate-pulse">Cargando...</span>
+            </div>
+          ) : filteredGlyphs.length > 0 ? (
             filteredGlyphs.map(glyph => (
                 <GlyphCard 
                     key={glyph.id} 
-                    glyph={glyph} 
+                    glyph={{
+                      ...glyph,
+                      name: glyph.nombre_maya,
+                      meaning: glyph.significado_es,
+                      image: glyph.imagen_url,
+                      level: (glyph.level === 'BASICO' ? 'BÁSICO' : glyph.level) || 'BÁSICO'
+                    }} 
                     onEdit={() => console.log('Edit', glyph.id)}
                     onDelete={() => console.log('Delete', glyph.id)}
                 />

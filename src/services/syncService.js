@@ -28,7 +28,9 @@ export const descargarCambios = async (usuarioLocalId = null) => {
 
     const {
         usuarios = [],
+        admins = [],
         niveles = [],
+        glifos = [],
         preguntas = [],
         opciones_respuestas = [],
         nivel_glifos_objetivos = [],
@@ -38,7 +40,9 @@ export const descargarCambios = async (usuarioLocalId = null) => {
     await db.transaction(
         'rw',
         db.usuarios,
+        db.admins,
         db.niveles,
+        db.glifos,
         db.preguntas,
         db.opciones_respuestas,
         db.nivel_glifos_objetivos,
@@ -58,9 +62,26 @@ export const descargarCambios = async (usuarioLocalId = null) => {
                 }
             }
 
+            // ADMINS
+            for (const admin of admins) {
+                if (admin.deleted_at) {
+                    await db.admins.delete(admin.local_id);
+                } else {
+                    await db.admins.put({
+                        ...admin,
+                        sync_status: 'SINCRONIZADO'
+                    });
+                }
+            }
+
             // NIVELES
             if (niveles.length > 0) {
                 await db.niveles.bulkPut(niveles);
+            }
+
+            // GLIFOS
+            if (glifos.length > 0) {
+                await db.glifos.bulkPut(glifos);
             }
 
             // PREGUNTAS - contenido de niveles tipo APRENDIZAJE
@@ -139,7 +160,7 @@ const procesarItem = async (item) => {
                     await db.usuarios.put({ ...user, sync_status: 'SINCRONIZADO' });
 
                     const idServidor = result.data?.id ?? null;
-                    if (idServidor) {
+                    if (idServidor && item.accion === 'CREAR') {
                         const progresosPendientes = await db.progreso_usuarios
                             .where('usuario_local_id')
                             .equals(user.local_id)
@@ -153,6 +174,10 @@ const procesarItem = async (item) => {
                                 });
                             }
                         }
+                    }
+                    
+                    if (item.accion === 'ELIMINAR') {
+                        await db.usuarios.delete(item.datos.local_id);
                     }
                 }
             }
@@ -172,49 +197,53 @@ const procesarItem = async (item) => {
     console.log(`Item ${item.id} (${item.entidad}) subido con exito.`);
 };
 
+let isSyncing = false;
+
 /**
  * Ciclo completo: pull primero, push despues.
  * Usuarios se procesan antes que progreso para garantizar
  * que el usuario_id real este disponible al enviar el progreso.
  */
 export const procesarColaSincronizacion = async (usuarioLocalId = null) => {
-    console.log("Iniciando ciclo de sincronizacion...");
-
-    await descargarCambios(usuarioLocalId);
-
-    const items = await db.cola_sincronizacion
-        .where('estado')
-        .equals('PENDIENTE')
-        .toArray();
-
-    if (items.length === 0) {
-        console.log("No hay datos locales para subir.");
+    if (isSyncing) {
+        console.log("Sincronización ya en curso, ignorando llamada duplicada.");
         return;
     }
 
-    const porEntidad = (entidad) => items.filter((i) => i.entidad === entidad);
-    const ordenados = [
-        ...porEntidad('usuarios'),
-        ...porEntidad('progreso_usuarios'),
-        ...items.filter((i) => i.entidad !== 'usuarios' && i.entidad !== 'progreso_usuarios')
-    ];
+    isSyncing = true;
+    console.log("Iniciando ciclo de sincronizacion...");
 
-    for (const item of ordenados) {
-        try {
-            await procesarItem(item);
-        } catch (error) {
-            console.error(`Error subiendo item ${item.id} (${item.entidad}):`, error);
+    try {
+        await descargarCambios(usuarioLocalId);
+
+        const items = await db.cola_sincronizacion
+            .where('estado')
+            .equals('PENDIENTE')
+            .toArray();
+
+        if (items.length === 0) {
+            console.log("No hay datos locales para subir.");
+            return;
         }
-    }
-};
 
-export const initSyncService = (usuarioLocalId = null) => {
-    window.addEventListener('online', () => {
-        console.log("Conexion restaurada. Sincronizando...");
-        procesarColaSincronizacion(usuarioLocalId);
-    });
+        const porEntidad = (entidad) => items.filter((i) => i.entidad === entidad);
+        const ordenados = [
+            ...porEntidad('usuarios'),
+            ...porEntidad('progreso_usuarios'),
+            ...items.filter((i) => i.entidad !== 'usuarios' && i.entidad !== 'progreso_usuarios')
+        ];
 
-    if (navigator.onLine) {
-        procesarColaSincronizacion(usuarioLocalId);
+        for (const item of ordenados) {
+            try {
+                await procesarItem(item);
+            } catch (error) {
+                console.error(`Error subiendo item ${item.id} (${item.entidad}):`, error);
+            }
+        }
+    } catch (err) {
+        console.error("Error crítico en el proceso de sincronización:", err);
+    } finally {
+        isSyncing = false;
+        console.log("Ciclo de sincronizacion finalizado.");
     }
 };

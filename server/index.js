@@ -8,10 +8,13 @@ import { Server } from "socket.io";
 import { handleSyncUsuarios } from "./controllers/pushController/UsuariosPushController.js";
 import { handleSyncProgreso } from "./controllers/pushController/progresoPushController.js";
 import { getUsuariosPull } from "./controllers/pullController/usuariosPullController.js";
+import { getAdminsPull } from "./controllers/pullController/adminsPullController.js";
 import { getNivelesPull } from "./controllers/pullController/nivelesPullController.js";
 import { getProgresoPull } from "./controllers/pullController/progresoPullController.js";
 import { getPreguntasPull } from "./controllers/pullController/preguntasPullController.js";
+import { getGlifosPull } from "./controllers/pullController/glifosPullController.js";
 import { getGlifosObjetivoPull } from "./controllers/pullController/glifosObjetivoPullController.js";
+import { getAllUsuarios, updateUsuario, deleteUsuario } from "./controllers/admin/AdminUsuariosController.js";
 
 dotenv.config();
 
@@ -52,8 +55,14 @@ app.post("/api/sync", async (req, res) => {
     switch (`${entidad}:${accion}`) {
       case "usuarios:CREAR":
         return await handleSyncUsuarios(req, res, db, io);
+      case "usuarios:EDITAR":
+        req.params.id = req.body.datos.id;
+        return await updateUsuario(req, res, db, io);
+      case "usuarios:ELIMINAR":
+        req.params.id = req.body.datos.id;
+        return await deleteUsuario(req, res, db, io);
       case "progreso_usuarios:UPSERT":
-        return await handleSyncProgreso(req, res, db);
+        return await handleSyncProgreso(req, res, db, io);
       default:
         return res.status(400).json({ success: false, message: "Entidad o acción no soportada" });
     }
@@ -63,7 +72,6 @@ app.post("/api/sync", async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
-
 
 // PULL SYNC
 // Devuelve los cambios del servidor desde la última sincronización del cliente.
@@ -77,7 +85,9 @@ app.get("/api/sync/pull", async (req, res) => {
   try {
 
     const usuarios = await getUsuariosPull(db, Op, lastSyncDate);
+    const admins = await getAdminsPull(db, Op, lastSyncDate);
     const niveles = await getNivelesPull(db, Op, lastSyncDate);
+    const glifos = await getGlifosPull(db, Op, lastSyncDate);
     const { preguntas, opciones_respuestas } = await getPreguntasPull(db, Op, lastSyncDate);
     const nivel_glifos_objetivos = await getGlifosObjetivoPull(db);
     const progreso_usuarios = await getProgresoPull(db, Op, lastSyncDate, usuario_local_id);
@@ -85,11 +95,13 @@ app.get("/api/sync/pull", async (req, res) => {
     res.json({
       success: true,
       cambios: { 
-        usuarios, 
+        usuarios,
+        admins,
         niveles, 
+        glifos,
         preguntas, 
         opciones_respuestas, 
-        nivel_glifos_objetivos, 
+        nivel_glifos_objetivos,
         progreso_usuarios 
       },
       serverTime: new Date().getTime()
@@ -100,6 +112,12 @@ app.get("/api/sync/pull", async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
+// ADMIN ROUTES
+app.get("/api/admin/usuarios", (req, res) => getAllUsuarios(req, res, db));
+app.put("/api/admin/usuarios/:id", (req, res) => updateUsuario(req, res, db, io));
+app.delete("/api/admin/usuarios/:id", (req, res) => deleteUsuario(req, res, db, io));
+
 
 server.listen(PORT, () => {
   console.log(`Servidor y Sockets corriendo en el puerto ${PORT}`);
