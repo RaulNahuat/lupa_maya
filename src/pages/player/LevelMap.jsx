@@ -5,11 +5,14 @@ import { useNavigate } from "react-router-dom"
 import LevelNode from "../../components/game/LevelNode"
 import ModalConfirmation from "../../components/ModalConfirmation"
 import BottomNav from "../../components/game/BottomNav"
-import { Map, Play, Award, Flame, Star, User, LogOut } from "lucide-react"
+import { Play, Flame, Star, LogOut } from "lucide-react"
 
 export default function LevelMap() {
   const levels = useGameStore((s) => s.levels)
   const initLevels = useGameStore((s) => s.initLevels)
+  const syncAndReload = useGameStore((s) => s.syncAndReload)
+  const syncReady = useGameStore((s) => s.syncReady)
+
   const { currentUser, logoutUser } = useAuth()
   const navigate = useNavigate()
 
@@ -19,10 +22,17 @@ export default function LevelMap() {
   const scrollRef = useRef(null)
 
   useEffect(() => {
-    if (currentUser) {
-      initLevels(currentUser)
-    }
-  }, [currentUser, initLevels])
+    if (!currentUser) return
+
+    // Cargar desde Dexie inmediatamente con lo que haya disponible
+    // para que el mapa no quede en blanco mientras espera el sync.
+    initLevels(currentUser)
+
+    // Sync en paralelo — cuando termine recarga los niveles automáticamente
+    // con el contenido actualizado del servidor.
+    syncAndReload(currentUser)
+
+  }, [currentUser])
 
   // Scroll automático al nivel actual
   useEffect(() => {
@@ -35,12 +45,25 @@ export default function LevelMap() {
     return <p className="text-center mt-10 text-gray-400">Cargando usuario...</p>
   }
 
-  if (levels.length === 0) {
-    return <p className="text-center mt-10 text-gray-400">Cargando niveles...</p>
+  // Spinner solo si no hay niveles en Dexie Y el sync aún no terminó
+  if (levels.length === 0 && !syncReady) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-amber-50">
+        <div className="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full animate-spin" />
+        <p className="text-gray-400 text-sm">Cargando niveles...</p>
+      </div>
+    )
   }
 
-  // Primer nivel desbloqueado que no ha sido completado (nivel actual)
-  // Si todos están completados, mostrar el último
+  // Sync terminó pero Dexie sigue vacío — no hay niveles configurados
+  if (levels.length === 0 && syncReady) {
+    return (
+      <p className="text-center mt-10 text-black">
+        No hay niveles disponibles aún.
+      </p>
+    )
+  }
+
   const nivelActual =
     levels.find((l) => l.desbloqueado && !l.completado) ??
     levels[levels.length - 1]
@@ -57,9 +80,9 @@ export default function LevelMap() {
       <div className="w-full md:w-[390px] md:max-h-[844px] min-h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
 
         {/* HEADER */}
-        <header className="shrink-0 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
+        <header className="shrink-0 bg-white border-b border-gray-100 px-5 py-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button 
+            <button
               onClick={() => setShowLogoutModal(true)}
               className="w-10 h-10 rounded-full bg-amber-100 border-2 border-amber-400 flex items-center justify-center transition-colors hover:bg-amber-200 active:scale-95"
               title="Cerrar sesión"
@@ -68,29 +91,35 @@ export default function LevelMap() {
             </button>
 
             <div>
-              <p className="font-bold text-gray-800 leading-tight">
+              <p className="font-bold text-black leading-tight text-lg">
                 {currentUser.nombre}
               </p>
-
-              <p className="text-xs text-amber-600 font-medium">
+              <p className="text-dark-gold font-medium text-xs">
                 Nivel {nivelActual.numero ?? nivelActual.id}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            {/* TODO: implementar lógica de racha cuando esté disponible */}
-            <div className="flex items-center gap-1 bg-orange-50 border border-orange-200 rounded-full px-3 py-1">
-              <Flame size={16} className="text-orange-500" />
+            {/* TODO: implementar lógica de racha */}
+            <div className="flex items-center gap-1 bg-orange-50 border border-orange rounded-full px-3 py-1">
+              <Flame size={16} className="text-orange" />
               <span className="text-sm font-bold text-gray-700">—</span>
             </div>
 
             <div className="flex items-center gap-1 bg-green-50 border border-green-200 rounded-full px-3 py-1">
-              <Star size={16} className="text-green-500" />
-              <span className="text-sm font-bold text-gray-700">{totalEstrellas}</span>
+              <Star size={16} className="text-light-green" />
+              <span className="text-sm font-bold text-light-green">{totalEstrellas}</span>
             </div>
           </div>
         </header>
+
+        {/* Indicador sutil de sync en curso — desaparece cuando termina */}
+        {!syncReady && (
+          <div className="flex-shrink-0 bg-amber-100 text-amber-700 text-xs text-center py-1">
+            Sincronizando contenido...
+          </div>
+        )}
 
         {/* MAPA */}
         <div className="flex-1 overflow-y-auto py-6" ref={scrollRef}>
@@ -99,7 +128,6 @@ export default function LevelMap() {
               const isCurrentActive = activeLevel?.id === level.id
               const pos = level.orden_secuencia % 3
 
-              // Posición zigzag centrado: izquierda / centro / derecha
               const alignment =
                 pos === 1 ? "items-start pl-20"
                 : pos === 2 ? "items-center"
@@ -112,18 +140,18 @@ export default function LevelMap() {
                 >
                   {isCurrentActive && (
                     <div className="mb-2 bg-white rounded-2xl shadow-lg p-4 w-44 flex flex-col items-center gap-3">
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                      <p className="text-md font-bold text-brown uppercase tracking-wider">
                         Nivel {level.numero ?? level.id}
                       </p>
                       <p className="text-xl font-extrabold text-gray-800 text-center">
                         {level.nombre ?? level.name}
                       </p>
-                      <div className="w-full bg-amber-800 rounded-full p-[3px]">
+                      <div className="w-full bg-gold rounded-xl p-[2px]">
                         <button
                           onClick={() => navigate(`/level/${level.id}`)}
-                          className="w-full bg-amber-500 text-white font-bold rounded-full py-2 px-4 flex items-center justify-center gap-2"
+                          className="w-full bg-dark-gold text-white text-md font-bold rounded-lg py-2 px-6 flex items-center justify-center gap-2"
                         >
-                          <Play size={13} className="fill-white" />
+                          <Play size={18} className="fill-white" />
                           {level.completado ? "REPETIR" : "INICIAR"}
                         </button>
                       </div>
@@ -155,7 +183,7 @@ export default function LevelMap() {
         <BottomNav className="shrink-0" />
 
         {/* MODAL DE CERRAR SESIÓN */}
-        <ModalConfirmation 
+        <ModalConfirmation
           isOpen={showLogoutModal}
           title="¿Ya te vas?"
           message="Se cerrará tu sesión, pero tu progreso está guardado."

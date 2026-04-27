@@ -16,7 +16,6 @@ import { getGlifosPull } from "./controllers/pullController/glifosPullController
 import { getGlifosObjetivoPull } from "./controllers/pullController/glifosObjetivoPullController.js";
 import { getAllUsuarios, updateUsuario, deleteUsuario } from "./controllers/admin/AdminUsuariosController.js";
 
-
 dotenv.config();
 
 const require = createRequire(import.meta.url);
@@ -102,7 +101,7 @@ app.get("/api/sync/pull", async (req, res) => {
         glifos,
         preguntas, 
         opciones_respuestas, 
-        nivel_glifos_objetivos, 
+        nivel_glifos_objetivos,
         progreso_usuarios 
       },
       serverTime: new Date().getTime()

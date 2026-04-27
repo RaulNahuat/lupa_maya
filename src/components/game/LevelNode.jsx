@@ -8,10 +8,10 @@ export default function LevelNode({ level, onClick, isActive }) {
     return (
       <button disabled className="flex flex-col items-center cursor-not-allowed">
         <div
-          className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center"
-          style={{ boxShadow: "0 6px 0 #9ca3af" }}
+          className="w-22 h-22 rounded-full bg-light-gray flex items-center justify-center"
+          style={{ boxShadow: "0 6px 0 #6B7280" }}
         >
-          <Lock size={28} className="text-white" />
+          <Lock size={34} className="text-white" />
         </div>
       </button>
     )
@@ -26,20 +26,20 @@ export default function LevelNode({ level, onClick, isActive }) {
         className="flex flex-col items-center gap-1.5 hover:scale-105 transition-transform duration-200"
       >
         <div
-          className="w-20 h-20 rounded-full bg-green-700 flex items-center justify-center"
-          style={{ boxShadow: "0 6px 0 #14532d" }}
+          className="w-22 h-22 rounded-full bg-light-green flex items-center justify-center"
+          style={{ boxShadow: "0 6px 0 #064E3B" }}
         >
-          <Icon size={30} className="text-white" strokeWidth={2} />
+          <Icon size={38} className="text-white" strokeWidth={2} />
         </div>
-        <div className="bg-white rounded-full px-2 py-0.5 flex gap-1 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-full px-2 py-0.5 flex gap-1 shadow-sm border border-light-gray">
           {[1, 2, 3].map((s) => (
             <Star
               key={s}
               size={13}
               className={
                 s <= stars
-                  ? "text-amber-400 fill-amber-400"
-                  : "text-gray-300 fill-gray-200"
+                  ? "text-yellow fill-yellow"
+                  : "text-gray fill-gray"
               }
             />
           ))}
@@ -56,10 +56,10 @@ export default function LevelNode({ level, onClick, isActive }) {
       style={{ animation: "levelPulse 1.8s ease-in-out infinite" }}
     >
       <div
-        className="w-20 h-20 rounded-full bg-amber-500 flex items-center justify-center"
-        style={{ boxShadow: "0 6px 0 #92400e" }}
+        className="w-22 h-22 rounded-full bg-yellow flex items-center justify-center"
+        style={{ boxShadow: "0 6px 0 #C88F12" }}
       >
-        <Icon size={30} className="text-white" strokeWidth={2} />
+        <Icon size={38} className="text-white" strokeWidth={2} />
       </div>
     </button>
   )

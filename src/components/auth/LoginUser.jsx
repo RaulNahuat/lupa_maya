@@ -2,11 +2,9 @@ import { useState } from 'react';
 import PinPad from './PinPad';
 import PrimaryButton from '../PrimaryButton';
 import { loginOffline } from '../../services/auth/offlineAuth';
-import { procesarColaSincronizacion } from '../../services/syncService';
 import { useNavigate } from "react-router-dom";
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { useGameStore } from '../../store/game/useGameStore';
 
 const LoginUser = () => {
   const navigate = useNavigate();
@@ -14,7 +12,6 @@ const LoginUser = () => {
   const [pin, setPin] = useState('');
   const { loginUser } = useAuth();
   const { showToast } = useToast();
-  const initLevels = useGameStore(s => s.initLevels);
 
   const handleNumberPress = (num) => {
     if (pin.length < 4) {
@@ -44,18 +41,16 @@ const LoginUser = () => {
       
       loginUser(user);
       showToast('¡Bienvenido!', `Hola ${user.nombre}, prepárate para jugar.`, 'success');
-      
-      await procesarColaSincronizacion(user.local_id);
-      await initLevels(user);
-      
+
+      // Navegar inmediatamente — LevelMap se encarga del sync y la carga
+      // de niveles a través de syncAndReload, sin bloquear al usuario aquí.
       navigate('/map');
-      
+
     } catch (error) {
       console.error(error);
       showToast('Error de acceso', String(error), 'error');
     }
   };
-
 
   return (
     <div className="w-full flex flex-col items-center">
@@ -80,18 +75,16 @@ const LoginUser = () => {
           {[...Array(4)].map((_, i) => (
             <div
               key={i}
-              className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-300 ${pin.length > i ? 'bg-maya-gold border-maya-gold scale-110' : 'border-gray-200'
-                }`}
+              className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-300 ${
+                pin.length > i ? 'bg-maya-gold border-maya-gold scale-110' : 'border-gray-200'
+              }`}
             />
           ))}
         </div>
 
         <PinPad onNumberPress={handleNumberPress} onDelete={handleDelete} />
 
-        <PrimaryButton
-          type="submit"
-          className="mt-2"
-        >
+        <PrimaryButton type="submit" className="mt-2">
           ¡A jugar!
         </PrimaryButton>
       </form>

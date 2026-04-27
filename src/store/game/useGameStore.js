@@ -5,11 +5,12 @@ import { procesarColaSincronizacion } from "../../services/syncService"
 
 export const useGameStore = create((set, get) => ({
   levels: [],
+  syncReady: false, // true cuando el primer pull sync termina
 
   /**
-   * Carga el catálogo de niveles desde IndexedDB y los cruza con el
-   * progreso del usuario para determinar cuáles están completados y
-   * desbloqueados
+   * Carga el catálogo de niveles desde IndexedDB, cruza cada nivel con
+   * su contenido (pregunta + opciones + glifo, o glifo objetivo según tipo),
+   * y calcula el progreso del usuario (completado, estrellas, desbloqueado).
    */
   initLevels: async (currentUser) => {
     // Traer catalogo completo ordenado por secuencia
@@ -47,12 +48,25 @@ export const useGameStore = create((set, get) => ({
               .equals(pregunta.id)
               .toArray()
 
+            // APRENDIZAJE
+            const objetivo = await db.nivel_glifos_objetivos
+              .where('nivel_id')
+              .equals(nivel.id)
+              .first()
+
+            // Usar el glifo embebido que guardó el sync
+            const glifo = objetivo?.glifo ?? null
+
+            console.log("objetivo raw de Dexie:", objetivo)
+            console.log("glifo embebido:", objetivo?.glifo)
             contenido = {
               pregunta_id: pregunta.id,
               question: pregunta.texto_pregunta,
               options: opciones.map((o) => o.texto_opcion),
-              // La opcion correcta se identifica por el flag es_correcta
-              correctAnswer: opciones.find((o) => o.es_correcta)?.texto_opcion ?? null
+              correctAnswer: opciones.find((o) => o.es_correcta)?.texto_opcion ?? null,
+              imagen_url: glifo?.imagen_url ?? null,
+              nombre_maya: glifo?.nombre_maya ?? null,
+              significado_es: glifo?.significado_es ?? null,
             }
           }
         }
@@ -64,16 +78,13 @@ export const useGameStore = create((set, get) => ({
             .equals(nivel.id)
             .first()
 
-          if (objetivo) {
-            contenido = {
-              glifo_id: objetivo.glifo_id,
-              glifo: objetivo.glifo ?? null,  // viene anidado del servidor
-              orden_aparicion: objetivo.orden_aparicion
-            }
+          contenido = {
+            glifo_id: objetivo?.glifo_id ?? null,
+            glifo: objetivo?.glifo ?? null,   // ya viene embebido
+            orden_aparicion: objetivo?.orden_aparicion
           }
         }
 
-        // Calcular estado del jugador para este nivel
         const progreso = progresoMap[nivel.id]
         const completado = progreso?.completado ?? false
         const estrellas = progreso?.estrellas ?? 0
@@ -98,16 +109,22 @@ export const useGameStore = create((set, get) => ({
     set({ levels: levelsConContenido })
   },
 
+  syncAndReload: async (currentUser) => {
+
+    set({ syncReady: false })
+    await procesarColaSincronizacion(currentUser.local_id)
+    set({ syncReady: true })
+    // Recargar niveles con el contenido ya disponible en Dexie
+    await get().initLevels(currentUser)
+  },
+
   /**
-   * Marca un nivel como completado para el usuario actual
-   * Guarda el progreso en IndexedDB y lo encola para sincronización
+   * Marca un nivel como completado para el usuario actual.
    */
   completeLevel: async (currentUser, nivelId, estrellas, intentos) => {
     const { levels } = get()
 
-    if (!currentUser) {
-      return
-    }
+    if (!currentUser) return
 
     const nivel = levels.find((l) => l.id === nivelId)
     if (!nivel) {
@@ -138,6 +155,6 @@ export const useGameStore = create((set, get) => ({
 
     set({ levels: updatedLevels })
 
-    procesarColaSincronizacion(currentUser.local_id);
+    procesarColaSincronizacion(currentUser.local_id)
   },
 }))

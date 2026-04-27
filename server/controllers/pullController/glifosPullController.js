@@ -1,10 +1,11 @@
 export async function getGlifosPull(db, Op, lastSyncDate) {
   try {
+    const esFirstSync = lastSyncDate.getTime() === 0;
+
     const glifos = await db.Glifo.findAll({
       where: {
-        updated_at: {
-          [Op.gt]: lastSyncDate
-        }
+        ...(esFirstSync ? {} : { updated_at: { [Op.gt]: lastSyncDate } }),
+        activo: true
       },
       include: [{
         model: db.GrupoNivel,
@@ -12,6 +13,7 @@ export async function getGlifosPull(db, Op, lastSyncDate) {
         attributes: ['dificultad']
       }]
     });
+
     return glifos.map(g => {
       const json = g.toJSON();
       return {
@@ -24,3 +26,4 @@ export async function getGlifosPull(db, Op, lastSyncDate) {
     return [];
   }
 }
+

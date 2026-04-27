@@ -34,6 +34,7 @@ export const descargarCambios = async (usuarioLocalId = null) => {
         preguntas = [],
         opciones_respuestas = [],
         nivel_glifos_objetivos = [],
+        glifos = [],
         progreso_usuarios = []
     } = result.cambios;
 
