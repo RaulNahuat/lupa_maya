@@ -28,8 +28,8 @@ const UserCard = ({ user, onEdit, onDelete }) => {
           <h3 className="font-black text-maya-dark text-[17px] mb-1 leading-tight">{user.name}</h3>
           
           <div className="flex flex-wrap items-center gap-x-1.5 text-[11px]">
-            <span className="font-extrabold text-maya-dark">Correo:</span>
-            <span className="font-bold text-gray-500">{user.email}</span>
+            <span className="font-extrabold text-maya-dark">username:</span>
+            <span className="font-bold text-gray-500">{user.username}</span>
           </div>
 
           <div className="flex flex-wrap items-center gap-x-1.5 text-[11px] mt-0.5 mb-2.5">

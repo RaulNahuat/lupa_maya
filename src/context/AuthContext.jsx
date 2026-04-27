@@ -16,8 +16,11 @@ export const AuthProvider = ({ children }) => {
             if (storedUserStr) {
                 const storedUser = JSON.parse(storedUserStr);
                 
-                // Verificar si el usuario aún existe en la base de datos local
-                const userExists = await db.usuarios.where('local_id').equals(storedUser.local_id).first();
+                let userExists = await db.usuarios.where('local_id').equals(storedUser.local_id).first();
+                
+                if (!userExists) {
+                    userExists = await db.admins.where('local_id').equals(storedUser.local_id).first();
+                }
                 
                 if (userExists) {
                     setCurrentUser(userExists);

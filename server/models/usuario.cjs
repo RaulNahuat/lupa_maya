@@ -33,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
     username: {
       type: DataTypes.STRING(100),
       allowNull: false,
-      unique: true
+      unique: false
     },
     escuela: {
       type: DataTypes.STRING(150),

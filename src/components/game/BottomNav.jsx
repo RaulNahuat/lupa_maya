@@ -10,7 +10,7 @@ export default function BottomNav() {
     levels[levels.length - 1]
 
   return (
-    <nav className="flex-shrink-0 bg-white border-t border-gray-100 px-6 py-2 flex items-center justify-between">
+    <nav className="shrink-0 bg-white border-t border-gray-100 px-6 py-2 flex items-center justify-between">
       <button
         onClick={() => navigate("/map")}
         className="flex flex-col items-center gap-1 text-amber-500"

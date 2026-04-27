@@ -30,6 +30,7 @@ export const descargarCambios = async (usuarioLocalId = null) => {
         usuarios = [],
         admins = [],
         niveles = [],
+        glifos = [],
         preguntas = [],
         opciones_respuestas = [],
         nivel_glifos_objetivos = [],
@@ -41,6 +42,7 @@ export const descargarCambios = async (usuarioLocalId = null) => {
         db.usuarios,
         db.admins,
         db.niveles,
+        db.glifos,
         db.preguntas,
         db.opciones_respuestas,
         db.nivel_glifos_objetivos,
@@ -75,6 +77,11 @@ export const descargarCambios = async (usuarioLocalId = null) => {
             // NIVELES
             if (niveles.length > 0) {
                 await db.niveles.bulkPut(niveles);
+            }
+
+            // GLIFOS
+            if (glifos.length > 0) {
+                await db.glifos.bulkPut(glifos);
             }
 
             // PREGUNTAS - contenido de niveles tipo APRENDIZAJE
@@ -153,7 +160,7 @@ const procesarItem = async (item) => {
                     await db.usuarios.put({ ...user, sync_status: 'SINCRONIZADO' });
 
                     const idServidor = result.data?.id ?? null;
-                    if (idServidor) {
+                    if (idServidor && item.accion === 'CREAR') {
                         const progresosPendientes = await db.progreso_usuarios
                             .where('usuario_local_id')
                             .equals(user.local_id)
@@ -167,6 +174,10 @@ const procesarItem = async (item) => {
                                 });
                             }
                         }
+                    }
+                    
+                    if (item.accion === 'ELIMINAR') {
+                        await db.usuarios.delete(item.datos.local_id);
                     }
                 }
             }
@@ -198,7 +209,7 @@ export const procesarColaSincronizacion = async (usuarioLocalId = null) => {
         console.log("Sincronización ya en curso, ignorando llamada duplicada.");
         return;
     }
-    
+
     isSyncing = true;
     console.log("Iniciando ciclo de sincronizacion...");
 

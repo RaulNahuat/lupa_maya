@@ -2,6 +2,16 @@ import { db } from "../../data/db";
 import bcrypt from "bcryptjs";
 
 export const registroOffline = async (usuarioData) => {
+    const usernameBuscado = usuarioData.username?.trim().toLowerCase();
+    
+    // Verificar si ya existe este username en el mismo dispositivo
+    const usuariosLocales = await db.usuarios.toArray();
+    const existe = usuariosLocales.some(u => u.username?.trim().toLowerCase() === usernameBuscado);
+    
+    if (existe) {
+        throw new Error("Este nombre de usuario ya está en uso en este dispositivo. ¡Por favor elige otro!");
+    }
+
     const local_id = crypto.randomUUID();
 
     const payload = { ...usuarioData };
