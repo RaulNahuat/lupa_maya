@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 import AdminHeader from '../../components/admin/AdminHeader';
 import GlyphSearchBar from '../../components/admin/GlyphSearchBar';
 import FilterTabs from '../../components/admin/FilterTabs';
+import Pagination from '../../components/admin/Pagination';
 import UserCard from '../../components/admin/UserCard';
 import AdminBottomNav from '../../components/admin/AdminBottomNav';
 import PrimaryButton from '../../components/PrimaryButton';
@@ -18,6 +19,8 @@ const AdminUsersPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('TODOS');
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 10;
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -66,6 +69,10 @@ const AdminUsersPage = () => {
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeFilter, searchQuery]);
 
   const handleEdit = (user) => {
     setSelectedUser(user);
@@ -189,6 +196,21 @@ const AdminUsersPage = () => {
     return matchesFilter && matchesSearch;
   });
 
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / usersPerPage));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (safeCurrentPage - 1) * usersPerPage;
+  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + usersPerPage);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const goToPage = (page) => {
+    setCurrentPage(Math.min(Math.max(page, 1), totalPages));
+  };
+
   return (
     <div className="min-h-screen bg-maya-cream pb-32">
       <AdminHeader />
@@ -220,15 +242,23 @@ const AdminUsersPage = () => {
             <div className="text-center py-10 opacity-40">
               <span className="font-bold uppercase tracking-widest animate-pulse">Cargando...</span>
             </div>
-          ) : filteredUsers.length > 0 ? (
-            filteredUsers.map(user => (
-              <UserCard
-                key={user.local_id || user.id}
-                user={user}
-                onEdit={() => handleEdit(user)}
-                onDelete={() => handleDelete(user)}
+          ) : paginatedUsers.length > 0 ? (
+            <>
+              {paginatedUsers.map(user => (
+                <UserCard
+                  key={user.local_id || user.id}
+                  user={user}
+                  onEdit={() => handleEdit(user)}
+                  onDelete={() => handleDelete(user)}
+                />
+              ))}
+
+              <Pagination
+                currentPage={safeCurrentPage}
+                totalPages={totalPages}
+                onPageChange={goToPage}
               />
-            ))
+            </>
           ) : (
             <div className="text-center py-10 opacity-40">
               <span className="font-bold uppercase tracking-widest">No se encontraron usuarios</span>

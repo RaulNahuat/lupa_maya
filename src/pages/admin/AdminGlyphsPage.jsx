@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 import AdminHeader from '../../components/admin/AdminHeader';
 import GlyphSearchBar from '../../components/admin/GlyphSearchBar';
 import FilterTabs from '../../components/admin/FilterTabs';
+import Pagination from '../../components/admin/Pagination';
 import GlyphCard from '../../components/admin/GlyphCard';
 import AdminBottomNav from '../../components/admin/AdminBottomNav';
 import PrimaryButton from '../../components/PrimaryButton';
@@ -12,7 +13,9 @@ const AdminGlyphsPage = () => {
   const [glyphs, setGlyphs] = useState([]);
   const [activeFilter, setActiveFilter] = useState('TODOS');
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const glyphsPerPage = 10;
 
   useEffect(() => {
     const fetchGlyphs = async () => {
@@ -30,6 +33,10 @@ const AdminGlyphsPage = () => {
     fetchGlyphs();
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeFilter, searchQuery]);
+
   const filteredGlyphs = glyphs.filter(glyph => {
     const normalizedLevel = (glyph.level === 'BASICO' ? 'BÁSICO' : glyph.level) || 'BÁSICO';
     const matchesFilter = activeFilter === 'TODOS' || normalizedLevel === activeFilter;
@@ -37,6 +44,17 @@ const AdminGlyphsPage = () => {
                           (glyph.significado_es || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredGlyphs.length / glyphsPerPage));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (safeCurrentPage - 1) * glyphsPerPage;
+  const paginatedGlyphs = filteredGlyphs.slice(startIndex, startIndex + glyphsPerPage);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   return (
     <div className="min-h-screen bg-maya-cream pb-32">
@@ -64,8 +82,9 @@ const AdminGlyphsPage = () => {
             <div className="text-center py-10 opacity-40">
               <span className="font-bold uppercase tracking-widest animate-pulse">Cargando...</span>
             </div>
-          ) : filteredGlyphs.length > 0 ? (
-            filteredGlyphs.map(glyph => (
+          ) : paginatedGlyphs.length > 0 ? (
+            <>
+            {paginatedGlyphs.map(glyph => (
                 <GlyphCard 
                     key={glyph.id} 
                     glyph={{
@@ -78,7 +97,14 @@ const AdminGlyphsPage = () => {
                     onEdit={() => console.log('Edit', glyph.id)}
                     onDelete={() => console.log('Delete', glyph.id)}
                 />
-            ))
+            ))}
+
+            <Pagination
+              currentPage={safeCurrentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+            </>
           ) : (
             <div className="text-center py-10 opacity-40">
                 <span className="font-bold">No se encontraron glifos</span>
