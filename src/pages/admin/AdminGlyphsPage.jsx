@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
-import AdminHeader from '../../components/admin/AdminHeader';
+import AdminPageShell from '../../components/admin/AdminPageShell';
 import GlyphSearchBar from '../../components/admin/GlyphSearchBar';
 import FilterTabs from '../../components/admin/FilterTabs';
 import Pagination from '../../components/admin/Pagination';
 import GlyphCard from '../../components/admin/GlyphCard';
-import AdminBottomNav from '../../components/admin/AdminBottomNav';
 import PrimaryButton from '../../components/PrimaryButton';
 import { db } from '../../data/db';
 
@@ -57,11 +56,7 @@ const AdminGlyphsPage = () => {
   }, [currentPage, totalPages]);
 
   return (
-    <div className="min-h-screen bg-maya-cream pb-32">
-
-      <AdminHeader />
-
-      <div className="max-w-md mx-auto p-4 flex flex-col gap-4">
+    <AdminPageShell activeTab="glifos">
 
         <div className="mt-2 px-1">
             <PrimaryButton className="relative flex items-center justify-center gap-4 py-6 rounded-3xl shadow-[0_8px_0_0_#B8851A] hover:translate-y-0.5 hover:shadow-[0_6px_0_0_#B8851A] transition-all">
@@ -110,11 +105,8 @@ const AdminGlyphsPage = () => {
                 <span className="font-bold">No se encontraron glifos</span>
             </div>
           )}
-        </div>
-      </div>
-
-      <AdminBottomNav activeTab="glifos" />
-    </div>
+            </div>
+        </AdminPageShell>
   );
 };
 

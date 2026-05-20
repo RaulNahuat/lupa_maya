@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus } from 'lucide-react';
-import AdminHeader from '../../components/admin/AdminHeader';
+import AdminPageShell from '../../components/admin/AdminPageShell';
 import GlyphSearchBar from '../../components/admin/GlyphSearchBar';
 import FilterTabs from '../../components/admin/FilterTabs';
 import Pagination from '../../components/admin/Pagination';
 import UserCard from '../../components/admin/UserCard';
-import AdminBottomNav from '../../components/admin/AdminBottomNav';
 import PrimaryButton from '../../components/PrimaryButton';
 import UserEditModal from '../../components/admin/UserEditModal';
 import ModalConfirmation from '../../components/ModalConfirmation';
@@ -190,11 +189,13 @@ const AdminUsersPage = () => {
   };
 
   const filteredUsers = users.filter(user => {
-    const matchesFilter = activeFilter === 'TODOS' || user.status === activeFilter;
+    const matchesFilter = activeFilter === 'TODOS' || user.genero === activeFilter;
     const matchesSearch = (user.name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
       (user.email?.toLowerCase() || '').includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
+
+  const genderFilters = ['TODOS', ...Array.from(new Set(users.map(u => u.genero).filter(Boolean)))];
 
   const totalPages = Math.max(1, Math.ceil(filteredUsers.length / usersPerPage));
   const safeCurrentPage = Math.min(currentPage, totalPages);
@@ -212,10 +213,7 @@ const AdminUsersPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-maya-cream pb-32">
-      <AdminHeader />
-
-      <div className="max-w-md mx-auto p-4 flex flex-col gap-4">
+    <AdminPageShell activeTab="usuarios">
         <div className="mt-2 px-1">
           <PrimaryButton 
             onClick={handleAddNew}
@@ -231,7 +229,7 @@ const AdminUsersPage = () => {
         <div className="space-y-2">
           <GlyphSearchBar onSearch={setSearchQuery} />
           <FilterTabs
-            filters={['TODOS', 'ACTIVOS', 'INACTIVOS']}
+            filters={genderFilters}
             activeFilter={activeFilter}
             onFilterChange={setActiveFilter}
           />
@@ -265,9 +263,6 @@ const AdminUsersPage = () => {
             </div>
           )}
         </div>
-      </div>
-
-      <AdminBottomNav activeTab="usuarios" />
 
       {/* Modals */}
       <UserEditModal
@@ -287,7 +282,7 @@ const AdminUsersPage = () => {
         confirmText="Eliminar"
         cancelText="Cancelar"
       />
-    </div>
+    </AdminPageShell>
   );
 };
 
