@@ -1,7 +1,7 @@
-import { Lock, Star, Brain, Search } from "lucide-react"
+import { Lock, Star, Brain, Search, ScanLine } from "lucide-react"
 
 export default function LevelNode({ level, onClick, isActive }) {
-  const Icon = level.tipo === "BUSQUEDA" ? Search : Brain
+  const Icon = level.tipo === "BUSQUEDA" ? ScanLine : Brain
 
   // Bloqueado
   if (!level.desbloqueado) {
@@ -9,7 +9,7 @@ export default function LevelNode({ level, onClick, isActive }) {
       <button disabled className="flex flex-col items-center cursor-not-allowed">
         <div
           className="w-22 h-22 rounded-full bg-light-gray flex items-center justify-center"
-          style={{ boxShadow: "0 6px 0 #6B7280" }}
+          style={{ boxShadow: "0 7px 0 #6B7280" }}
         >
           <Lock size={34} className="text-white" />
         </div>
@@ -27,11 +27,11 @@ export default function LevelNode({ level, onClick, isActive }) {
       >
         <div
           className="w-22 h-22 rounded-full bg-light-green flex items-center justify-center"
-          style={{ boxShadow: "0 6px 0 #064E3B" }}
+          style={{ boxShadow: "0 7px 0 #064E3B" }}
         >
           <Icon size={38} className="text-white" strokeWidth={2} />
         </div>
-        <div className="bg-white rounded-full px-2 py-0.5 flex gap-1 shadow-sm border border-light-gray">
+        <div className="bg-white rounded-full -mt-3 px-3 py-1 flex gap-1 shadow-sm border border-light-gray">
           {[1, 2, 3].map((s) => (
             <Star
               key={s}
@@ -56,8 +56,8 @@ export default function LevelNode({ level, onClick, isActive }) {
       style={{ animation: "levelPulse 1.8s ease-in-out infinite" }}
     >
       <div
-        className="w-22 h-22 rounded-full bg-yellow flex items-center justify-center"
-        style={{ boxShadow: "0 6px 0 #C88F12" }}
+        className="w-22 h-22 rounded-full bg-yellow flex items-center justify-center border-4 border-white"
+        style={{ boxShadow: "0 7px 0 #C88F12" }}
       >
         <Icon size={38} className="text-white" strokeWidth={2} />
       </div>

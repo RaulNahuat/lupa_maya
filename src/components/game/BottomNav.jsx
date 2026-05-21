@@ -10,21 +10,21 @@ export default function BottomNav() {
     levels[levels.length - 1]
 
   return (
-    <nav className="flex-shrink-0 bg-white border-t border-gray-100 px-6 py-4 flex items-center justify-between">
+    <nav className="flex-shrink-0 bg-white border-t border-gray-200 rounded-t-3xl px-7 py-4 flex items-center justify-between shadow-xs">
       <button
         onClick={() => navigate("/map")}
         className="flex flex-col items-center gap-1 text-dark-gold"
       >
         <Map size={24} />
-        <span className="text-md font-bold">Camino</span>
+        <span className="text-sm font-bold">Camino</span>
       </button>
 
       <button
         onClick={() => nivelActual && navigate(`/level/${nivelActual.id}`)}
-        className="w-20 h-20 -mt-8 rounded-full bg-dark-gold border-4 border-amber-50 flex items-center justify-center"
-        style={{ boxShadow: "0 4px 0 #92400e" }}
+        className="w-22 h-22 -mt-12 rounded-full bg-dark-gold border-4 border-amber-50 flex items-center justify-center"
+        style={{ boxShadow: "0 6px 0 #C88F12" }}
       >
-        <Play size={32} className="text-white fill-white ml-0.5" />
+        <Play size={36} className="text-white fill-white ml-0.5" />
       </button>
 
       <button
@@ -32,7 +32,7 @@ export default function BottomNav() {
         className="flex flex-col items-center gap-1 text-gray-400"
       >
         <Award size={24} />
-        <span className="text-md font-bold">Logros</span>
+        <span className="text-sm font-bold">Logros</span>
       </button>
     </nav>
   )

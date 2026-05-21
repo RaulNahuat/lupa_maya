@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom"
 import LevelNode from "../../components/game/LevelNode"
 import ModalConfirmation from "../../components/ModalConfirmation"
 import BottomNav from "../../components/game/BottomNav"
-import { Play, Flame, Star, LogOut } from "lucide-react"
+import { CircleUserRound, Play, Flame, Star, LogOut } from "lucide-react"
 
 export default function LevelMap() {
   const levels = useGameStore((s) => s.levels)
@@ -80,21 +80,21 @@ export default function LevelMap() {
       <div className="w-full md:w-[390px] md:max-h-[844px] min-h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
 
         {/* HEADER */}
-        <header className="shrink-0 bg-white border-b border-gray-100 px-5 py-6 flex items-center justify-between">
+        <header className="shrink-0 bg-white border-b-2 border-gray-200 px-5 py-5 flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowLogoutModal(true)}
-              className="w-10 h-10 rounded-full bg-amber-100 border-2 border-amber-400 flex items-center justify-center transition-colors hover:bg-amber-200 active:scale-95"
+              className="w-12 h-12 rounded-full flex items-center justify-center transition-colors hover:bg-amber-200 active:scale-95"
               title="Cerrar sesión"
             >
-              <LogOut size={18} className="text-amber-600 ml-0.5" />
+              <CircleUserRound strokeWidth={1} size={60} className="text-dark-gold" />
             </button>
 
             <div>
               <p className="font-bold text-black leading-tight text-lg">
                 {currentUser.nombre}
               </p>
-              <p className="text-dark-gold font-medium text-xs">
+              <p className="text-dark-gold font-medium text-sm">
                 Nivel {nivelActual.numero ?? nivelActual.id}
               </p>
             </div>
@@ -102,12 +102,12 @@ export default function LevelMap() {
 
           <div className="flex items-center gap-2">
             {/* TODO: implementar lógica de racha */}
-            <div className="flex items-center gap-1 bg-orange-50 border border-orange rounded-full px-3 py-1">
+            <div className="flex items-center gap-1 bg-orange-50 border border-orange rounded-full px-3 py-1.5">
               <Flame size={16} className="text-orange" />
               <span className="text-sm font-bold text-gray-700">—</span>
             </div>
 
-            <div className="flex items-center gap-1 bg-green-50 border border-green-200 rounded-full px-3 py-1">
+            <div className="flex items-center gap-1 bg-green-50 border border-green-200 rounded-full px-3 py-1.5">
               <Star size={16} className="text-light-green" />
               <span className="text-sm font-bold text-light-green">{totalEstrellas}</span>
             </div>
@@ -140,16 +140,13 @@ export default function LevelMap() {
                 >
                   {isCurrentActive && (
                     <div className="mb-2 bg-white rounded-2xl shadow-lg p-4 w-44 flex flex-col items-center gap-3">
-                      <p className="text-md font-bold text-brown uppercase tracking-wider">
+                      <p className="text-xl font-extrabold text-brown uppercase">
                         Nivel {level.numero ?? level.id}
                       </p>
-                      <p className="text-xl font-extrabold text-gray-800 text-center">
-                        {level.nombre ?? level.name}
-                      </p>
-                      <div className="w-full bg-gold rounded-xl p-[2px]">
+                      <div className="w-full rounded-xl p-[2px]">
                         <button
                           onClick={() => navigate(`/level/${level.id}`)}
-                          className="w-full bg-dark-gold text-white text-md font-bold rounded-lg py-2 px-6 flex items-center justify-center gap-2"
+                          className="w-full bg-dark-gold text-white text-md font-bold rounded-xl py-2 px-6 flex items-center justify-center gap-2 shadow-[0_4px_0_#7A5000]"
                         >
                           <Play size={18} className="fill-white" />
                           {level.completado ? "REPETIR" : "INICIAR"}

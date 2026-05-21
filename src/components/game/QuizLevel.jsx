@@ -1,11 +1,13 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Volume2 } from "lucide-react"
+import { X, Volume2 } from "lucide-react"
 import { calculateStars } from "../../utils/calculateStars"
 
 export default function QuizLevel({ level, onComplete }) {
   const navigate = useNavigate()
   const { contenido } = level
+
+  const numeroNivel = level.orden ?? level.numero ?? level.id ?? ""
 
   const [selected, setSelected] = useState(null)
   const [answered, setAnswered] = useState(false)
@@ -73,17 +75,20 @@ export default function QuizLevel({ level, onComplete }) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    //<div className="min-h-screen flex flex-col">
+    <div className="md:min-h-screen md:bg-gray-600 md:flex md:items-center md:justify-center">
+      <div className="w-full md:w-[390px] md:max-h-[844px] min-h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 pt-7 mb-5">
-        <button
-          onClick={() => navigate("/map")}
-          className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm text-gray-500 text-lg font-bold"
-        >
-          ✕
+
+
+      <div className="flex items-center justify-between px-4 pt-5 pb-3">
+        <button onClick={() => navigate("/map")}
+          title="Cerrar"
+          className="w-10 h-10 rounded-full bg-white flex ml-2 items-center justify-center border-2 border-gray-300 shadow-sm">
+          <X size={18} className="text-gray-500" />
         </button>
-        <span className="bg-gold font-bold text-black text-md px-5 py-2 rounded-full">
-          ¡Adivina lo siguiente!
+        <span className="bg-gold font-bold text-white text-md px-5 py-1 rounded-2xl shadow-[0_3px_0_#B8851A]">
+          NIVEL {numeroNivel}
         </span>
         <div className="w-10" />
       </div>
@@ -93,7 +98,7 @@ export default function QuizLevel({ level, onComplete }) {
         {/* Glifo */}
         {contenido.imagen_url && (
           <div
-            className="bg-white w-40 h-40 rounded-2xl border-4 border-light-green flex items-center justify-center mb-4 shadow-md"
+            className="bg-white w-50 h-50 rounded-3xl border-3 border-light-green flex items-center justify-center mb-4 shadow-[0_6px_0_#065f46]"
           >
             <img
               src={contenido.imagen_url}
@@ -122,7 +127,7 @@ export default function QuizLevel({ level, onComplete }) {
         )}
 
         {/* Pregunta */}
-        <p className="font-semibold text-brown mt-3 mb-5 px-4 text-center text-lg">
+        <p className="font-bold text-brown mt-3 mb-7 px-4 text-center text-xl">
           {contenido.question}
         </p>
 
@@ -145,7 +150,7 @@ export default function QuizLevel({ level, onComplete }) {
 
         {/* Feedback — solo al acertar */}
         {answered && esCorrecta && (
-          <div className="mt-4 text-center">
+          <div className="mt-10 text-center">
             <p className="font-bold text-xl text-light-green">
               ¡Correcto!
             </p>
@@ -154,8 +159,8 @@ export default function QuizLevel({ level, onComplete }) {
 
         {/* Feedback — incorrecto (desaparece solo con el reset) */}
         {answered && !esCorrecta && (
-          <div className="mt-4 text-center">
-            <p className="font-bold text-lg text-red">
+          <div className="mt-10 text-center">
+            <p className="font-bold text-xl text-red">
               Inténtalo de nuevo
             </p>
           </div>
@@ -168,7 +173,7 @@ export default function QuizLevel({ level, onComplete }) {
           <button
             onClick={handleComprobar}
             disabled={!selected}
-            className="w-full bg-light-green py-4 rounded-2xl font-extrabold text-white text-base tracking-widest transition-opacity disabled:opacity-40"
+            className="w-full bg-light-green py-5 rounded-2xl font-bold text-white text-xl tracking-widest transition-opacity disabled:opacity-40 shadow-[0_8px_0_#065f46]"
             style={{ letterSpacing: "0.1em" }}
           >
             COMPROBAR
@@ -176,7 +181,7 @@ export default function QuizLevel({ level, onComplete }) {
         ) : esCorrecta ? (
           <button
             onClick={handleContinue}
-            className="w-full bg-light-green py-4 rounded-2xl font-extrabold text-white text-base tracking-widest"
+            className="w-full bg-light-green py-5 rounded-2xl font-bold text-white text-xl tracking-widest shadow-[0_8px_0_#065f46]"
           >
             CONTINUAR
           </button>
@@ -184,11 +189,12 @@ export default function QuizLevel({ level, onComplete }) {
           // Mientras espera el reset automático, el botón queda deshabilitado
           <button
             disabled
-            className="w-full bg-light-gree py-4 rounded-2xl font-extrabold text-white text-base tracking-widest opacity-40"
+            className="w-full bg-light-gree py-5 rounded-2xl font-bold text-white text-xl tracking-widest opacity-40"
           >
             COMPROBAR
           </button>
         )}
+      </div>
       </div>
     </div>
   )

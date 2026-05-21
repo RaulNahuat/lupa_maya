@@ -13,6 +13,7 @@
   --color-black: #2B2B2B;
   --color-green: #064E3B;
   --color-light-green: #2E8B57;
+  --color-dark-green: #065f46;
   --color-brown: #7A5000;
   --color-red: #DE393E;
   --color-gold: #D4AF37;
@@ -25,6 +26,15 @@
   --font-maya: "Outfit", "Inter", "system-ui", "sans-serif";
   --radius-4xl: 2rem;
 }
+
+/*@theme {
+  --animate-slide-up: slide-up 0.25s ease-out;
+
+  @keyframes slide-up {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+}*/
 
 @layer base {
   :root {

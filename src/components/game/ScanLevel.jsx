@@ -165,7 +165,9 @@ export default function ScanLevel({ level, onComplete }) {
 
   // — Pantalla principal de escaneo —
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden">
+    //<div className="min-h-screen flex flex-col relative overflow-hidden">
+    <div className="md:min-h-screen md:bg-gray-600 md:flex md:items-center md:justify-center">
+      <div className="w-full md:w-[390px] md:max-h-[844px] min-h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
 
       {/* ── Capa 1: video completo oscurecido (fondo) ── */}
       <video
@@ -185,16 +187,19 @@ export default function ScanLevel({ level, onComplete }) {
         <div className="flex items-center justify-between px-4 pt-5 pb-2">
           <button
             onClick={() => navigate("/map")}
-            className="w-10 h-10 rounded-full flex items-center justify-center"
+            className="w-10 h-10 rounded-full flex items-center justify-center border-1 border-gray-200"
             style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
           >
             <X size={18} className="text-white" />
           </button>
-          <span className="font-extrabold text-white text-sm px-5 py-2 rounded-full tracking-widest"
+          <span className="font-extrabold text-white text-sm px-5 py-2 rounded-full tracking-widest border-1 border-gray-200"
             style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
             NIVEL {numeroNivel}
           </span>
-          <button className="w-10 h-10 bg-gold rounded-full flex items-center justify-center">
+          <button 
+            className="w-10 h-10 rounded-full flex items-center justify-center border-1 border-gray-200"
+            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+          >
             <Zap size={18} className="text-white" />
           </button>
         </div>
@@ -259,16 +264,16 @@ export default function ScanLevel({ level, onComplete }) {
           <p className="text-center text-brown text-md mb-10 font-bold leading-relaxed">
             Apunta tu cámara hacia el glifo<br />
             que creas que hace referencia a{" "}
-            {contenido.glifo?.significado_es ? `un ${nombreObjetivo}` : "este glifo"}.
+            {contenido.glifo?.significado_es ? `un ${nombreObjetivo}` : "[significado]"}.
           </p>
 
           <button
             onClick={handleScan}
             disabled={scanning}
-            className="w-full py-4 bg-gold rounded-2xl font-extrabold text-white text-base flex items-center justify-center gap-3 disabled:opacity-50"
+            className="w-full py-4 bg-gold rounded-2xl font-bold tracking-widest text-white text-base flex items-center justify-center gap-4 disabled:opacity-50 shadow-[0_8px_0_#C88F12]"
           >
-            <Camera size={24} />
-            Escanear Glifo
+            <Camera size={26} />
+            ESCANEAR GLIFO
           </button>
         </div>
       </div>
@@ -287,6 +292,7 @@ export default function ScanLevel({ level, onComplete }) {
           position: absolute;
         }
       `}</style>
+      </div>
     </div>
   )
 }
