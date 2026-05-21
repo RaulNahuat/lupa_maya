@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus } from 'lucide-react';
-import AdminHeader from '../../components/admin/AdminHeader';
+import AdminPageShell from '../../components/admin/AdminPageShell';
 import GlyphSearchBar from '../../components/admin/GlyphSearchBar';
 import FilterTabs from '../../components/admin/FilterTabs';
+import Pagination from '../../components/admin/Pagination';
 import UserCard from '../../components/admin/UserCard';
-import AdminBottomNav from '../../components/admin/AdminBottomNav';
 import PrimaryButton from '../../components/PrimaryButton';
 import UserEditModal from '../../components/admin/UserEditModal';
 import ModalConfirmation from '../../components/ModalConfirmation';
@@ -18,6 +18,8 @@ const AdminUsersPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('TODOS');
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 10;
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -28,33 +30,80 @@ const AdminUsersPage = () => {
     setIsLoading(true);
     try {
       const localUsers = await db.usuarios.toArray();
-      
-      const processed = localUsers.map(u => ({
-        ...u,
-        id: u.id || u.local_id,
-        name: `${u.nombre} ${u.apellido || ''}`,
-        email: u.username,
-        level: 0,
-        stars: 0,
-        badges: 0,
-        status: u.deleted_at ? "INACTIVOS" : "ACTIVOS"
-      }));
+
+      // Cargar progresos e insignias locales y agrupar por usuario_local_id
+      const allProgresos = await db.progreso_usuarios.toArray();
+      const allInsignias = await db.usuario_insignias.toArray();
+
+      const progresosByUser = allProgresos.reduce((acc, p) => {
+        const key = p.usuario_local_id || p.usuario_id || 'unknown';
+        if (!acc[key]) acc[key] = { stars: 0, completed: 0 };
+        acc[key].stars += p.estrellas ?? 0;
+        if (p.completado) acc[key].completed += 1;
+        return acc;
+      }, {});
+
+      const insigniasByUser = allInsignias.reduce((acc, i) => {
+        const key = i.usuario_local_id || i.usuario_id || 'unknown';
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
+
+      const processed = localUsers.map(u => {
+        const key = u.local_id || u.id;
+        const p = progresosByUser[key] || { stars: 0, completed: 0 };
+        const b = insigniasByUser[key] || 0;
+
+        return {
+          ...u,
+          id: u.id || u.local_id,
+          name: `${u.nombre} ${u.apellido || ''}`,
+          email: u.username,
+          level: p.completed,
+          stars: p.stars,
+          badges: b,
+          status: u.deleted_at ? "INACTIVOS" : "ACTIVOS"
+        };
+      });
 
       setUsers(processed);
 
       if (navigator.onLine) {
         await procesarColaSincronizacion();
         const updatedUsers = await db.usuarios.toArray();
-        setUsers(updatedUsers.map(u => ({
-          ...u,
-          id: u.id || u.local_id,
-          name: `${u.nombre} ${u.apellido || ''}`,
-          email: u.username,
-          level: 0,
-          stars: 0,
-          badges: 0,
-          status: u.deleted_at ? "INACTIVOS" : "ACTIVOS"
-        })));
+
+        const updatedProgresos = await db.progreso_usuarios.toArray();
+        const updatedInsignias = await db.usuario_insignias.toArray();
+
+        const progresosByUser2 = updatedProgresos.reduce((acc, p) => {
+          const key = p.usuario_local_id || p.usuario_id || 'unknown';
+          if (!acc[key]) acc[key] = { stars: 0, completed: 0 };
+          acc[key].stars += p.estrellas ?? 0;
+          if (p.completado) acc[key].completed += 1;
+          return acc;
+        }, {});
+
+        const insigniasByUser2 = updatedInsignias.reduce((acc, i) => {
+          const key = i.usuario_local_id || i.usuario_id || 'unknown';
+          acc[key] = (acc[key] || 0) + 1;
+          return acc;
+        }, {});
+
+        setUsers(updatedUsers.map(u => {
+          const key = u.local_id || u.id;
+          const p = progresosByUser2[key] || { stars: 0, completed: 0 };
+          const b = insigniasByUser2[key] || 0;
+          return {
+            ...u,
+            id: u.id || u.local_id,
+            name: `${u.nombre} ${u.apellido || ''}`,
+            email: u.username,
+            level: p.completed,
+            stars: p.stars,
+            badges: b,
+            status: u.deleted_at ? "INACTIVOS" : "ACTIVOS"
+          };
+        }));
       }
     } catch (error) {
       console.error("Error al obtener usuarios:", error);
@@ -66,6 +115,10 @@ const AdminUsersPage = () => {
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeFilter, searchQuery]);
 
   const handleEdit = (user) => {
     setSelectedUser(user);
@@ -183,17 +236,31 @@ const AdminUsersPage = () => {
   };
 
   const filteredUsers = users.filter(user => {
-    const matchesFilter = activeFilter === 'TODOS' || user.status === activeFilter;
+    const matchesFilter = activeFilter === 'TODOS' || user.genero === activeFilter;
     const matchesSearch = (user.name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
       (user.email?.toLowerCase() || '').includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
-  return (
-    <div className="min-h-screen bg-maya-cream pb-32">
-      <AdminHeader />
+  const genderFilters = ['TODOS', ...Array.from(new Set(users.map(u => u.genero).filter(Boolean)))];
 
-      <div className="max-w-md mx-auto p-4 flex flex-col gap-4">
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / usersPerPage));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (safeCurrentPage - 1) * usersPerPage;
+  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + usersPerPage);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const goToPage = (page) => {
+    setCurrentPage(Math.min(Math.max(page, 1), totalPages));
+  };
+
+  return (
+    <AdminPageShell activeTab="usuarios">
         <div className="mt-2 px-1">
           <PrimaryButton 
             onClick={handleAddNew}
@@ -209,7 +276,7 @@ const AdminUsersPage = () => {
         <div className="space-y-2">
           <GlyphSearchBar onSearch={setSearchQuery} />
           <FilterTabs
-            filters={['TODOS', 'ACTIVOS', 'INACTIVOS']}
+            filters={genderFilters}
             activeFilter={activeFilter}
             onFilterChange={setActiveFilter}
           />
@@ -220,24 +287,29 @@ const AdminUsersPage = () => {
             <div className="text-center py-10 opacity-40">
               <span className="font-bold uppercase tracking-widest animate-pulse">Cargando...</span>
             </div>
-          ) : filteredUsers.length > 0 ? (
-            filteredUsers.map(user => (
-              <UserCard
-                key={user.local_id || user.id}
-                user={user}
-                onEdit={() => handleEdit(user)}
-                onDelete={() => handleDelete(user)}
+          ) : paginatedUsers.length > 0 ? (
+            <>
+              {paginatedUsers.map(user => (
+                <UserCard
+                  key={user.local_id || user.id}
+                  user={user}
+                  onEdit={() => handleEdit(user)}
+                  onDelete={() => handleDelete(user)}
+                />
+              ))}
+
+              <Pagination
+                currentPage={safeCurrentPage}
+                totalPages={totalPages}
+                onPageChange={goToPage}
               />
-            ))
+            </>
           ) : (
             <div className="text-center py-10 opacity-40">
               <span className="font-bold uppercase tracking-widest">No se encontraron usuarios</span>
             </div>
           )}
         </div>
-      </div>
-
-      <AdminBottomNav activeTab="usuarios" />
 
       {/* Modals */}
       <UserEditModal
@@ -257,7 +329,7 @@ const AdminUsersPage = () => {
         confirmText="Eliminar"
         cancelText="Cancelar"
       />
-    </div>
+    </AdminPageShell>
   );
 };
 

@@ -6,6 +6,7 @@ import LevelMap from "./pages/player/LevelMap";
 import LevelPlay from "./pages/player/LevelPlay";
 import AdminGlyphsPage from './pages/admin/AdminGlyphsPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
+import AdminSettingsPage from './pages/admin/AdminSettingsPage';
 import UserRoute from './routes/UserRoute';
 import AdminRoute from './routes/AdminRoute';
 import './App.css';
@@ -21,6 +22,7 @@ function App() {
 
           {/* ADMIN */}
           <Route path="/dashboard" element={<AdminRoute><Dashboard /></AdminRoute>} />
+          <Route path="/admin/settings" element={<AdminRoute><AdminSettingsPage /></AdminRoute>} />
           <Route path="/admin/glyphs" element={<AdminRoute><AdminGlyphsPage /></AdminRoute>} />
           <Route path="/admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
 

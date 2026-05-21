@@ -7,6 +7,7 @@ import http from "http";
 import { Server } from "socket.io";
 import { handleSyncUsuarios } from "./controllers/pushController/UsuariosPushController.js";
 import { handleSyncProgreso } from "./controllers/pushController/progresoPushController.js";
+import { handleSyncAdmins } from "./controllers/pushController/adminsPushController.js";
 import { getUsuariosPull } from "./controllers/pullController/usuariosPullController.js";
 import { getAdminsPull } from "./controllers/pullController/adminsPullController.js";
 import { getNivelesPull } from "./controllers/pullController/nivelesPullController.js";
@@ -63,6 +64,8 @@ app.post("/api/sync", async (req, res) => {
         return await deleteUsuario(req, res, db, io);
       case "progreso_usuarios:UPSERT":
         return await handleSyncProgreso(req, res, db, io);
+      case "admins:EDITAR":
+        return await handleSyncAdmins(req, res, db, io);
       default:
         return res.status(400).json({ success: false, message: "Entidad o acción no soportada" });
     }
