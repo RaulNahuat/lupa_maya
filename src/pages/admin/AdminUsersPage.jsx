@@ -30,33 +30,80 @@ const AdminUsersPage = () => {
     setIsLoading(true);
     try {
       const localUsers = await db.usuarios.toArray();
-      
-      const processed = localUsers.map(u => ({
-        ...u,
-        id: u.id || u.local_id,
-        name: `${u.nombre} ${u.apellido || ''}`,
-        email: u.username,
-        level: 0,
-        stars: 0,
-        badges: 0,
-        status: u.deleted_at ? "INACTIVOS" : "ACTIVOS"
-      }));
+
+      // Cargar progresos e insignias locales y agrupar por usuario_local_id
+      const allProgresos = await db.progreso_usuarios.toArray();
+      const allInsignias = await db.usuario_insignias.toArray();
+
+      const progresosByUser = allProgresos.reduce((acc, p) => {
+        const key = p.usuario_local_id || p.usuario_id || 'unknown';
+        if (!acc[key]) acc[key] = { stars: 0, completed: 0 };
+        acc[key].stars += p.estrellas ?? 0;
+        if (p.completado) acc[key].completed += 1;
+        return acc;
+      }, {});
+
+      const insigniasByUser = allInsignias.reduce((acc, i) => {
+        const key = i.usuario_local_id || i.usuario_id || 'unknown';
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
+
+      const processed = localUsers.map(u => {
+        const key = u.local_id || u.id;
+        const p = progresosByUser[key] || { stars: 0, completed: 0 };
+        const b = insigniasByUser[key] || 0;
+
+        return {
+          ...u,
+          id: u.id || u.local_id,
+          name: `${u.nombre} ${u.apellido || ''}`,
+          email: u.username,
+          level: p.completed,
+          stars: p.stars,
+          badges: b,
+          status: u.deleted_at ? "INACTIVOS" : "ACTIVOS"
+        };
+      });
 
       setUsers(processed);
 
       if (navigator.onLine) {
         await procesarColaSincronizacion();
         const updatedUsers = await db.usuarios.toArray();
-        setUsers(updatedUsers.map(u => ({
-          ...u,
-          id: u.id || u.local_id,
-          name: `${u.nombre} ${u.apellido || ''}`,
-          email: u.username,
-          level: 0,
-          stars: 0,
-          badges: 0,
-          status: u.deleted_at ? "INACTIVOS" : "ACTIVOS"
-        })));
+
+        const updatedProgresos = await db.progreso_usuarios.toArray();
+        const updatedInsignias = await db.usuario_insignias.toArray();
+
+        const progresosByUser2 = updatedProgresos.reduce((acc, p) => {
+          const key = p.usuario_local_id || p.usuario_id || 'unknown';
+          if (!acc[key]) acc[key] = { stars: 0, completed: 0 };
+          acc[key].stars += p.estrellas ?? 0;
+          if (p.completado) acc[key].completed += 1;
+          return acc;
+        }, {});
+
+        const insigniasByUser2 = updatedInsignias.reduce((acc, i) => {
+          const key = i.usuario_local_id || i.usuario_id || 'unknown';
+          acc[key] = (acc[key] || 0) + 1;
+          return acc;
+        }, {});
+
+        setUsers(updatedUsers.map(u => {
+          const key = u.local_id || u.id;
+          const p = progresosByUser2[key] || { stars: 0, completed: 0 };
+          const b = insigniasByUser2[key] || 0;
+          return {
+            ...u,
+            id: u.id || u.local_id,
+            name: `${u.nombre} ${u.apellido || ''}`,
+            email: u.username,
+            level: p.completed,
+            stars: p.stars,
+            badges: b,
+            status: u.deleted_at ? "INACTIVOS" : "ACTIVOS"
+          };
+        }));
       }
     } catch (error) {
       console.error("Error al obtener usuarios:", error);
