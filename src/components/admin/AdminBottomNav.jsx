@@ -17,7 +17,7 @@ const AdminBottomNav = ({ activeTab = 'glifos' }) => {
       <div className="relative -top-8">
         <div className="absolute -inset-6 bg-maya-gold/10 rounded-full blur-2xl opacity-40 animate-pulse"></div>
         <button 
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/admin/settings')}
           className="relative w-20 h-20 bg-white rounded-full border-[6px] border-maya-cream flex items-center justify-center shadow-2xl hover:scale-110 active:scale-90 transition-all z-10"
         >
           <div className="w-14 h-14 bg-maya-dark rounded-full flex items-center justify-center shadow-inner">

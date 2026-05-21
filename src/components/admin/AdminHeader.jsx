@@ -8,7 +8,7 @@ const AdminHeader = () => {
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  const name = currentUser?.nombre || currentUser?.email || 'Administrador';
+  const name = currentUser?.nombre ? currentUser.nombre : 'Administrador';
   const role = currentUser?.rol || 'Administrador';
   const avatar = currentUser?.avatar || null;
 
