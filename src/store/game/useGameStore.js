@@ -2,9 +2,11 @@ import { create } from "zustand"
 import { db } from "../../data/db"
 import { guardarProgreso } from "../../services/player/progresoService"
 import { procesarColaSincronizacion } from "../../services/syncService"
+import { obtenerRacha, actualizarRacha } from "../../services/player/rachaService"
 
 export const useGameStore = create((set, get) => ({
   levels: [],
+  racha: 0,
   syncReady: false, // true cuando el primer pull sync termina
 
   /**
@@ -106,11 +108,13 @@ export const useGameStore = create((set, get) => ({
       })
     )
 
-    set({ levels: levelsConContenido })
+    // Cargar racha persistida del usuario
+    const racha = currentUser ? await obtenerRacha(currentUser.local_id) : 0
+    
+    set({ levels: levelsConContenido, racha })
   },
 
   syncAndReload: async (currentUser) => {
-
     set({ syncReady: false })
     await procesarColaSincronizacion(currentUser.local_id)
     set({ syncReady: true })
@@ -119,7 +123,7 @@ export const useGameStore = create((set, get) => ({
   },
 
   /**
-   * Marca un nivel como completado para el usuario actual.
+   * Marca un nivel como completado, actualiza estrellas y recalcula la racha.
    */
   completeLevel: async (currentUser, nivelId, estrellas, intentos) => {
     const { levels } = get()
@@ -133,6 +137,9 @@ export const useGameStore = create((set, get) => ({
     }
 
     await guardarProgreso({ usuario: currentUser, nivel, estrellas, intentos })
+
+    // Recalcular racha, sube si completó a primera vez, se rompe si no
+    const nuevaRacha = await actualizarRacha(currentUser.local_id, intentos)
 
     // Actualizar estado en memoria sin tocar el catálogo
     const updatedLevels = levels.map((lvl, index) => {
@@ -153,7 +160,7 @@ export const useGameStore = create((set, get) => ({
       return lvl
     })
 
-    set({ levels: updatedLevels })
+    set({ levels: updatedLevels, racha: nuevaRacha })
 
     procesarColaSincronizacion(currentUser.local_id)
   },
