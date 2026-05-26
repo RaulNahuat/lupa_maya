@@ -1,0 +1,25 @@
+FROM node:22-alpine
+
+# Install pnpm
+RUN npm i -g pnpm
+
+WORKDIR /app
+
+# Copy dependency files
+COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies (including devDependencies so sequelize-cli is available for migrations)
+RUN pnpm install --frozen-lockfile
+
+# Copy the rest of the application
+COPY . .
+
+# Expose backend port
+EXPOSE 5000
+
+# Set environment variables defaults
+ENV PORT=5000
+ENV NODE_ENV=production
+
+# Command to run the server
+CMD ["node", "server/index.js"]
