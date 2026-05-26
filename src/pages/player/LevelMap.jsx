@@ -13,6 +13,7 @@ export default function LevelMap() {
   const initLevels = useGameStore((s) => s.initLevels)
   const syncAndReload = useGameStore((s) => s.syncAndReload)
   const syncReady = useGameStore((s) => s.syncReady)
+  const racha = useGameStore((s) => s.racha)
 
   const { currentUser, logoutUser } = useAuth()
   const navigate = useNavigate()
@@ -83,7 +84,7 @@ export default function LevelMap() {
 
   return (
     <div className="md:min-h-screen md:bg-gray-600 md:flex md:items-center md:justify-center">
-      <div className="w-full md:w-[390px] md:max-h-[844px] min-h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
+      <div className="w-full md:w-[390px] md:max-h-[844px] h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
 
         {/* HEADER */}
         <header className="shrink-0 bg-white border-b-2 border-gray-200 px-5 py-5 flex items-center justify-between shadow-xs">
@@ -110,7 +111,7 @@ export default function LevelMap() {
             {/* TODO: implementar lógica de racha */}
             <div className="flex items-center gap-1 bg-orange-50 border border-orange rounded-full px-3 py-1.5">
               <Flame size={16} className="text-orange" />
-              <span className="text-sm font-bold text-gray-700">—</span>
+              <span className="text-sm font-bold text-orange">{racha}</span>
             </div>
 
             <div className="flex items-center gap-1 bg-green-50 border border-green-200 rounded-full px-3 py-1.5">
