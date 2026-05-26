@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom"
 import LevelNode from "../../components/game/LevelNode"
 import ModalConfirmation from "../../components/ModalConfirmation"
 import BottomNav from "../../components/game/BottomNav"
+import { ensureActiveAiModelCached } from "../../services/recognition/aiModelCacheService"
 import { CircleUserRound, Play, Flame, Star, LogOut } from "lucide-react"
 
 export default function LevelMap() {
@@ -31,6 +32,11 @@ export default function LevelMap() {
     // Sync en paralelo — cuando termine recarga los niveles automáticamente
     // con el contenido actualizado del servidor.
     syncAndReload(currentUser)
+
+    // Precarga el modelo activo en el navegador para poder usarlo sin internet.
+    ensureActiveAiModelCached().catch((error) => {
+      console.warn('No se pudo preparar el modelo de IA en caché:', error)
+    })
 
   }, [currentUser])
 
