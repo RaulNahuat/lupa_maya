@@ -18,8 +18,9 @@ RUN pnpm install --frozen-lockfile
 # Copy project files
 COPY . .
 
-# Use relative API paths in production
-ENV VITE_API_URL=""
+# Allow the build to receive the public API URL when needed.
+ARG VITE_API_URL
+ENV VITE_API_URL=${VITE_API_URL}
 
 # Build app
 RUN pnpm run build

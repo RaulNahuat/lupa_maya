@@ -26,6 +26,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL}
     container_name: lupa_maya_frontend
     restart: always
     ports:
