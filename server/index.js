@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { createRequire } from "module";
+import path from "path";
 
 import http from "http";
 import { Server } from "socket.io";
@@ -16,6 +17,8 @@ import { getPreguntasPull } from "./controllers/pullController/preguntasPullCont
 import { getGlifosPull } from "./controllers/pullController/glifosPullController.js";
 import { getGlifosObjetivoPull } from "./controllers/pullController/glifosObjetivoPullController.js";
 import { getAllUsuarios, updateUsuario, deleteUsuario } from "./controllers/admin/AdminUsuariosController.js";
+import { createAiModel, uploadAiModelFiles } from "./controllers/admin/AiModelsController.js";
+import { getActiveAiModel } from "./controllers/pullController/aiModelsPullController.js";
 
 dotenv.config();
 
@@ -30,6 +33,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+app.use('/models', express.static(path.join(process.cwd(), 'public', 'models')));
 
 
 db.sequelize.authenticate()
@@ -115,6 +119,10 @@ app.get("/api/sync/pull", async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
+// AI MODELS
+app.post("/api/admin/ai-models", uploadAiModelFiles, (req, res) => createAiModel(req, res, db));
+app.get("/api/ai-models/active", (req, res) => getActiveAiModel(req, res, db));
 
 // ADMIN ROUTES
 app.get("/api/admin/usuarios", (req, res) => getAllUsuarios(req, res, db));

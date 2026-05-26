@@ -1,6 +1,7 @@
 import { db } from "../data/db";
+import { API_BASE_URL } from "../config/api";
 
-const API_SYNC_URL = `${import.meta.env.VITE_API_URL}/api/sync`;
+const API_SYNC_URL = `${API_BASE_URL}/api/sync`;
 
 /**
  * Pull: descarga cambios del servidor desde la última sincronización.

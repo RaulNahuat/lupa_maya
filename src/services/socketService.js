@@ -1,7 +1,8 @@
 import { io } from "socket.io-client";
 import { procesarColaSincronizacion } from "./syncService";
+import { API_BASE_URL } from "../config/api";
 
-const SOCKET_URL = import.meta.env.VITE_API_URL;
+const SOCKET_URL = API_BASE_URL;
 
 let socket = null;
 
