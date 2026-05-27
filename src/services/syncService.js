@@ -36,7 +36,8 @@ export const descargarCambios = async (usuarioLocalId = null) => {
         preguntas = [],
         opciones_respuestas = [],
         nivel_glifos_objetivos = [],
-        progreso_usuarios = []
+        progreso_usuarios = [],
+        insignias = []
     } = result.cambios;
 
     await db.transaction(
@@ -49,8 +50,14 @@ export const descargarCambios = async (usuarioLocalId = null) => {
         db.opciones_respuestas,
         db.nivel_glifos_objetivos,
         db.progreso_usuarios,
+        db.insignias,
         db.configuracion,
         async () => {
+
+            // INSIGNIAS
+            if (insignias.length > 0) {
+                await db.insignias.bulkPut(insignias);
+            }
 
             // USUARIOS
             for (const user of usuarios) {

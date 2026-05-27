@@ -53,6 +53,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,jpg,ttf,woff2}'],
+        maximumFileSizeToCacheInBytes: 8 * 1024 * 1024, // 8MB to support large badge images
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

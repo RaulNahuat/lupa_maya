@@ -4,6 +4,7 @@ import Register from './pages/auth/Register';
 import Dashboard from './pages/Dashboard';
 import LevelMap from "./pages/player/LevelMap";
 import LevelPlay from "./pages/player/LevelPlay";
+import Rewards from "./pages/player/Rewards";
 import AdminGlyphsPage from './pages/admin/AdminGlyphsPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminSettingsPage from './pages/admin/AdminSettingsPage';
@@ -29,6 +30,7 @@ function App() {
           {/* PLAYER */}
           <Route path="/map" element={<UserRoute><LevelMap /></UserRoute>} />
           <Route path="/level/:id" element={<UserRoute><LevelPlay /></UserRoute>} />
+          <Route path="/rewards" element={<UserRoute><Rewards /></UserRoute>} />
 
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="*" element={<Navigate to="/login" replace />} />

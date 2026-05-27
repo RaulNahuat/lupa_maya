@@ -16,6 +16,7 @@ import { getProgresoPull } from "./controllers/pullController/progresoPullContro
 import { getPreguntasPull } from "./controllers/pullController/preguntasPullController.js";
 import { getGlifosPull } from "./controllers/pullController/glifosPullController.js";
 import { getGlifosObjetivoPull } from "./controllers/pullController/glifosObjetivoPullController.js";
+import { getInsigniasPull } from "./controllers/pullController/insigniasPullController.js";
 import { getAllUsuarios, updateUsuario, deleteUsuario } from "./controllers/admin/AdminUsuariosController.js";
 import { createAiModel, uploadAiModelFiles } from "./controllers/admin/AiModelsController.js";
 import { getActiveAiModel } from "./controllers/pullController/aiModelsPullController.js";
@@ -98,6 +99,7 @@ app.get("/api/sync/pull", async (req, res) => {
     const { preguntas, opciones_respuestas } = await getPreguntasPull(db, Op, lastSyncDate);
     const nivel_glifos_objetivos = await getGlifosObjetivoPull(db);
     const progreso_usuarios = await getProgresoPull(db, Op, lastSyncDate, usuario_local_id);
+    const insignias = await getInsigniasPull(db);
 
     res.json({
       success: true,
@@ -109,7 +111,8 @@ app.get("/api/sync/pull", async (req, res) => {
         preguntas, 
         opciones_respuestas, 
         nivel_glifos_objetivos,
-        progreso_usuarios 
+        progreso_usuarios,
+        insignias
       },
       serverTime: new Date().getTime()
     });
