@@ -39,7 +39,6 @@ export default function QuizLevel({ level, onComplete }) {
   const handleContinue = async () => {
     const estrellas = calculateStars(intentos)
     await onComplete(level.id, estrellas, intentos)
-    navigate("/map")
   }
 
   const handleAudio = () => {

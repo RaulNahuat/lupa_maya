@@ -77,7 +77,6 @@ export default function ScanLevel({ level, onComplete }) {
     streamRef.current?.getTracks().forEach((track) => track.stop())
     const estrellas = calculateStars(intentos)
     await onComplete(level.id, estrellas, intentos)
-    navigate("/map")
   }
 
   const nombreObjetivo = contenido.glifo?.significado_es ?? contenido.glifo?.nombre_maya ?? "el glifo"
@@ -187,17 +186,17 @@ export default function ScanLevel({ level, onComplete }) {
         <div className="flex items-center justify-between px-4 pt-5 pb-2">
           <button
             onClick={() => navigate("/map")}
-            className="w-10 h-10 rounded-full flex items-center justify-center border-1 border-gray-200"
+            className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-200"
             style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
           >
             <X size={18} className="text-white" />
           </button>
-          <span className="font-extrabold text-white text-sm px-5 py-2 rounded-full tracking-widest border-1 border-gray-200"
+          <span className="font-extrabold text-white text-sm px-5 py-2 rounded-full tracking-widest border border-gray-200"
             style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
             NIVEL {numeroNivel}
           </span>
           <button 
-            className="w-10 h-10 rounded-full flex items-center justify-center border-1 border-gray-200"
+            className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-200"
             style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
           >
             <Zap size={18} className="text-white" />
