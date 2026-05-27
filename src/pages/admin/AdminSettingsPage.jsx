@@ -190,11 +190,6 @@ const AdminSettingsPage = () => {
               <input name="metadataFile" type="file" accept="application/json,.json" onChange={handleModelFieldChange} className="w-full text-sm" />
             </label>
 
-            <label className="flex items-center gap-3 text-sm font-bold text-maya-dark">
-              <input name="isActive" type="checkbox" checked={modelForm.isActive} onChange={handleModelFieldChange} className="w-4 h-4 accent-[var(--maya-gold)]" />
-              Marcar como modelo activo
-            </label>
-
             <div className="flex gap-3">
               <PrimaryButton onClick={handleUploadModel} disabled={uploadingModel} className="px-4 py-3">
                 {uploadingModel ? 'Subiendo...' : 'Subir modelo IA'}
