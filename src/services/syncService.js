@@ -61,6 +61,13 @@ export const descargarCambios = async (usuarioLocalId = null) => {
                         ...user,
                         sync_status: 'SINCRONIZADO'
                     });
+
+                    if (user.racha !== undefined && user.local_id) {
+                    await db.configuracion.put({
+                        clave: `racha_${user.local_id}`,
+                        valor: user.racha,
+                    });
+                    }
                 }
             }
 

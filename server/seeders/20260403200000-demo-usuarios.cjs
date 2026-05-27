@@ -18,7 +18,7 @@ module.exports = {
       },
       {
         local_id: crypto.randomUUID(),
-        email: 'juan@lupamaya.com',
+        email: 'admin@lupamaya.com',
         password_hash: await bcrypt.hash('Admin1234', saltRounds),
         created_at: new Date(),
         updated_at: new Date()
