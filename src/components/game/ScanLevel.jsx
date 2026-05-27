@@ -4,6 +4,7 @@ import { X, Zap, Search, Camera } from "lucide-react"
 import { calculateStars } from "../../utils/calculateStars"
 
 import * as tmImage from "@teachablemachine/image"
+import { API_BASE_URL } from "../../config/api"
 
 export default function ScanLevel({ level, onComplete }) {
   const videoRef = useRef(null)
@@ -36,8 +37,8 @@ export default function ScanLevel({ level, onComplete }) {
     console.log("Cargando modelo...")
     try {
       const model = await tmImage.load(
-        "/models/model.json",
-        "/models/metadata.json"
+        `${API_BASE_URL}/models/model.json`,
+        `${API_BASE_URL}/models/metadata.json`
       )
       modelRef.current = model
       console.log("Modelo cargado:", model)
