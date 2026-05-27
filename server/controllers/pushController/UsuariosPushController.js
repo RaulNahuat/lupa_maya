@@ -6,6 +6,11 @@ export async function handleSyncUsuarios(req, res, db, io) {
   });
 
   if (existente) {
+    // Actualizar racha si el cliente manda un valor más reciente
+    if (datos.racha !== undefined && datos.racha !== null) {
+      await existente.update({ racha: datos.racha });
+    }
+
     return res.status(200).json({
       success: true,
       message: "Ya existe",
@@ -23,7 +28,8 @@ export async function handleSyncUsuarios(req, res, db, io) {
       genero: datos.genero || "Femenino",
       grado: datos.grado || "1er Grado",
       pin_hash: datos.pin_hash || datos.pin || null,
-      local_id: datos.local_id
+      local_id: datos.local_id,
+      racha: datos.racha ?? 0
     });
 
     io.emit("hay_cambios");

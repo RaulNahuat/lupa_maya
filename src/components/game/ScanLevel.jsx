@@ -3,11 +3,16 @@ import { useNavigate } from "react-router-dom"
 import { X, Zap, Search, Camera } from "lucide-react"
 import { calculateStars } from "../../utils/calculateStars"
 
+import * as tmImage from "@teachablemachine/image"
+
 export default function ScanLevel({ level, onComplete }) {
   const videoRef = useRef(null)
   const videoClearRef = useRef(null) // segundo video para el área clara del visor
   const canvasRef = useRef(null)
   const streamRef = useRef(null)
+  const modelRef = useRef(null)
+  const rafRef = useRef(null)
+
   const navigate = useNavigate()
 
   const { contenido } = level
@@ -20,10 +25,27 @@ export default function ScanLevel({ level, onComplete }) {
 
   useEffect(() => {
     startCamera()
+    loadModel()
     return () => {
       streamRef.current?.getTracks().forEach((track) => track.stop())
+      cancelAnimationFrame(rafRef.current)
     }
   }, [])
+
+  const loadModel = async () => {
+    console.log("Cargando modelo...")
+    try {
+      const model = await tmImage.load(
+        "/models/model.json",
+        "/models/metadata.json"
+      )
+      modelRef.current = model
+      console.log("Modelo cargado:", model)
+      console.log("Clases:", model.getClassLabels())
+    } catch (err) {
+      console.error("Error al cargar modelo:", err)
+    }
+  }
 
   const startCamera = async () => {
     try {
@@ -43,7 +65,7 @@ export default function ScanLevel({ level, onComplete }) {
   }
 
   const handleScan = () => {
-    if (scanning) return
+    if (scanning || !modelRef.current) return
     setScanning(true)
 
     const video = videoRef.current
@@ -55,15 +77,28 @@ export default function ScanLevel({ level, onComplete }) {
 
     streamRef.current?.getTracks().forEach((track) => track.stop())
     setIntentos((prev) => prev + 1)
-    simulateDetection()
+    runPrediction(canvas)
   }
 
-  const simulateDetection = () => {
-    setTimeout(() => {
-      setDetectado({ coincide: true, glifo: contenido.glifo })
-      setScanned(true)
-      setScanning(false)
-    }, 1000)
+  const runPrediction = async (canvas) => {
+    console.log("Modelo disponible:", modelRef.current)
+    const predictions = await modelRef.current.predict(canvas)
+    console.log("Predicciones:", predictions) 
+    
+    // Ordenar por probabilidad más alta
+    const top = predictions.sort((a, b) => b.probability - a.probability)[0]
+
+    console.log("Top predicción:", top.className, top.probability)
+    console.log("clase_modelo en BD:", contenido.glifo?.clase_modelo)
+
+    const UMBRAL = 0.20 
+    const esNinguno = top.className.toLowerCase() === "fondo"
+    const coincide = !esNinguno && top.probability >= UMBRAL
+      && top.className === contenido.glifo?.clase_modelo
+
+    setDetectado({ coincide, glifo: contenido.glifo, confianza: top.probability })
+    setScanned(true)
+    setScanning(false)
   }
 
   const handleReintentar = async () => {

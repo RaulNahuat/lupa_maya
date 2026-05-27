@@ -51,6 +51,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(50),
       allowNull: false
     },
+    racha: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
 
     //Para iniciar sesion con el perfil de niño
     pin_hash: {
