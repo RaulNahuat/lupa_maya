@@ -54,6 +54,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,jpg,ttf,woff2}'],
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024, // 8MB to support large badge images
+        navigateFallbackDenylist: [/^\/api/, /^\/models/, /^\/socket\.io/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -63,6 +64,20 @@ export default defineConfig({
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 365
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /.*\/models\/.*\.(json|bin)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'lupa-maya-ai-models-v1',
+              expiration: {
+                maxEntries: 15,
+                maxAgeSeconds: 60 * 60 * 24 * 90 // 90 días
               },
               cacheableResponse: {
                 statuses: [0, 200]
