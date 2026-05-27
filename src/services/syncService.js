@@ -10,8 +10,9 @@ const API_SYNC_URL = `${API_BASE_URL}/api/sync`;
  */
 export const descargarCambios = async (usuarioLocalId = null) => {
     let lastSync = 0;
+    const syncKey = usuarioLocalId ? `lastSync_${usuarioLocalId}` : 'lastSync';
 
-    const config = await db.configuracion.get('lastSync');
+    const config = await db.configuracion.get(syncKey);
     if (config) lastSync = config.valor;
 
     const usuarioParam = usuarioLocalId ? `&usuario_local_id=${usuarioLocalId}` : '';
@@ -126,7 +127,7 @@ export const descargarCambios = async (usuarioLocalId = null) => {
             }
 
             await db.configuracion.put({
-                clave: 'lastSync',
+                clave: syncKey,
                 valor: result.serverTime
             });
         }

@@ -1,11 +1,14 @@
 export async function getProgresoPull(db, Op, lastSyncDate, usuario_local_id) {
-  if (!usuario_local_id) return [];
+  const whereClause = {
+    updated_at: { [Op.gt]: lastSyncDate }
+  };
+
+  if (usuario_local_id) {
+    whereClause.usuario_local_id = usuario_local_id;
+  }
 
   const progresosRaw = await db.ProgresoUsuario.findAll({
-    where: {
-      usuario_local_id,
-      updated_at: { [Op.gt]: lastSyncDate }
-    }
+    where: whereClause
   });
 
   return progresosRaw.map(p => p.toJSON());
