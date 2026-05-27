@@ -43,6 +43,11 @@ async function cacheRemoteAsset(cache, assetUrl) {
     throw new Error(`No se pudo descargar ${assetUrl} (${response.status})`);
   }
 
+  const contentType = response.headers.get('content-type') || '';
+  if (contentType.includes('text/html')) {
+    throw new Error(`Se recibió HTML en lugar de un recurso del modelo AI para ${assetUrl}. Asegúrate de que el servidor esté sirviendo los archivos correctamente.`);
+  }
+
   await cache.put(request, response.clone());
   return response;
 }

@@ -19,6 +19,8 @@ services:
       JWT_SECRET: ${JWT_SECRET}
     ports:
       - "5000:5000"
+    volumes:
+      - lupa_maya_models:/app/public/models
     networks:
       - lupa_maya_net
 
@@ -41,3 +43,6 @@ networks:
   lupa_maya_net:
     external: true
     name: dokploy-network
+
+volumes:
+  lupa_maya_models:
