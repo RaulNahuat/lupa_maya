@@ -44,6 +44,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
       allowNull: true
     },
+    clase_modelo: {
+      type: DataTypes.STRING(100),
+      allowNull: true
+    },
     activo: {
       type: DataTypes.BOOLEAN,
       defaultValue: true
