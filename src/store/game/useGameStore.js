@@ -138,8 +138,11 @@ export const useGameStore = create((set, get) => ({
 
     await guardarProgreso({ usuario: currentUser, nivel, estrellas, intentos })
 
+    const esPrimeraVez = !nivel.completado
+
     // Recalcular racha, sube si completó a primera vez, se rompe si no
-    const nuevaRacha = await actualizarRacha(currentUser.local_id, intentos)
+    //const nuevaRacha = await actualizarRacha(currentUser.local_id, intentos)
+    const nuevaRacha = await actualizarRacha(currentUser.local_id, intentos, esPrimeraVez)
 
     // Actualizar estado en memoria sin tocar el catálogo
     const updatedLevels = levels.map((lvl, index) => {

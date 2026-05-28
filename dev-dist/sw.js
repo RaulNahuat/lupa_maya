@@ -67,11 +67,10 @@ if (!self.define) {
     });
   };
 }
-define(['./workbox-35c88359'], (function (workbox) { 'use strict';
+define(['./workbox-afac4cd2'], (function (workbox) { 'use strict';
 
   self.skipWaiting();
   workbox.clientsClaim();
-
   /**
    * The precacheAndRoute() method efficiently caches and responds to
    * requests for URLs in the manifest.
@@ -79,17 +78,27 @@ define(['./workbox-35c88359'], (function (workbox) { 'use strict';
    */
   workbox.precacheAndRoute([{
     "url": "index.html",
-    "revision": "0.g0lono678cc"
+    "revision": "0.6rak9lt2808"
   }], {});
   workbox.cleanupOutdatedCaches();
   workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("index.html"), {
-    allowlist: [/^\/$/]
+    allowlist: [/^\/$/],
+    denylist: [/^\/api/, /^\/models/, /^\/socket\.io/]
   }));
   workbox.registerRoute(/^https:\/\/fonts\.googleapis\.com\/.*/i, new workbox.CacheFirst({
     "cacheName": "google-fonts-cache",
     plugins: [new workbox.ExpirationPlugin({
       maxEntries: 10,
       maxAgeSeconds: 31536000
+    }), new workbox.CacheableResponsePlugin({
+      statuses: [0, 200]
+    })]
+  }), 'GET');
+  workbox.registerRoute(/.*\/models\/.*\.(json|bin)$/i, new workbox.CacheFirst({
+    "cacheName": "lupa-maya-ai-models-v1",
+    plugins: [new workbox.ExpirationPlugin({
+      maxEntries: 15,
+      maxAgeSeconds: 7776000
     }), new workbox.CacheableResponsePlugin({
       statuses: [0, 200]
     })]

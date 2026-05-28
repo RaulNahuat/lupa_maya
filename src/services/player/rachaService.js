@@ -27,8 +27,12 @@ export const obtenerRacha = async (usuarioLocalId) => {
  *
  * Retorna la nueva racha.
  */
-export const actualizarRacha = async (usuarioLocalId, intentos) => {
+export const actualizarRacha = async (usuarioLocalId, intentos, esPrimeraVez) => {
   const rachaActual = await obtenerRacha(usuarioLocalId);
+
+  // Si es repetición de nivel, no modificar la racha
+  if (!esPrimeraVez) return rachaActual
+
   const nuevaRacha = intentos === 1 ? rachaActual + 1 : 0;
   
   await db.transaction('rw', db.usuarios, db.configuracion, db.cola_sincronizacion, async () => {
