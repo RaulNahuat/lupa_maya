@@ -25,6 +25,15 @@
 
   --font-maya: "Outfit", "Inter", "system-ui", "sans-serif";
   --radius-4xl: 2rem;
+
+  --animate-ping-slow: ping-slow 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+
+  @keyframes ping-slow {
+    75%, 100% {
+      transform: scale(1.6);
+      opacity: 0;
+    }
+  }
 }
 
 /*@theme {

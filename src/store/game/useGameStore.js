@@ -30,6 +30,9 @@ export const useGameStore = create((set, get) => ({
         progresos.map((p) => [p.nivel_id, p])
       )
     }
+    
+    const gruposArr = await db.grupos_niveles.toArray()
+    const gruposMap = Object.fromEntries(gruposArr.map((g) => [g.id, g]))
 
     // Armar cada nivel con su contenido segun el tipo
     const levelsConContenido = await Promise.all(
@@ -98,12 +101,15 @@ export const useGameStore = create((set, get) => ({
 
         const desbloqueado = index === 0 || anteriorCompletado
 
+        const grupo = gruposMap[nivel.grupo_id] ?? null
+
         return {
           ...nivel,
           contenido,
           completado,
           estrellas,
           desbloqueado,
+          grupo,
         }
       })
     )

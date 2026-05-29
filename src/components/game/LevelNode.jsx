@@ -1,14 +1,17 @@
 import { Lock, Star, Brain, Search, ScanLine } from "lucide-react"
 
-export default function LevelNode({ level, onClick, isActive }) {
+export default function LevelNode({ level, onClick, isActive, isCurrent }) {
   const Icon = level.tipo === "BUSQUEDA" ? ScanLine : Brain
+
+  const colorPrincipal = level.grupo?.color ?? '#16A34A'
+  const shadowColor = darkenHex(colorPrincipal, 0.4)
 
   // Bloqueado
   if (!level.desbloqueado) {
     return (
       <button disabled className="flex flex-col items-center cursor-not-allowed">
         <div
-          className="w-22 h-22 rounded-full bg-light-gray flex items-center justify-center"
+          className="w-21 h-21 rounded-full bg-light-gray flex items-center justify-center border-3 border-white"
           style={{ boxShadow: "0 7px 0 #6B7280" }}
         >
           <Lock size={34} className="text-white" />
@@ -26,8 +29,11 @@ export default function LevelNode({ level, onClick, isActive }) {
         className="flex flex-col items-center gap-1.5 hover:scale-105 transition-transform duration-200"
       >
         <div
-          className="w-22 h-22 rounded-full bg-light-green flex items-center justify-center"
-          style={{ boxShadow: "0 7px 0 #064E3B" }}
+          className="w-21 h-21 rounded-full flex items-center justify-center border-3 border-white"
+          style={{
+            backgroundColor: colorPrincipal,
+            boxShadow: `0 7px 0 ${shadowColor}`,
+          }}
         >
           <Icon size={38} className="text-white" strokeWidth={2} />
         </div>
@@ -52,15 +58,37 @@ export default function LevelNode({ level, onClick, isActive }) {
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center"
+      className="flex flex-col items-center gap-1.5"
       style={{ animation: "levelPulse 1.8s ease-in-out infinite" }}
     >
-      <div
-        className="w-22 h-22 rounded-full bg-yellow flex items-center justify-center border-4 border-white"
-        style={{ boxShadow: "0 7px 0 #C88F12" }}
-      >
-        <Icon size={38} className="text-white" strokeWidth={2} />
+      <div className="relative flex items-center justify-center">
+
+        {/* Aro parpadeante*/}
+        {isCurrent && (
+          <span
+            className="absolute inset-0 rounded-full animate-ping-slow opacity-60"
+            style={{ backgroundColor: colorPrincipal }}
+          />
+        )}
+
+        <div
+          className="relative w-21 h-21 rounded-full flex items-center justify-center border-3 border-white"
+          style={{
+            backgroundColor: colorPrincipal,
+            boxShadow: `0 7px 0 ${shadowColor}`,
+          }}
+        >
+          <Icon size={38} className="text-white" strokeWidth={2} />
+        </div>
       </div>
     </button>
   )
+}
+
+function darkenHex(hex, amount) {
+  const clean = hex.replace('#', '')
+  const r = Math.round(parseInt(clean.substring(0, 2), 16) * (1 - amount))
+  const g = Math.round(parseInt(clean.substring(2, 4), 16) * (1 - amount))
+  const b = Math.round(parseInt(clean.substring(4, 6), 16) * (1 - amount))
+  return `rgb(${r}, ${g}, ${b})`
 }

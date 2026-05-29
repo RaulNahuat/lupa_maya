@@ -32,6 +32,7 @@ export const descargarCambios = async (usuarioLocalId = null) => {
         usuarios = [],
         admins = [],
         niveles = [],
+        grupos_niveles = [],
         glifos = [],
         preguntas = [],
         opciones_respuestas = [],
@@ -45,6 +46,7 @@ export const descargarCambios = async (usuarioLocalId = null) => {
         db.usuarios,
         db.admins,
         db.niveles,
+        db.grupos_niveles,
         db.glifos,
         db.preguntas,
         db.opciones_respuestas,
@@ -93,6 +95,11 @@ export const descargarCambios = async (usuarioLocalId = null) => {
             // NIVELES
             if (niveles.length > 0) {
                 await db.niveles.bulkPut(niveles);
+            }
+
+            // GRUPOS DE NIVELES (Categorías)
+            if (grupos_niveles.length > 0) {
+                await db.grupos_niveles.bulkPut(grupos_niveles);
             }
 
             // GLIFOS

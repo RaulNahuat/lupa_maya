@@ -20,6 +20,7 @@ import { getInsigniasPull } from "./controllers/pullController/insigniasPullCont
 import { getAllUsuarios, updateUsuario, deleteUsuario } from "./controllers/admin/AdminUsuariosController.js";
 import { createAiModel, uploadAiModelFiles } from "./controllers/admin/AiModelsController.js";
 import { getActiveAiModel } from "./controllers/pullController/aiModelsPullController.js";
+import { getGruposNivelesPull } from "./controllers/pullController/gruposNivelesPullController.js"
 
 dotenv.config();
 
@@ -100,13 +101,15 @@ app.get("/api/sync/pull", async (req, res) => {
     const nivel_glifos_objetivos = await getGlifosObjetivoPull(db);
     const progreso_usuarios = await getProgresoPull(db, Op, lastSyncDate, usuario_local_id);
     const insignias = await getInsigniasPull(db);
+    const grupos_niveles = await getGruposNivelesPull(db, Op, lastSyncDate);
 
     res.json({
       success: true,
       cambios: { 
         usuarios,
         admins,
-        niveles, 
+        niveles,
+        grupos_niveles, 
         glifos,
         preguntas, 
         opciones_respuestas, 

@@ -44,7 +44,7 @@ export default function LevelMap() {
   // Scroll automático al nivel actual
   useEffect(() => {
     if (levels.length > 0 && scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+      scrollRef.current.scrollIntoView({ behavior: 'smooth', block: 'center'})
     }
   }, [levels])
 
@@ -108,7 +108,6 @@ export default function LevelMap() {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* TODO: implementar lógica de racha */}
             <div className="flex items-center gap-1 bg-orange-50 border border-orange rounded-full px-3 py-1.5">
               <Flame size={16} className="text-orange" />
               <span className="text-sm font-bold text-orange">{racha}</span>
@@ -131,53 +130,86 @@ export default function LevelMap() {
         {/* MAPA */}
         <div className="flex-1 overflow-y-auto py-6" ref={scrollRef}>
           <div className="flex flex-col gap-8">
-            {[...levels].reverse().map((level) => {
+            {levels.map((level, index) => {
               const isCurrentActive = activeLevel?.id === level.id
-              const pos = level.orden_secuencia % 3
+              const isCurrent = level.id === nivelActual.id
+              const pos = level.orden_secuencia % 4
 
               const alignment =
-                pos === 1 ? "items-start pl-20"
-                : pos === 2 ? "items-center"
-                : "items-end pr-20"
+                pos === 1 ? "items-center"
+                : pos === 2 ? "items-start pl-18"
+                : pos === 3 ? "items-center"
+                : "items-end pr-18"
+
+              // Mostrar separador de categoría cuando cambia el grupo
+              const nivelAnterior = levels[index - 1]
+              const cambiaCategoria =
+                level.grupo_id &&
+                (!nivelAnterior || nivelAnterior.grupo_id !== level.grupo_id)
 
               return (
-                <div
-                  key={level.id}
-                  className={`w-full flex flex-col ${alignment}`}
-                >
-                  {isCurrentActive && (
-                    <div className="mb-2 bg-white rounded-2xl shadow-lg p-4 w-44 flex flex-col items-center gap-3">
-                      <p className="text-xl font-extrabold text-brown uppercase">
-                        Nivel {level.numero ?? level.id}
-                      </p>
-                      <div className="w-full rounded-xl p-[2px]">
-                        <button
-                          onClick={() => navigate(`/level/${level.id}`)}
-                          className="w-full bg-dark-gold text-white text-md font-bold rounded-xl py-2 px-6 flex items-center justify-center gap-2 shadow-[0_4px_0_#7A5000]"
-                        >
-                          <Play size={18} className="fill-white" />
-                          {level.completado ? "REPETIR" : "INICIAR"}
-                        </button>
+                <div key={level.id} className="flex flex-col gap-8">
+
+                  {/* Separador de categoría*/}
+                  {cambiaCategoria && level.grupo && (
+                    <div className="flex items-center gap-2 px-6 mt-5 mb-2">
+                      <div 
+                        className="flex-1 h-px rounded-full opacity-60" 
+                        style={{ backgroundColor: level.grupo.color ?? '#16A34A' }}
+                      />
+                      <div
+                        className="flex items-center gap-1.5 px-10 py-1 rounded-full text-white text-md font-bold tracking-wider"
+                        style={{ backgroundColor: level.grupo.color ?? '#16A34A'}}
+                      >
+                        {level.grupo.nombre}
                       </div>
+                      <div 
+                        className="flex-1 h-px rounded-full opacity-60" 
+                        style={{ backgroundColor: level.grupo.color ?? '#16A34A' }}
+                      />
                     </div>
                   )}
 
-                  {isCurrentActive && (
-                    <div
-                      className="w-0 h-0 mb-1.5"
-                      style={{
-                        borderLeft: "10px solid transparent",
-                        borderRight: "10px solid transparent",
-                        borderTop: "12px solid #e5e7eb",
-                      }}
-                    />
-                  )}
+                  {/* Nodo */}
+                  <div
+                    className={`w-full flex flex-col ${alignment}`}
+                    ref={isCurrent ? scrollRef : null}
+                  >
+                    {isCurrentActive && (
+                      <div className="mb-2 bg-white rounded-2xl shadow-lg p-4 w-44 flex flex-col items-center gap-3">
+                        <p className="text-xl font-extrabold text-brown uppercase">
+                          Nivel {level.numero ?? level.id}
+                        </p>
+                        <div className="w-full rounded-xl p-[2px]">
+                          <button
+                            onClick={() => navigate(`/level/${level.id}`)}
+                            className="w-full bg-dark-gold text-white text-md font-bold rounded-xl py-2 px-6 flex items-center justify-center gap-2 shadow-[0_4px_0_#7A5000]"
+                          >
+                            <Play size={18} className="fill-white" />
+                            {level.completado ? "REPETIR" : "INICIAR"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
 
-                  <LevelNode
-                    level={level}
-                    onClick={() => handleNodeClick(level)}
-                    isActive={isCurrentActive}
-                  />
+                    {isCurrentActive && (
+                      <div
+                        className="w-0 h-0 mb-1.5"
+                        style={{
+                          borderLeft: "10px solid transparent",
+                          borderRight: "10px solid transparent",
+                          borderTop: "12px solid #e5e7eb",
+                        }}
+                      />
+                    )}
+
+                    <LevelNode
+                      level={level}
+                      onClick={() => handleNodeClick(level)}
+                      isActive={isCurrentActive}
+                      isCurrent={isCurrent}
+                    />
+                  </div>
                 </div>
               )
             })}

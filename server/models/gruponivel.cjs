@@ -29,7 +29,12 @@ module.exports = (sequelize, DataTypes) => {
     },
     dificultad: {
       type: DataTypes.ENUM('BASICO', 'INTERMEDIO', 'AVANZADO'),
-      allowNull: false
+      allowNull: true
+    },
+    color: {
+      type: DataTypes.STRING(7),
+      allowNull: true,
+      defaultValue: '#16A34A'
     },
     activo: {
       type: DataTypes.BOOLEAN,
