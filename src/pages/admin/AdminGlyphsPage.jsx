@@ -6,7 +6,9 @@ import GlyphSearchBar from '../../components/admin/GlyphSearchBar';
 import FilterTabs from '../../components/admin/FilterTabs';
 import Pagination from '../../components/admin/Pagination';
 import PrimaryButton from '../../components/PrimaryButton';
+import BlockEditModal from '../../components/admin/BlockEditModal';
 import { db } from '../../data/db';
+import { procesarColaSincronizacion } from '../../services/syncService';
 
 const AdminGlyphsPage = () => {
   const navigate = useNavigate();
@@ -17,6 +19,11 @@ const AdminGlyphsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const blocksPerPage = 10;
+
+  // Estados para CRUD de Bloques
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedBlock, setSelectedBlock] = useState(null);
+  const [isAddingNew, setIsAddingNew] = useState(false);
 
   const fetchAllData = async () => {
     setIsLoading(true);
@@ -86,6 +93,50 @@ const AdminGlyphsPage = () => {
     }
   };
 
+  const handleAddNewBlock = () => {
+    setSelectedBlock({
+      nombre: '',
+      numero_grupo: '',
+      dificultad: 'BASICO',
+      color: '#10B981',
+      descripcion: ''
+    });
+    setIsAddingNew(true);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveBlock = async (id, data) => {
+    try {
+      const isNew = !id;
+      const blockId = id ? Number(id) : Date.now();
+      const blockData = {
+        ...data,
+        id: blockId,
+        activo: true,
+        version: 1
+      };
+
+      await db.transaction('rw', db.grupos_niveles, db.cola_sincronizacion, async () => {
+        await db.grupos_niveles.put(blockData);
+        await db.cola_sincronizacion.add({
+          entidad: 'grupos_niveles',
+          accion: isNew ? 'CREAR' : 'EDITAR',
+          datos: blockData,
+          estado: 'PENDIENTE',
+          created_at: new Date().getTime()
+        });
+      });
+
+      setIsEditModalOpen(false);
+      fetchAllData();
+
+      if (navigator.onLine) procesarColaSincronizacion();
+    } catch (error) {
+      console.error("Error al guardar el bloque en Dexie:", error);
+      alert("Error al guardar bloque: " + error.message);
+    }
+  };
+
   const totalPages = Math.max(1, Math.ceil(filteredBlocks.length / blocksPerPage));
   const safeCurrentPage = Math.min(currentPage, totalPages);
   const startIndex = (safeCurrentPage - 1) * blocksPerPage;
@@ -101,7 +152,10 @@ const AdminGlyphsPage = () => {
     <AdminPageShell activeTab="glifos">
         {/* Botón principal (Añadir Nuevo Bloque) */}
         <div className="mt-2 px-1">
-          <PrimaryButton className="relative flex items-center justify-center gap-3 sm:gap-4 py-4 sm:py-5 w-full rounded-2xl sm:rounded-3xl shadow-[0_6px_0_0_#B8851A] sm:shadow-[0_8px_0_0_#B8851A] hover:translate-y-0.5 hover:shadow-[0_4px_0_0_#B8851A] sm:hover:shadow-[0_6px_0_0_#B8851A] transition-all group">
+          <PrimaryButton 
+            onClick={handleAddNewBlock}
+            className="relative flex items-center justify-center gap-3 sm:gap-4 py-4 sm:py-5 w-full rounded-2xl sm:rounded-3xl shadow-[0_6px_0_0_#B8851A] sm:shadow-[0_8px_0_0_#B8851A] hover:translate-y-0.5 hover:shadow-[0_4px_0_0_#B8851A] sm:hover:shadow-[0_6px_0_0_#B8851A] transition-all group"
+          >
             <div className="w-10 h-10 bg-white/20 group-hover:bg-white/30 rounded-xl flex items-center justify-center border border-white/40 shrink-0 transition-colors">
               <Plus className="w-6 h-6 text-white" strokeWidth={3} />
             </div>
@@ -215,8 +269,17 @@ const AdminGlyphsPage = () => {
             </div>
           )}
         </div>
+
+        {/* Modal de Edición/Creación de Bloques */}
+        <BlockEditModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          block={selectedBlock}
+          onSave={handleSaveBlock}
+          isAdding={isAddingNew}
+        />
     </AdminPageShell>
   );
 };
 
-export default AdminGlyphsPage;
+export default AdminGlyphsPage;

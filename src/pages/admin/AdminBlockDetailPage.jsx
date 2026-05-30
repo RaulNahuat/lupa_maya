@@ -4,7 +4,10 @@ import { Plus, ArrowLeft, Edit2, Trash2, Search, HelpCircle } from 'lucide-react
 import AdminPageShell from '../../components/admin/AdminPageShell';
 import GlyphCard from '../../components/admin/GlyphCard';
 import Pagination from '../../components/admin/Pagination';
+import BlockEditModal from '../../components/admin/BlockEditModal';
+import ModalConfirmation from '../../components/ModalConfirmation';
 import { db } from '../../data/db';
+import { procesarColaSincronizacion } from '../../services/syncService';
 
 const AdminBlockDetailPage = () => {
   const { blockId } = useParams();
@@ -15,6 +18,10 @@ const AdminBlockDetailPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const glyphsPerPage = 10;
+
+  //Esttados para el crud de bloques
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const fetchBlockData = async () => {
     setIsLoading(true);
@@ -27,13 +34,25 @@ const AdminBlockDetailPage = () => {
       if (blockData) {
         setBlock(blockData);
         setGlyphs(allGlyphs);
+        setIsLoading(false);
       } else {
+        // Si es un ID temporal, darle un momento al servicio de sincronización para redirigir la URL
+        if (Number(blockId) > 1000000000000) {
+          // Mantener isLoading como true para permanecer en el estado de carga
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          // Si la URL del navegador sigue siendo la ID temporal anterior, volver a la lista
+          if (window.location.pathname === `/admin/glyphs/block/${blockId}`) {
+            navigate('/admin/glyphs');
+            setIsLoading(false);
+          }
+          return;
+        }
         console.error("Bloque no encontrado");
         navigate('/admin/glyphs');
+        setIsLoading(false);
       }
     } catch (error) {
       console.error("Error al obtener datos del bloque y sus glifos:", error);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -41,6 +60,17 @@ const AdminBlockDetailPage = () => {
   useEffect(() => {
     fetchBlockData();
   }, [blockId]);
+
+  useEffect(() => {
+    const handleIdSynced = (e) => {
+      if (Number(e.detail.oldId) === Number(blockId)) {
+        navigate(`/admin/glyphs/block/${e.detail.newId}`, { replace: true });
+      }
+    };
+
+    window.addEventListener('block-id-synced', handleIdSynced);
+    return () => window.removeEventListener('block-id-synced', handleIdSynced);
+  }, [blockId, navigate]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -67,12 +97,65 @@ const AdminBlockDetailPage = () => {
 
   const handleEditBlock = (block, e) => {
     e.stopPropagation();
-    console.log('Edit block', block.id);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveBlock = async (id, data) => {
+    try {
+      const blockData = {
+        ...data,
+        id: Number(id),
+        activo: true,
+        version: 1
+      };
+      
+      await db.transaction('rw', db.grupos_niveles, db.cola_sincronizacion, async () => {
+        await db.grupos_niveles.put(blockData);
+        await db.cola_sincronizacion.add({
+          entidad: 'grupos_niveles',
+          accion: 'EDITAR',
+          datos: blockData,
+          estado: 'PENDIENTE',
+          created_at: new Date().getTime()
+        });
+      });
+
+      setBlock(blockData);
+      setIsEditModalOpen(false);
+
+      if (navigator.onLine) procesarColaSincronizacion();
+    } catch (error) {
+      console.error("Error al actualizar el bloque en Dexie:", error);
+      alert("Error al actualizar bloque: " + error.message);
+    }
   };
 
   const handleDeleteBlock = (block, e) => {
     e.stopPropagation();
-    console.log('Delete block', block.id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDeleteBlock = async () => {
+    try {
+      await db.transaction('rw', db.grupos_niveles, db.glifos, db.cola_sincronizacion, async () => {
+        await db.grupos_niveles.delete(block.id);
+        await db.glifos.where('grupo_id').equals(block.id).delete();
+        await db.cola_sincronizacion.add({
+          entidad: 'grupos_niveles',
+          accion: 'ELIMINAR',
+          datos: { id: block.id },
+          estado: 'PENDIENTE',
+          created_at: new Date().getTime()
+        });
+      });
+
+      setIsDeleteModalOpen(false);
+      navigate('/admin/glyphs');
+
+      if (navigator.onLine) procesarColaSincronizacion();
+    } catch (error) {
+      console.error("Error al eliminar el bloque:", error);
+    }
   };
 
   const handleAddGlyphToBlock = (blockId) => {
@@ -221,6 +304,25 @@ const AdminBlockDetailPage = () => {
           )}
         </div>
       </div>
+
+      {/* Modal para editar bloque */}
+      <BlockEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        block={block}
+        onSave={handleSaveBlock}
+        isAdding={false}
+      />
+
+      <ModalConfirmation
+        isOpen={isDeleteModalOpen}
+        title="¿Eliminar Bloque?"
+        message={`¿Estás seguro de que deseas eliminar el bloque "${block?.nombre}" y TODOS sus glifos asociados? Esta acción no se puede deshacer.`}
+        onConfirm={confirmDeleteBlock}
+        onCancel={() => setIsDeleteModalOpen(false)}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+      />
     </AdminPageShell>
   );
 };

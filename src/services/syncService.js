@@ -174,6 +174,9 @@ const procesarItem = async (item) => {
         db.cola_sincronizacion,
         db.usuarios,
         db.progreso_usuarios,
+        db.grupos_niveles,
+        db.glifos,
+        db.niveles,
         async () => {
             await db.cola_sincronizacion.put({ ...item, estado: 'ENVIADO' });
 
@@ -212,6 +215,73 @@ const procesarItem = async (item) => {
                         ...progreso,
                         sync_status: 'SINCRONIZADO'
                     });
+                }
+            }
+
+            if (item.entidad === 'grupos_niveles') {
+                if (item.accion === 'CREAR') {
+                    const idServidor = result.data?.id ?? null;
+                    if (idServidor) {
+                        const grupo = await db.grupos_niveles.get(item.datos.id);
+                        if (grupo) {
+                            await db.grupos_niveles.delete(item.datos.id);
+                            await db.grupos_niveles.put({
+                                ...grupo,
+                                id: Number(idServidor)
+                            });
+
+                            //Propagar el id del servidor a los glifos
+                            const glifosAfectados = await db.glifos
+                                .where('grupo_id')
+                                .equals(Number(item.datos.id))
+                                .toArray();
+                            for (const g of glifosAfectados) {
+                                await db.glifos.put({
+                                    ...g,
+                                    grupo_id: Number(idServidor)
+                                });
+                            }
+
+                            //Propagar el id del servidor a los niveles
+                            const nivelesAfectados = await db.niveles
+                                .where('grupo_id')
+                                .equals(Number(item.datos.id))
+                                .toArray();
+                            for (const n of nivelesAfectados) {
+                                await db.niveles.put({
+                                    ...n,
+                                    grupo_id: Number(idServidor)
+                                });
+                            }
+
+                            //Actualizar elementos pendientes de la cola que hacen referencia al ID temporal antiguo
+                            const colaPendiente = await db.cola_sincronizacion
+                                .where('estado')
+                                .equals('PENDIENTE')
+                                .toArray();
+                            for (const c of colaPendiente) {
+                                if (c.datos && Number(c.datos.grupo_id) === Number(item.datos.id)) {
+                                    c.datos.grupo_id = Number(idServidor);
+                                    await db.cola_sincronizacion.put(c);
+                                }
+                            }
+
+                            //Si el usuario está actualmente en la página de detalles del ID temporal, actualiza la URL y despacha el evento
+                            if (typeof window !== 'undefined' && window.location.pathname === `/admin/glyphs/block/${item.datos.id}`) {
+                                window.history.replaceState(null, '', `/admin/glyphs/block/${idServidor}`);
+                                window.dispatchEvent(new CustomEvent('block-id-synced', { 
+                                    detail: { oldId: Number(item.datos.id), newId: Number(idServidor) } 
+                                }));
+                            }
+                        }
+                    }
+                } else {
+                    const grupo = await db.grupos_niveles.get(item.datos.id);
+                    if (grupo) {
+                        if (item.accion === 'ELIMINAR') {
+                            await db.grupos_niveles.delete(item.datos.id);
+                        }
+                    }
                 }
             }
         }

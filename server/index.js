@@ -20,7 +20,8 @@ import { getInsigniasPull } from "./controllers/pullController/insigniasPullCont
 import { getAllUsuarios, updateUsuario, deleteUsuario } from "./controllers/admin/AdminUsuariosController.js";
 import { createAiModel, uploadAiModelFiles } from "./controllers/admin/AiModelsController.js";
 import { getActiveAiModel } from "./controllers/pullController/aiModelsPullController.js";
-import { getGruposNivelesPull } from "./controllers/pullController/gruposNivelesPullController.js"
+import { getGruposNivelesPull } from "./controllers/pullController/gruposNivelesPullController.js";
+import { handleSyncGruposNiveles } from "./controllers/pushController/gruposNivelesPushController.js";
 
 dotenv.config();
 
@@ -72,6 +73,10 @@ app.post("/api/sync", async (req, res) => {
         return await handleSyncProgreso(req, res, db, io);
       case "admins:EDITAR":
         return await handleSyncAdmins(req, res, db, io);
+      case "grupos_niveles:CREAR":
+      case "grupos_niveles:EDITAR":
+      case "grupos_niveles:ELIMINAR":
+        return await handleSyncGruposNiveles(req, res, db, io);
       default:
         return res.status(400).json({ success: false, message: "Entidad o acción no soportada" });
     }
