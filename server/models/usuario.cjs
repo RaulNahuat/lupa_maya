@@ -4,6 +4,7 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Usuario extends Model {
     static associate(models) {
+      Usuario.belongsTo(models.Role, { foreignKey: 'rol_id', as: 'rol' });
       Usuario.hasMany(models.ProgresoUsuario, { foreignKey: 'usuario_id', as: 'progresos' });
       Usuario.hasMany(models.RegistroEscaneo, { foreignKey: 'usuario_id', as: 'escaneos' });
       Usuario.belongsToMany(models.Insignia, {
@@ -19,6 +20,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BIGINT,
       autoIncrement: true,
       primaryKey: true
+    },
+    rol_id: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      defaultValue: 2
     },
     nombre: {
       type: DataTypes.STRING(100),
