@@ -1,57 +1,49 @@
 const GlyphCard = ({ glyph, onEdit, onDelete }) => {
-  const getLevelColor = (level) => {
-    switch (level?.toUpperCase()) {
-      case 'BÁSICO': return 'bg-[#00D0B0]';
-      case 'INTERMEDIO': return 'bg-[#FFB82E]';
-      case 'AVANZADO': return 'bg-[#FF5C5C]';
-      default: return 'bg-gray-400';
-    }
-  };
-
   return (
-    <div className="bg-white rounded-[2rem] sm:rounded-[2.5rem] p-4 sm:p-5 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05)] border border-gray-100 relative mb-4 sm:mb-5 transition-transform hover:scale-[1.01]">
-      {/* Badge de nivel */}
-      <div className="absolute top-4 right-4 sm:right-5 flex items-center gap-2">
-        <span className="text-[10px] sm:text-[11px] font-bold text-gray-400 tracking-wider">
-          {glyph.level}
-        </span>
-        <div className={`w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full ${getLevelColor(glyph.level)} shadow-sm shadow-black/10`}></div>
+    <div className="bg-white rounded-3xl p-4 sm:p-5 shadow-[0_6px_20px_rgba(0,0,0,0.03)] border border-slate-100 flex gap-4 sm:gap-5 items-center relative transition-all duration-300 hover:shadow-[0_12px_28px_rgba(0,0,0,0.06)] w-full min-w-0">
+      {/* Contenedor de la imagen*/}
+      <div className="w-20 h-20 sm:w-24 sm:h-24 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100 overflow-hidden shrink-0">
+        {glyph.image ? (
+          <img src={glyph.image} alt={glyph.name} className="w-16 h-16 sm:w-20 sm:h-20 object-contain" />
+        ) : (
+          <div className="text-slate-200 text-2xl font-black">?</div>
+        )}
       </div>
 
-      <div className="flex gap-3 sm:gap-4 items-center">
-        {/* Para cargar las imagenes del glifo */}
-        <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-2xl flex items-center justify-center border-2 border-gray-100 overflow-hidden shrink-0">
-          {glyph.image ? (
-            <img src={glyph.image} alt={glyph.name} className="w-16 h-16 sm:w-20 sm:h-20 object-contain" />
-          ) : (
-            <div className="text-gray-200 text-2xl sm:text-3xl font-black">?</div>
-          )}
+      {/* Contenedor de textos y acciones */}
+      <div className="flex flex-col grow min-w-0 gap-1">
+        <div className="flex items-baseline gap-1.5 min-w-0">
+          <span className="font-black text-slate-850 text-base sm:text-lg truncate" title={glyph.name}>
+            {glyph.name}
+          </span>
+          <span className="text-[8px] sm:text-[9px] font-black text-amber-600 uppercase tracking-widest shrink-0">
+            (maya)
+          </span>
+        </div>
+        
+        <div className="flex items-baseline gap-1.5 min-w-0">
+          <span className="font-bold text-slate-500 text-sm sm:text-base truncate" title={glyph.meaning}>
+            {glyph.meaning}
+          </span>
+          <span className="text-[8px] sm:text-[9px] font-black text-amber-600/80 uppercase tracking-widest shrink-0">
+            (es)
+          </span>
         </div>
 
-        <div className="flex flex-col gap-1 grow">
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-bold text-maya-dark text-[14px] sm:text-base">{glyph.name}</span>
-            <span className="text-[9px] sm:text-[10px] font-black text-maya-gold uppercase tracking-tighter">(maya)</span>
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-bold text-maya-dark text-[14px] sm:text-base">{glyph.meaning}</span>
-            <span className="text-[9px] sm:text-[10px] font-black text-maya-gold uppercase tracking-tighter">(español)</span>
-          </div>
-
-          <div className="flex gap-2 mt-2 flex-wrap">
-            <button 
-              onClick={() => onEdit?.(glyph)}
-              className="px-4 sm:px-6 py-1.5 bg-[#01805E] text-white text-[9px] sm:text-[10px] font-black rounded-full shadow-md shadow-green-900/20 active:scale-95 transition-all uppercase tracking-widest"
-            >
-              EDITAR
-            </button>
-            <button 
-              onClick={() => onDelete?.(glyph)}
-              className="px-4 sm:px-6 py-1.5 bg-[#E14D4B] text-white text-[9px] sm:text-[10px] font-black rounded-full shadow-md shadow-red-900/20 active:scale-95 transition-all uppercase tracking-widest"
-            >
-              ELIMINAR
-            </button>
-          </div>
+        {/* Botones de acción*/}
+        <div className="flex gap-2.5 mt-2 flex-wrap">
+          <button 
+            onClick={() => onEdit?.(glyph)}
+            className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] sm:text-xs font-black rounded-xl shadow-sm active:scale-95 transition-all uppercase tracking-widest shrink-0"
+          >
+            EDITAR
+          </button>
+          <button 
+            onClick={() => onDelete?.(glyph)}
+            className="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white text-[10px] sm:text-xs font-black rounded-xl shadow-sm active:scale-95 transition-all uppercase tracking-widest shrink-0"
+          >
+            ELIMINAR
+          </button>
         </div>
       </div>
     </div>
