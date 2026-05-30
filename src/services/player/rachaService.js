@@ -33,7 +33,7 @@ export const actualizarRacha = async (usuarioLocalId, aprobado, esPrimeraVez) =>
   // Si es repetición de nivel, no modificar la racha
   if (!esPrimeraVez) return rachaActual
 
-  const nuevaRacha = intentos === aprobado ? rachaActual + 1 : 0;
+  const nuevaRacha = aprobado ? rachaActual + 1 : 0;
   
   await db.transaction('rw', db.usuarios, db.configuracion, db.cola_sincronizacion, async () => {
 
