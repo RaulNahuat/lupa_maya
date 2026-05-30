@@ -111,8 +111,9 @@ export default function ScanLevel({ level, onComplete }) {
 
   const handleComplete = async () => {
     streamRef.current?.getTracks().forEach((track) => track.stop())
-    const estrellas = calculateStars(intentos)
-    await onComplete(level.id, estrellas, intentos)
+    const estrellas = calculateStars(1, intentos > 1 ? 1 : 0)
+    const aprobado = intentos === 1
+    await onComplete(level.id, estrellas, intentos, aprobado)
   }
 
   const nombreObjetivo = contenido.glifo?.significado_es ?? contenido.glifo?.nombre_maya ?? "el glifo"

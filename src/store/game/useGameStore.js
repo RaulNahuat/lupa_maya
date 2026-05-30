@@ -41,39 +41,40 @@ export const useGameStore = create((set, get) => ({
         let contenido = null
 
         if (nivel.tipo === 'APRENDIZAJE') {
-          // Buscar la pregunta activa del nivel
-          const pregunta = await db.preguntas
+          const preguntasRaw = await db.preguntas
             .where('nivel_id')
             .equals(nivel.id)
-            .first()
+            .toArray()
 
-          if (pregunta) {
-            const opciones = await db.opciones_respuestas
-              .where('preguntas_id')
-              .equals(pregunta.id)
-              .toArray()
+          // Filtrar solo activas y mezclar aleatoriamente
+          const preguntasMezcladas = preguntasRaw
+            .filter(p => p.activa !== false)
+            .sort(() => Math.random() - 0.5)
 
-            // APRENDIZAJE
-            const objetivo = await db.nivel_glifos_objetivos
-              .where('nivel_id')
-              .equals(nivel.id)
-              .first()
+          const preguntasConOpciones = await Promise.all(
+            preguntasMezcladas.map(async (pregunta) => {
+              const opciones = await db.opciones_respuestas
+                .where('preguntas_id')
+                .equals(pregunta.id)
+                .toArray()
 
-            // Usar el glifo embebido que guardó el sync
-            const glifo = objetivo?.glifo ?? null
+              // Glifo embebido en la pregunta
+              const glifo = pregunta.glifo ?? null
 
-            console.log("objetivo raw de Dexie:", objetivo)
-            console.log("glifo embebido:", objetivo?.glifo)
-            contenido = {
-              pregunta_id: pregunta.id,
-              question: pregunta.texto_pregunta,
-              options: opciones.map((o) => o.texto_opcion),
-              correctAnswer: opciones.find((o) => o.es_correcta)?.texto_opcion ?? null,
-              imagen_url: glifo?.imagen_url ?? null,
-              nombre_maya: glifo?.nombre_maya ?? null,
-              significado_es: glifo?.significado_es ?? null,
-            }
-          }
+              return {
+                pregunta_id: pregunta.id,
+                question: pregunta.texto_pregunta,
+                options: opciones.map((o) => o.texto_opcion).sort(() => Math.random() - 0.5),
+                correctAnswer: opciones.find((o) => o.es_correcta)?.texto_opcion ?? null,
+                imagen_url: glifo?.imagen_url ?? null,
+                nombre_maya: glifo?.nombre_maya ?? null,
+                significado_es: glifo?.significado_es ?? null,
+                audio_url: glifo?.audio_url ?? null,
+              }
+            })
+          )
+
+          contenido = { preguntas: preguntasConOpciones }
         }
 
         if (nivel.tipo === 'BUSQUEDA') {
@@ -100,7 +101,6 @@ export const useGameStore = create((set, get) => ({
           : true
 
         const desbloqueado = index === 0 || anteriorCompletado
-
         const grupo = gruposMap[nivel.grupo_id] ?? null
 
         return {
@@ -131,7 +131,7 @@ export const useGameStore = create((set, get) => ({
   /**
    * Marca un nivel como completado, actualiza estrellas y recalcula la racha.
    */
-  completeLevel: async (currentUser, nivelId, estrellas, intentos) => {
+  completeLevel: async (currentUser, nivelId, estrellas, intentos, aprobado) => {
     const { levels } = get()
 
     if (!currentUser) return
@@ -146,9 +146,12 @@ export const useGameStore = create((set, get) => ({
 
     const esPrimeraVez = !nivel.completado
 
+    // Si aprobado no se pasa explícitamente (niveles BUSQUEDA),
+    // usar el criterio simple de intentos === 1
+    const criterioRacha = aprobado !== undefined ? aprobado : intentos === 1
+
     // Recalcular racha, sube si completó a primera vez, se rompe si no
-    //const nuevaRacha = await actualizarRacha(currentUser.local_id, intentos)
-    const nuevaRacha = await actualizarRacha(currentUser.local_id, intentos, esPrimeraVez)
+    const nuevaRacha = await actualizarRacha(currentUser.local_id, criterioRacha, esPrimeraVez)
 
     // Actualizar estado en memoria sin tocar el catálogo
     const updatedLevels = levels.map((lvl, index) => {

@@ -3,7 +3,13 @@ export async function getPreguntasPull(db, Op, lastSyncDate) {
     where: {
       activa: true,
       updated_at: { [Op.gt]: lastSyncDate }
-    }
+    },
+    include: [{
+      model: db.Glifo,
+      as: 'glifo',
+      attributes: ['id', 'nombre_maya', 'significado_es', 'imagen_url', 'audio_url'],
+      required: false
+    }]
   });
 
   const preguntas = preguntasRaw.map(p => p.toJSON());
