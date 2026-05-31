@@ -236,13 +236,15 @@ const AdminUsersPage = () => {
   };
 
   const filteredUsers = users.filter(user => {
-    const matchesFilter = activeFilter === 'TODOS' || user.genero === activeFilter;
+    const matchesFilter = activeFilter === 'TODOS' || 
+      (activeFilter === 'ESTUDIANTE' && Number(user.rol_id) === 2) ||
+      (activeFilter === 'DOCENTE' && Number(user.rol_id) === 3);
     const matchesSearch = (user.name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
       (user.email?.toLowerCase() || '').includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
-  const genderFilters = ['TODOS', ...Array.from(new Set(users.map(u => u.genero).filter(Boolean)))];
+  const roleFilters = ['TODOS', 'ESTUDIANTE', 'DOCENTE'];
 
   const totalPages = Math.max(1, Math.ceil(filteredUsers.length / usersPerPage));
   const safeCurrentPage = Math.min(currentPage, totalPages);
@@ -276,7 +278,7 @@ const AdminUsersPage = () => {
         <div className="space-y-2">
           <GlyphSearchBar onSearch={setSearchQuery} />
           <FilterTabs
-            filters={genderFilters}
+            filters={roleFilters}
             activeFilter={activeFilter}
             onFilterChange={setActiveFilter}
           />

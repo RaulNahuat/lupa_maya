@@ -26,7 +26,7 @@ const GlyphCard = ({ glyph, onEdit, onDelete }) => {
             {glyph.meaning}
           </span>
           <span className="text-[8px] sm:text-[9px] font-black text-amber-600/80 uppercase tracking-widest shrink-0">
-            (es)
+            (español)
           </span>
         </div>
 
