@@ -6,9 +6,12 @@ export async function handleSyncUsuarios(req, res, db, io) {
   });
 
   if (existente) {
-    // Actualizar racha si el cliente manda un valor más reciente
-    if (datos.racha !== undefined && datos.racha !== null) {
-      await existente.update({ racha: datos.racha });
+    //Actualiza racha y rol_id si el cliente manda valores más recientes
+    const updates = {};
+    if (datos.racha !== undefined && datos.racha !== null) updates.racha = datos.racha;
+    if (datos.rol_id !== undefined && datos.rol_id !== null) updates.rol_id = datos.rol_id;
+    if (Object.keys(updates).length > 0) {
+      await existente.update(updates);
     }
 
     return res.status(200).json({
@@ -29,7 +32,8 @@ export async function handleSyncUsuarios(req, res, db, io) {
       grado: datos.grado || "1er Grado",
       pin_hash: datos.pin_hash || datos.pin || null,
       local_id: datos.local_id,
-      racha: datos.racha ?? 0
+      racha: datos.racha ?? 0,
+      rol_id: datos.rol_id ?? 2
     });
 
     io.emit("hay_cambios");

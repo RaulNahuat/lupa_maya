@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, User, School, MapPin, GraduationCap, Lock } from 'lucide-react';
+import { X, User, School, MapPin, GraduationCap, Lock, Users } from 'lucide-react';
 import PrimaryButton from '../PrimaryButton';
 
 const UserEditModal = ({ isOpen, onClose, user, onSave, isAdding }) => {
@@ -11,7 +11,8 @@ const UserEditModal = ({ isOpen, onClose, user, onSave, isAdding }) => {
     lugar_procedencia: '',
     genero: 'Femenino',
     grado: '1er Grado',
-    pin: ''
+    pin: '',
+    rol_id: 2
   });
 
   useEffect(() => {
@@ -24,7 +25,8 @@ const UserEditModal = ({ isOpen, onClose, user, onSave, isAdding }) => {
         lugar_procedencia: user.lugar_procedencia || '',
         genero: user.genero || 'Femenino',
         grado: user.grado || '1er Grado',
-        pin: user.pin || ''
+        pin: user.pin || '',
+        rol_id: user.rol_id || 2
       });
     }
   }, [user]);
@@ -38,7 +40,10 @@ const UserEditModal = ({ isOpen, onClose, user, onSave, isAdding }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(user?.id, formData);
+    onSave(user?.id, {
+      ...formData,
+      rol_id: Number(formData.rol_id)
+    });
   };
 
   return (
@@ -146,6 +151,22 @@ const UserEditModal = ({ isOpen, onClose, user, onSave, isAdding }) => {
                   className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white border-2 border-transparent focus:border-maya-gold outline-none font-bold text-maya-dark transition-all"
                 />
               </div>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-black text-maya-dark/60 ml-2 uppercase">Rol del Usuario</label>
+            <div className="relative">
+              <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-maya-gold animate-pulse" />
+              <select
+                name="rol_id"
+                value={formData.rol_id}
+                onChange={handleChange}
+                className="w-full pl-12 pr-6 py-4 rounded-2xl bg-white border-2 border-transparent focus:border-maya-gold outline-none font-bold text-maya-dark appearance-none transition-all cursor-pointer"
+              >
+                <option value={2}>Estudiante (Usuario)</option>
+                <option value={3}>Docente</option>
+              </select>
             </div>
           </div>
 

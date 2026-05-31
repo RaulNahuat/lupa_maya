@@ -2,7 +2,7 @@ const UserCard = ({ user, onEdit, onDelete }) => {
   const gradeLabel = user.grado || 'sin grado';
 
   return (
-    <div className="bg-white rounded-[2rem] sm:rounded-4xl p-3 sm:p-4 shadow-sm border border-gray-100 mb-3 sm:mb-4 transition-transform hover:-translate-y-0.5 hover:shadow-md relative">
+    <div className="bg-white rounded-4xl sm:rounded-4xl p-3 sm:p-4 shadow-sm border border-gray-100 mb-3 sm:mb-4 transition-transform hover:-translate-y-0.5 hover:shadow-md relative">
       {/* Badge de estado en la esquina superior derecha */}
       <div className="absolute top-4 right-4 sm:top-5 sm:right-5 flex items-center gap-1.5">
         <span className="text-[10px] sm:text-xs font-bold uppercase text-gray-400 tracking-wide">
@@ -12,7 +12,7 @@ const UserCard = ({ user, onEdit, onDelete }) => {
       </div>
 
       <div className="flex gap-3 sm:gap-4 items-center">
-        {/* Avatar del usuario (sin borde dorado molesto) */}
+        {/* Avatar del usuario */}
         <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-gray-50">
           {user.avatar ? (
             <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
@@ -36,7 +36,13 @@ const UserCard = ({ user, onEdit, onDelete }) => {
           </div>
 
           <div className="flex items-center gap-2 text-[10px] sm:text-[11px] mt-0.5 mb-2.5">
-            <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">Nivel {user.level ?? 0}</span>
+            {user.rol_id === 3 ? (
+              <span className="bg-maya-gold text-white font-black px-2.5 py-0.5 rounded-full tracking-wider uppercase text-[9px]">
+                Docente
+              </span>
+            ) : (
+              <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">Nivel {user.level ?? 0}</span>
+            )}
             <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">⭐ {user.stars ?? 0}</span>
             <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">🏅 {user.badges ?? 0}</span>
           </div>

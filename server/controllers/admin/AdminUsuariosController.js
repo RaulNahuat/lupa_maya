@@ -4,7 +4,7 @@ export async function getAllUsuarios(req, res, db) {
     const usuarios = await db.Usuario.findAll({
       where: { deleted_at: null },
       attributes: [
-        'id', 'nombre', 'apellido', 'username', 'escuela', 'lugar_procedencia', 'genero', 'grado', 'local_id', 'created_at'
+        'id', 'nombre', 'apellido', 'username', 'escuela', 'lugar_procedencia', 'genero', 'grado', 'local_id', 'rol_id', 'created_at'
       ],
       include: [
         {
@@ -47,7 +47,8 @@ export async function getAllUsuarios(req, res, db) {
 
 export async function updateUsuario(req, res, db, io) {
   const { id } = req.params;
-  const { nombre, apellido, username, escuela, lugar_procedencia, genero, grado, pin_hash } = req.body;
+  const source = req.body.datos ? req.body.datos : req.body;
+  const { nombre, apellido, username, escuela, lugar_procedencia, genero, grado, pin_hash, rol_id } = source;
 
   try {
     const usuario = await db.Usuario.findByPk(id);
@@ -63,7 +64,8 @@ export async function updateUsuario(req, res, db, io) {
       lugar_procedencia,
       genero,
       grado,
-      pin_hash: pin_hash || usuario.pin_hash
+      pin_hash: pin_hash || usuario.pin_hash,
+      rol_id: rol_id !== undefined ? rol_id : usuario.rol_id
     });
 
     if (io) io.emit("hay_cambios");
