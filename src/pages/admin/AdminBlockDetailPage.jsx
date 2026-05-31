@@ -5,6 +5,7 @@ import AdminPageShell from '../../components/admin/AdminPageShell';
 import GlyphCard from '../../components/admin/GlyphCard';
 import Pagination from '../../components/admin/Pagination';
 import BlockEditModal from '../../components/admin/BlockEditModal';
+import GlyphEditModal from '../../components/admin/GlyphEditModal';
 import ModalConfirmation from '../../components/ModalConfirmation';
 import { db } from '../../data/db';
 import { procesarColaSincronizacion } from '../../services/syncService';
@@ -19,9 +20,15 @@ const AdminBlockDetailPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const glyphsPerPage = 10;
 
-  //Esttados para el crud de bloques
+  // Estados para el CRUD de bloques
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // Estados para el CRUD de glifos
+  const [isGlyphModalOpen, setIsGlyphModalOpen] = useState(false);
+  const [isDeleteGlyphModalOpen, setIsDeleteGlyphModalOpen] = useState(false);
+  const [selectedGlyph, setSelectedGlyph] = useState(null);
+  const [isAddingGlyph, setIsAddingGlyph] = useState(false);
 
   const fetchBlockData = async () => {
     setIsLoading(true);
@@ -150,16 +157,99 @@ const AdminBlockDetailPage = () => {
       });
 
       setIsDeleteModalOpen(false);
-      navigate('/admin/glyphs');
 
-      if (navigator.onLine) procesarColaSincronizacion();
+      if (navigator.onLine) {
+        await procesarColaSincronizacion();
+      }
+      navigate('/admin/glyphs');
     } catch (error) {
       console.error("Error al eliminar el bloque:", error);
     }
   };
 
-  const handleAddGlyphToBlock = (blockId) => {
-    console.log('Add glyph to block', blockId);
+  const handleAddGlyphToBlock = () => {
+    setSelectedGlyph({
+      nombre_maya: '',
+      significado_es: '',
+      pronunciacion: '',
+      imagen_url: ''
+    });
+    setIsAddingGlyph(true);
+    setIsGlyphModalOpen(true);
+  };
+
+  const handleEditGlyph = (glyph) => {
+    setSelectedGlyph(glyph);
+    setIsAddingGlyph(false);
+    setIsGlyphModalOpen(true);
+  };
+
+  const handleDeleteGlyph = (glyph) => {
+    setSelectedGlyph(glyph);
+    setIsDeleteGlyphModalOpen(true);
+  };
+
+  const confirmDeleteGlyph = async () => {
+    if (!selectedGlyph) return;
+
+    try {
+      await db.transaction('rw', db.glifos, db.cola_sincronizacion, async () => {
+        await db.glifos.delete(selectedGlyph.id);
+        await db.cola_sincronizacion.add({
+          entidad: 'glifos',
+          accion: 'ELIMINAR',
+          datos: { id: selectedGlyph.id },
+          estado: 'PENDIENTE',
+          created_at: new Date().getTime()
+        });
+      });
+
+      setIsDeleteGlyphModalOpen(false);
+      setSelectedGlyph(null);
+
+      if (navigator.onLine) {
+        await procesarColaSincronizacion();
+      }
+      fetchBlockData();
+    } catch (error) {
+      console.error("Error al eliminar el glifo:", error);
+    }
+  };
+
+  const handleSaveGlyph = async (id, data) => {
+    try {
+      const isNew = !id;
+      const glyphId = id ? Number(id) : Date.now();
+      const glyphData = {
+        ...data,
+        id: glyphId,
+        grupo_id: Number(blockId),
+        activo: true,
+        version: 1
+      };
+
+      await db.transaction('rw', db.glifos, db.cola_sincronizacion, async () => {
+        await db.glifos.put(glyphData);
+        await db.cola_sincronizacion.add({
+          entidad: 'glifos',
+          accion: isNew ? 'CREAR' : 'EDITAR',
+          datos: glyphData,
+          estado: 'PENDIENTE',
+          created_at: new Date().getTime()
+        });
+      });
+
+      setIsGlyphModalOpen(false);
+      setSelectedGlyph(null);
+
+      if (navigator.onLine) {
+        await procesarColaSincronizacion();
+      }
+      fetchBlockData();
+    } catch (error) {
+      console.error("Error al guardar el glifo en Dexie:", error);
+      alert("Error al guardar el glifo: " + error.message);
+    }
   };
 
   const visibleGlyphs = glyphs.filter(glyph => {
@@ -274,8 +364,8 @@ const AdminBlockDetailPage = () => {
                       image: glyph.imagen_url,
                       level: block.dificultad || 'BÁSICO'
                     }} 
-                    onEdit={() => console.log('Edit glyph', glyph.id)}
-                    onDelete={() => console.log('Delete glyph', glyph.id)}
+                    onEdit={() => handleEditGlyph(glyph)}
+                    onDelete={() => handleDeleteGlyph(glyph)}
                   />
                 ))}
               </div>
@@ -314,12 +404,33 @@ const AdminBlockDetailPage = () => {
         isAdding={false}
       />
 
+      {/* Modal para añadir/editar glifo */}
+      <GlyphEditModal
+        isOpen={isGlyphModalOpen}
+        onClose={() => setIsGlyphModalOpen(false)}
+        glyph={selectedGlyph}
+        onSave={handleSaveGlyph}
+        isAdding={isAddingGlyph}
+      />
+
+      {/* Confirmación para eliminar bloque */}
       <ModalConfirmation
         isOpen={isDeleteModalOpen}
         title="¿Eliminar Bloque?"
         message={`¿Estás seguro de que deseas eliminar el bloque "${block?.nombre}" y TODOS sus glifos asociados? Esta acción no se puede deshacer.`}
         onConfirm={confirmDeleteBlock}
         onCancel={() => setIsDeleteModalOpen(false)}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+      />
+
+      {/* Confirmación para eliminar glifo */}
+      <ModalConfirmation
+        isOpen={isDeleteGlyphModalOpen}
+        title="¿Eliminar Glifo?"
+        message={`¿Estás seguro de que deseas eliminar el glifo "${selectedGlyph?.nombre_maya}"? Esta acción no se puede deshacer.`}
+        onConfirm={confirmDeleteGlyph}
+        onCancel={() => setIsDeleteGlyphModalOpen(false)}
         confirmText="Eliminar"
         cancelText="Cancelar"
       />

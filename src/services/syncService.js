@@ -41,6 +41,24 @@ export const descargarCambios = async (usuarioLocalId = null) => {
         insignias = []
     } = result.cambios;
 
+    // Obtener los IDs de elementos que tienen cambios locales pendientes de sincronizar
+    const itemsPendientes = await db.cola_sincronizacion
+        .where('estado')
+        .equals('PENDIENTE')
+        .toArray();
+
+    const glifosAfectadosIds = new Set(
+        itemsPendientes
+            .filter(item => item.entidad === 'glifos' && item.datos?.id)
+            .map(item => Number(item.datos.id))
+    );
+
+    const gruposAfectadosIds = new Set(
+        itemsPendientes
+            .filter(item => item.entidad === 'grupos_niveles' && item.datos?.id)
+            .map(item => Number(item.datos.id))
+    );
+
     await db.transaction(
         'rw',
         db.usuarios,
@@ -72,10 +90,10 @@ export const descargarCambios = async (usuarioLocalId = null) => {
                     });
 
                     if (user.racha !== undefined && user.local_id) {
-                    await db.configuracion.put({
-                        clave: `racha_${user.local_id}`,
-                        valor: user.racha,
-                    });
+                        await db.configuracion.put({
+                            clave: `racha_${user.local_id}`,
+                            valor: user.racha,
+                        });
                     }
                 }
             }
@@ -97,14 +115,20 @@ export const descargarCambios = async (usuarioLocalId = null) => {
                 await db.niveles.bulkPut(niveles);
             }
 
-            // GRUPOS DE NIVELES (Categorías)
+            // GRUPOS DE NIVELES (Categorías) - Filtrar para no sobreescribir cambios locales pendientes
             if (grupos_niveles.length > 0) {
-                await db.grupos_niveles.bulkPut(grupos_niveles);
+                const gruposFiltrados = grupos_niveles.filter(g => !gruposAfectadosIds.has(Number(g.id)));
+                if (gruposFiltrados.length > 0) {
+                    await db.grupos_niveles.bulkPut(gruposFiltrados);
+                }
             }
 
-            // GLIFOS
+            // GLIFOS - Filtrar para no sobreescribir cambios locales pendientes (resuelve el bug del doble borrado)
             if (glifos.length > 0) {
-                await db.glifos.bulkPut(glifos);
+                const glifosFiltrados = glifos.filter(g => !glifosAfectadosIds.has(Number(g.id)));
+                if (glifosFiltrados.length > 0) {
+                    await db.glifos.bulkPut(glifosFiltrados);
+                }
             }
 
             // PREGUNTAS - contenido de niveles tipo APRENDIZAJE
@@ -281,6 +305,25 @@ const procesarItem = async (item) => {
                         if (item.accion === 'ELIMINAR') {
                             await db.grupos_niveles.delete(item.datos.id);
                         }
+                    }
+                }
+            }
+            if (item.entidad === 'glifos') {
+                if (item.accion === 'CREAR') {
+                    const idServidor = result.data?.id ?? null;
+                    if (idServidor) {
+                        const glifo = await db.glifos.get(item.datos.id);
+                        if (glifo) {
+                            await db.glifos.delete(item.datos.id);
+                            await db.glifos.put({
+                                ...glifo,
+                                id: Number(idServidor)
+                            });
+                        }
+                    }
+                } else {
+                    if (item.accion === 'ELIMINAR') {
+                        await db.glifos.delete(item.datos.id);
                     }
                 }
             }

@@ -22,6 +22,9 @@ import { createAiModel, uploadAiModelFiles } from "./controllers/admin/AiModelsC
 import { getActiveAiModel } from "./controllers/pullController/aiModelsPullController.js";
 import { getGruposNivelesPull } from "./controllers/pullController/gruposNivelesPullController.js";
 import { handleSyncGruposNiveles } from "./controllers/pushController/gruposNivelesPushController.js";
+import { handleSyncGlifos } from "./controllers/pushController/glifosPushController.js";
+import multer from "multer";
+import fs from "fs/promises";
 
 dotenv.config();
 
@@ -77,6 +80,10 @@ app.post("/api/sync", async (req, res) => {
       case "grupos_niveles:EDITAR":
       case "grupos_niveles:ELIMINAR":
         return await handleSyncGruposNiveles(req, res, db, io);
+      case "glifos:CREAR":
+      case "glifos:EDITAR":
+      case "glifos:ELIMINAR":
+        return await handleSyncGlifos(req, res, db, io);
       default:
         return res.status(400).json({ success: false, message: "Entidad o acción no soportada" });
     }
@@ -134,6 +141,47 @@ app.get("/api/sync/pull", async (req, res) => {
 // AI MODELS
 app.post("/api/admin/ai-models", uploadAiModelFiles, (req, res) => createAiModel(req, res, db));
 app.get("/api/ai-models/active", (req, res) => getActiveAiModel(req, res, db));
+
+//Subida de archivos para los glifos
+const glyphStorage = multer.diskStorage({
+  destination: async function (req, file, cb) {
+    let subfolder = "images/glyphs";
+    if (file.mimetype.startsWith("audio/")) {
+      subfolder = "audio/glyphs";
+    } else if (file.mimetype.startsWith("video/")) {
+      subfolder = "video/glyphs";
+    }
+    const dir = path.join(process.cwd(), "public", "assets", subfolder);
+    await fs.mkdir(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    let prefix = "glyph-";
+    if (file.mimetype.startsWith("audio/")) {
+      prefix = "audio-";
+    } else if (file.mimetype.startsWith("video/")) {
+      prefix = "video-";
+    }
+    cb(null, prefix + uniqueSuffix + ext);
+  }
+});
+const uploadGlyph = multer({ storage: glyphStorage });
+
+app.post("/api/admin/glyphs/upload", uploadGlyph.single("file"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: "No se subió ningún archivo." });
+  }
+  let subfolder = "images/glyphs";
+  if (req.file.mimetype.startsWith("audio/")) {
+    subfolder = "audio/glyphs";
+  } else if (req.file.mimetype.startsWith("video/")) {
+    subfolder = "video/glyphs";
+  }
+  const relativePath = `/assets/${subfolder}/${req.file.filename}`;
+  res.json({ success: true, url: relativePath });
+});
 
 // ADMIN ROUTES
 app.get("/api/admin/usuarios", (req, res) => getAllUsuarios(req, res, db));
