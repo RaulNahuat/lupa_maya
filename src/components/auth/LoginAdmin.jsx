@@ -35,7 +35,7 @@ const LoginAdmin = () => {
 
       procesarColaSincronizacion();
       
-      navigate('/admin/glyphs');
+      navigate('/admin');
     } catch (error) {
       showToast('Error de acceso', String(error), 'error');
     }

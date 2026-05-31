@@ -17,7 +17,7 @@ export default function UserRoute({ children }) {
   // Si el usuario es un administrador, no debería entrar a las rutas de niño
   const esAdmin = currentUser && (currentUser.rol === 'ADMIN' || currentUser.email);
   if (esAdmin) {
-    return <Navigate to="/admin/glyphs" replace />;
+    return <Navigate to="/admin" replace />;
   }
 
   // Si hay usuario, renderizar el componente protegido

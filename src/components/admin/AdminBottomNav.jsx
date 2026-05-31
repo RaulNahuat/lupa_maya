@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Settings, Users } from 'lucide-react';
+import { Sparkles, Home, Users } from 'lucide-react';
 
 const AdminBottomNav = ({ activeTab = 'glifos' }) => {
   const navigate = useNavigate();
@@ -17,11 +17,11 @@ const AdminBottomNav = ({ activeTab = 'glifos' }) => {
       <div className="relative -top-8">
         <div className="absolute -inset-6 bg-maya-gold/10 rounded-full blur-2xl opacity-40 animate-pulse"></div>
         <button 
-          onClick={() => navigate('/admin/settings')}
-          className="relative w-20 h-20 bg-white rounded-full border-[6px] border-maya-cream flex items-center justify-center shadow-2xl hover:scale-110 active:scale-90 transition-all z-10"
+          onClick={() => navigate('/admin')}
+          className={`relative w-20 h-20 bg-white rounded-full border-[6px] border-maya-cream flex items-center justify-center shadow-2xl hover:scale-110 active:scale-90 transition-all z-10 ${activeTab === 'lobby' ? 'border-maya-gold/30' : ''}`}
         >
-          <div className="w-14 h-14 bg-maya-dark rounded-full flex items-center justify-center shadow-inner">
-            <Settings className="w-8 h-8 text-white" />
+          <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-inner transition-colors ${activeTab === 'lobby' ? 'bg-maya-gold' : 'bg-maya-dark'}`}>
+            <Home className="w-7 h-7 text-white" />
           </div>
         </button>
       </div>

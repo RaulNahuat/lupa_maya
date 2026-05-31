@@ -4,6 +4,7 @@ import Register from './pages/auth/Register';
 import LevelMap from "./pages/player/LevelMap";
 import LevelPlay from "./pages/player/LevelPlay";
 import Rewards from "./pages/player/Rewards";
+import AdminLobbyPage from './pages/admin/AdminLobbyPage';
 import AdminGlyphsPage from './pages/admin/AdminGlyphsPage';
 import AdminBlockDetailPage from './pages/admin/AdminBlockDetailPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
@@ -22,6 +23,7 @@ function App() {
           <Route path="/register" element={<Register />} />
 
           {/* ADMIN */}
+          <Route path="/admin" element={<AdminRoute><AdminLobbyPage /></AdminRoute>} />
           <Route path="/admin/settings" element={<AdminRoute><AdminSettingsPage /></AdminRoute>} />
           <Route path="/admin/glyphs" element={<AdminRoute><AdminGlyphsPage /></AdminRoute>} />
           <Route path="/admin/glyphs/block/:blockId" element={<AdminRoute><AdminBlockDetailPage /></AdminRoute>} />

@@ -15,7 +15,11 @@ const AdminHeader = () => {
   return (
     <>
       <div className="sticky top-0 bg-white px-4 py-4 sm:px-6 sm:py-6 rounded-b-[2.5rem] sm:rounded-b-[3rem] shadow-[0_15px_30px_-10px_rgba(0,0,0,0.05)] flex items-center justify-between border-gray-50 border-b z-50">
-        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+        <div 
+          onClick={() => navigate('/admin')}
+          className="flex items-center gap-3 sm:gap-4 min-w-0 cursor-pointer hover:opacity-80 active:scale-[0.98] transition-all"
+          title="Ir al Lobby del Administrador"
+        >
           <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-[3px] border-maya-gold p-1 bg-white shadow-sm shrink-0">
             <div className="w-full h-full rounded-full overflow-hidden bg-maya-orange-light">
             {avatar ? (
