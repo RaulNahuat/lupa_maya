@@ -59,6 +59,12 @@ export const descargarCambios = async (usuarioLocalId = null) => {
             .map(item => Number(item.datos.id))
     );
 
+    const nivelesAfectadosIds = new Set(
+        itemsPendientes
+            .filter(item => item.entidad === 'niveles' && item.datos?.id)
+            .map(item => Number(item.datos.id))
+    );
+
     await db.transaction(
         'rw',
         db.usuarios,
@@ -110,9 +116,12 @@ export const descargarCambios = async (usuarioLocalId = null) => {
                 }
             }
 
-            // NIVELES
+            // NIVELES - Filtrar para no sobreescribir niveles con cambios locales pendientes
             if (niveles.length > 0) {
-                await db.niveles.bulkPut(niveles);
+                const nivelesFiltrados = niveles.filter(n => !nivelesAfectadosIds.has(Number(n.id)));
+                if (nivelesFiltrados.length > 0) {
+                    await db.niveles.bulkPut(nivelesFiltrados);
+                }
             }
 
             // GRUPOS DE NIVELES (Categorías) - Filtrar para no sobreescribir cambios locales pendientes
@@ -201,6 +210,9 @@ const procesarItem = async (item) => {
         db.grupos_niveles,
         db.glifos,
         db.niveles,
+        db.preguntas,
+        db.opciones_respuestas,
+        db.nivel_glifos_objetivos,
         async () => {
             await db.cola_sincronizacion.put({ ...item, estado: 'ENVIADO' });
 
@@ -327,6 +339,134 @@ const procesarItem = async (item) => {
                     }
                 }
             }
+            if (item.entidad === 'niveles') {
+                if (item.accion === 'CREAR') {
+                    const idServidor = result.data?.id ?? null;
+                    if (idServidor) {
+                        const nivel = await db.niveles.get(item.datos.id);
+                        if (nivel) {
+                            await db.niveles.delete(item.datos.id);
+                            await db.niveles.put({
+                                ...nivel,
+                                id: Number(idServidor)
+                            });
+                        }
+
+                        // Actualizar en IndexedDB local las preguntas y objetivos con el ID temporal del nivel
+                        const preguntasLocales = await db.preguntas
+                            .where('nivel_id')
+                            .equals(Number(item.datos.id))
+                            .toArray();
+                        for (const q of preguntasLocales) {
+                            await db.preguntas.put({
+                                ...q,
+                                nivel_id: Number(idServidor)
+                            });
+                        }
+
+                        const objetivosLocales = await db.nivel_glifos_objetivos
+                            .where('nivel_id')
+                            .equals(Number(item.datos.id))
+                            .toArray();
+                        for (const obj of objetivosLocales) {
+                            await db.nivel_glifos_objetivos.put({
+                                ...obj,
+                                nivel_id: Number(idServidor)
+                            });
+                        }
+
+                        // Propagar el ID del servidor a los elementos de la cola que hacen referencia al ID temporal del nivel
+                        const colaPendiente = await db.cola_sincronizacion
+                            .where('estado')
+                            .equals('PENDIENTE')
+                            .toArray();
+                        for (const c of colaPendiente) {
+                            if (c.entidad === 'niveles' && c.datos && Number(c.datos.id) === Number(item.datos.id)) {
+                                c.datos.id = Number(idServidor);
+                                await db.cola_sincronizacion.put(c);
+                            }
+                            if (c.entidad === 'preguntas' && c.datos && Number(c.datos.nivel_id) === Number(item.datos.id)) {
+                                c.datos.nivel_id = Number(idServidor);
+                                await db.cola_sincronizacion.put(c);
+                            }
+                            if (c.entidad === 'nivel_glifos_objetivos' && c.datos && Number(c.datos.nivel_id) === Number(item.datos.id)) {
+                                c.datos.nivel_id = Number(idServidor);
+                                await db.cola_sincronizacion.put(c);
+                            }
+                        }
+                    }
+                } else {
+                    if (item.accion === 'ELIMINAR') {
+                        await db.niveles.delete(item.datos.id);
+                    }
+                }
+            }
+            if (item.entidad === 'preguntas') {
+                if (item.accion === 'CREAR') {
+                    const idServidor = result.data?.id ?? null;
+                    if (idServidor) {
+                        const pregunta = await db.preguntas.get(item.datos.id);
+                        if (pregunta) {
+                            await db.preguntas.delete(item.datos.id);
+                            await db.preguntas.put({
+                                ...pregunta,
+                                id: Number(idServidor)
+                            });
+                        }
+
+                        // Actualizar en IndexedDB local las opciones ya guardadas con el ID temporal de la pregunta
+                        const opcionesLocales = await db.opciones_respuestas
+                            .where('preguntas_id')
+                            .equals(Number(item.datos.id))
+                            .toArray();
+                        for (const opt of opcionesLocales) {
+                            await db.opciones_respuestas.put({
+                                ...opt,
+                                preguntas_id: Number(idServidor)
+                            });
+                        }
+
+                        // Propagar el ID del servidor a las opciones vinculadas en la cola
+                        const colaPendiente = await db.cola_sincronizacion
+                            .where('estado')
+                            .equals('PENDIENTE')
+                            .toArray();
+                        for (const c of colaPendiente) {
+                            if (c.entidad === 'opciones_respuestas' && c.datos && Number(c.datos.preguntas_id) === Number(item.datos.id)) {
+                                c.datos.preguntas_id = Number(idServidor);
+                                await db.cola_sincronizacion.put(c);
+                            }
+                            if (c.entidad === 'preguntas' && c.datos && Number(c.datos.id) === Number(item.datos.id)) {
+                                c.datos.id = Number(idServidor);
+                                await db.cola_sincronizacion.put(c);
+                            }
+                        }
+                    }
+                } else {
+                    if (item.accion === 'ELIMINAR') {
+                        await db.preguntas.delete(item.datos.id);
+                    }
+                }
+            }
+            if (item.entidad === 'opciones_respuestas') {
+                if (item.accion === 'CREAR') {
+                    const idServidor = result.data?.id ?? null;
+                    if (idServidor) {
+                        const opcion = await db.opciones_respuestas.get(item.datos.id);
+                        if (opcion) {
+                            await db.opciones_respuestas.delete(item.datos.id);
+                            await db.opciones_respuestas.put({
+                                ...opcion,
+                                id: Number(idServidor)
+                            });
+                        }
+                    }
+                } else {
+                    if (item.accion === 'ELIMINAR') {
+                        await db.opciones_respuestas.delete(item.datos.id);
+                    }
+                }
+            }
         }
     );
 
@@ -366,12 +506,25 @@ export const procesarColaSincronizacion = async (usuarioLocalId = null) => {
         const ordenados = [
             ...porEntidad('usuarios'),
             ...porEntidad('progreso_usuarios'),
-            ...items.filter((i) => i.entidad !== 'usuarios' && i.entidad !== 'progreso_usuarios')
+            ...porEntidad('grupos_niveles'),
+            ...porEntidad('glifos'),
+            ...porEntidad('niveles'),
+            ...porEntidad('preguntas'),
+            ...porEntidad('opciones_respuestas'),
+            ...porEntidad('nivel_glifos_objetivos'),
+            ...items.filter((i) => ![
+                'usuarios', 'progreso_usuarios', 'grupos_niveles', 'glifos', 
+                'niveles', 'preguntas', 'opciones_respuestas', 'nivel_glifos_objetivos'
+            ].includes(i.entidad))
         ];
 
         for (const item of ordenados) {
             try {
-                await procesarItem(item);
+                // Obtener el item actualizado de la base de datos para capturar cualquier ID real propagado
+                const latestItem = await db.cola_sincronizacion.get(item.id);
+                if (latestItem && latestItem.estado === 'PENDIENTE') {
+                    await procesarItem(latestItem);
+                }
             } catch (error) {
                 console.error(`Error subiendo item ${item.id} (${item.entidad}):`, error);
             }

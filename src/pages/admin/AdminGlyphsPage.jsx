@@ -94,9 +94,13 @@ const AdminGlyphsPage = () => {
   };
 
   const handleAddNewBlock = () => {
+    const nextSuggestedGroupNumber = blocks.length > 0
+      ? Math.max(...blocks.map(b => Number(b.numero_grupo) || 0)) + 1
+      : 1;
+
     setSelectedBlock({
       nombre: '',
-      numero_grupo: '',
+      numero_grupo: nextSuggestedGroupNumber,
       dificultad: 'BASICO',
       color: '#10B981',
       descripcion: ''

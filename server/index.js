@@ -23,6 +23,10 @@ import { getActiveAiModel } from "./controllers/pullController/aiModelsPullContr
 import { getGruposNivelesPull } from "./controllers/pullController/gruposNivelesPullController.js";
 import { handleSyncGruposNiveles } from "./controllers/pushController/gruposNivelesPushController.js";
 import { handleSyncGlifos } from "./controllers/pushController/glifosPushController.js";
+import { handleSyncNiveles } from "./controllers/pushController/nivelesPushController.js";
+import { handleSyncPreguntas } from "./controllers/pushController/preguntasPushController.js";
+import { handleSyncOpciones } from "./controllers/pushController/opcionesPushController.js";
+import { handleSyncGlifosObjetivo } from "./controllers/pushController/glifosObjetivosPushController.js";
 import multer from "multer";
 import fs from "fs/promises";
 
@@ -84,6 +88,21 @@ app.post("/api/sync", async (req, res) => {
       case "glifos:EDITAR":
       case "glifos:ELIMINAR":
         return await handleSyncGlifos(req, res, db, io);
+      case "niveles:CREAR":
+      case "niveles:EDITAR":
+      case "niveles:ELIMINAR":
+        return await handleSyncNiveles(req, res, db, io);
+      case "preguntas:CREAR":
+      case "preguntas:EDITAR":
+      case "preguntas:ELIMINAR":
+        return await handleSyncPreguntas(req, res, db, io);
+      case "opciones_respuestas:CREAR":
+      case "opciones_respuestas:EDITAR":
+      case "opciones_respuestas:ELIMINAR":
+        return await handleSyncOpciones(req, res, db, io);
+      case "nivel_glifos_objetivos:CREAR":
+      case "nivel_glifos_objetivos:ELIMINAR":
+        return await handleSyncGlifosObjetivo(req, res, db, io);
       default:
         return res.status(400).json({ success: false, message: "Entidad o acción no soportada" });
     }
