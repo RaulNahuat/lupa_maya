@@ -2,10 +2,12 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { X, Volume2 } from "lucide-react"
 import { calculateStars } from "../../utils/calculateStars"
+import { useGameStore } from "../../store/game/useGameStore"
 
 export default function QuizLevel({ level, onComplete }) {
   const navigate = useNavigate()
   const { contenido } = level
+  const levels = useGameStore((s) => s.levels)
   const preguntas = contenido.preguntas ?? []
   const totalPreguntas = preguntas.length
 
@@ -66,7 +68,7 @@ export default function QuizLevel({ level, onComplete }) {
       setEsCorrecta(false)
       setFalloActual(false)
     } else {
-      // Nivel completado — calcular resultado final
+      // Nivel completado - calcular resultado final
       const estrellas = calculateStars(totalPreguntas, fallosTotal)
 
       // aprobado = 80% o más correctas a primera vez
@@ -75,6 +77,15 @@ export default function QuizLevel({ level, onComplete }) {
       const intentos = fallosTotal === 0 ? 1 : fallosTotal + 1
 
       await onComplete(level.id, estrellas, intentos, aprobado)
+
+      const indexActual = levels.findIndex((l) => l.id === level.id)
+      const siguiente = levels[indexActual + 1]
+
+      if (siguiente) {
+        navigate(`/level/${siguiente.id}`)
+      } else {
+        navigate("/map")
+      }
     }
   }
 
@@ -149,7 +160,7 @@ export default function QuizLevel({ level, onComplete }) {
       <div className="flex-1 flex flex-col items-center px-5 pt-2">
         {/* Glifo */}
         {preguntaActual.imagen_url && (
-          <div className="bg-white w-45 h-45 rounded-3xl border-2 border-black flex items-center justify-center mb-3">
+          <div className="bg-white w-45 h-45 rounded-3xl border-2 border-light-gray shadow-[0_6px_0_#E5E7EB] flex items-center justify-center mb-3">
             <img
               src={preguntaActual.imagen_url}
               alt={preguntaActual.nombre_maya ?? "Glifo maya"}

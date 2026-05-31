@@ -1,7 +1,8 @@
 import { useRef, useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { X, Zap, Search, Camera } from "lucide-react"
+import { X, Zap, Search, Camera, Volume2 } from "lucide-react"
 import { calculateStars } from "../../utils/calculateStars"
+import { useGameStore } from "../../store/game/useGameStore"
 
 import * as tmImage from "@teachablemachine/image"
 import { API_BASE_URL } from "../../config/api"
@@ -17,6 +18,8 @@ export default function ScanLevel({ level, onComplete }) {
   const navigate = useNavigate()
 
   const { contenido } = level
+
+  const levels = useGameStore((s) => s.levels)
 
   const [scanned, setScanned] = useState(false)
   const [detectado, setDetectado] = useState(null)
@@ -114,6 +117,16 @@ export default function ScanLevel({ level, onComplete }) {
     const estrellas = calculateStars(1, intentos > 1 ? 1 : 0)
     const aprobado = intentos === 1
     await onComplete(level.id, estrellas, intentos, aprobado)
+
+    // Buscar el siguiente nivel desbloqueado y no completado
+    const indexActual = levels.findIndex((l) => l.id === level.id)
+    const siguiente = levels[indexActual + 1]
+
+    if (siguiente) {
+      navigate(`/level/${siguiente.id}`)
+    } else {
+      navigate("/map")  // era el último nivel
+    }
   }
 
   const nombreObjetivo = contenido.glifo?.significado_es ?? contenido.glifo?.nombre_maya ?? "el glifo"
@@ -135,37 +148,81 @@ export default function ScanLevel({ level, onComplete }) {
   // — Resultado correcto —
   if (scanned && detectado?.coincide) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <div className="flex items-center justify-between px-4 pt-5 pb-2">
-          <button onClick={() => navigate("/map")}
-            className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
-            <X size={18} className="text-gray-500" />
-          </button>
-          <span className="bg-black font-bold text-white text-sm px-5 py-2 rounded-full">
-            NIVEL {numeroNivel}
-          </span>
-          <div className="w-10" />
-        </div>
-        <div className="flex-1 flex flex-col items-center justify-center px-6 text-center gap-4">
-          {detectado.glifo?.imagen_url && (
-            <div className="w-40 h-40 bg-light-green  border-4 border-light green rounded-2xl flex items-center justify-center shadow-md">
-              <img src={detectado.glifo.imagen_url} alt={detectado.glifo.nombre_maya ?? "Glifo"}
-                className="w-32 h-32 object-contain" />
+      <div className="md:min-h-screen md:bg-gray-600 md:flex md:items-center md:justify-center">
+        <div className="w-full md:w-[390px] md:max-h-[844px] min-h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
+
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 pt-6 pb-4 gap-3">
+            <button
+              onClick={() => navigate("/map")}
+              className="w-10 h-10 shrink-0 rounded-full bg-white flex items-center justify-center border-2 border-gray-200 shadow-sm"
+            >
+              <X size={18} className="text-gray-500" />
+            </button>
+            <div className="flex-1 flex justify-center">
+              <span className="bg-light-green text-white font-bold text-lg px-10 py-2 rounded-3xl text-center leading-tight shadow-[0_4px_0_#065f46]">
+                ¡Felicidades!<br />Glifo encontrado
+              </span>
             </div>
-          )}
-          <p className="text-2xl font-extrabold text-light-green">¡Glifo correcto!</p>
-          {detectado.glifo?.nombre_maya && (
-            <p className="text-xl font-bold text-gray-800">{detectado.glifo.nombre_maya}</p>
-          )}
-          {detectado.glifo?.significado_es && (
-            <p className="text-gray-500">{detectado.glifo.significado_es}</p>
-          )}
-        </div>
-        <div className="px-5 pb-8">
-          <button onClick={handleComplete}
-            className="w-full py-4 bg-light-green rounded-2xl font-extrabold text-white text-base tracking-widest">
-            COMPLETAR NIVEL
-          </button>
+            <div className="w-10 shrink-0" />
+          </div>
+
+          {/* Contenido */}
+          <div className="flex-1 flex flex-col items-center px-12 pt-4 gap-5 overflow-y-auto">
+
+            {/* Tarjeta del glifo */}
+            <div className="w-full bg-white rounded-2xl flex flex-col items-center py-6 px-6 gap-1.5 border-3 border-light-gray shadow-[0_7px_0_#E5E7EB]">
+              {detectado.glifo?.imagen_url && (
+                <img
+                  src={detectado.glifo.imagen_url}
+                  alt={detectado.glifo.nombre_maya ?? "Glifo"}
+                  className="w-45 h-45 object-contain"
+                />
+              )}
+              {detectado.glifo?.nombre_maya && (
+                <p className="text-3xl font-extrabold text-gray-900">
+                  {detectado.glifo.nombre_maya}
+                </p>
+              )}
+              {detectado.glifo?.significado_es && (
+                <p className="text-lg font-semibold text-gray-900">
+                  {detectado.glifo.significado_es}
+                </p>
+              )}
+            </div>
+
+            {/* Botón de audio */}
+            {detectado.glifo?.audio_url && (
+              <div className="flex flex-col items-center gap-2">
+                <button
+                  onClick={() => new Audio(detectado.glifo.audio_url).play()}
+                  className="w-16 h-16 bg-gold rounded-full flex items-center justify-center shadow-[0_4px_0_#C88F12] active:shadow-none active:translate-y-1 transition-all"
+                >
+                  <Volume2 size={28} className="text-white" />
+                </button>
+                <p className="text-sm text-gray-400 font-medium">Toca para escuchar en maya</p>
+              </div>
+            )}
+
+            {/* Dato cultural / descripción */}
+            {detectado.glifo?.descripcion && (
+              <div className="w-full bg-amber-100 rounded-2xl px-5 py-4">
+                <p className="text-gray-700 font-medium leading-relaxed">
+                  {detectado.glifo.descripcion}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Botón continuar */}
+          <div className="px-5 pb-8 pt-4">
+            <button
+              onClick={handleComplete}
+              className="w-full py-4 bg-light-green rounded-2xl font-extrabold text-white tracking-widest uppercase shadow-[0_8px_0_#065f46] active:shadow-[0_2px_0_#065f46] active:translate-y-1 transition-all"
+            >
+              CONTINUAR
+            </button>
+          </div>
         </div>
       </div>
     )
@@ -174,26 +231,52 @@ export default function ScanLevel({ level, onComplete }) {
   // — Resultado incorrecto —
   if (scanned && !detectado?.coincide) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <div className="flex items-center justify-between px-4 pt-5 pb-2">
-          <button onClick={() => navigate("/map")}
-            className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
-            <X size={18} className="text-gray-500" />
-          </button>
-          <span className="bg-black font-bold text-white text-sm px-5 py-2 rounded-full">
-            NIVEL {numeroNivel}
-          </span>
-          <div className="w-10" />
-        </div>
-        <div className="flex-1 flex flex-col items-center justify-center px-6 text-center gap-3">
-          <p className="text-2xl font-extrabold text-red-500">Ese no es el glifo correcto</p>
-          <p className="text-gray-500">Intenta con otro</p>
-        </div>
-        <div className="px-5 pb-8">
-          <button onClick={handleReintentar}
-            className="w-full py-4 bg-gold rounded-2xl font-extrabold text-white text-base tracking-widest">
-            REINTENTAR
-          </button>
+      <div className="md:min-h-screen md:bg-gray-600 md:flex md:items-center md:justify-center">
+        <div className="w-full md:w-[390px] md:max-h-[844px] min-h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
+
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 pt-6 pb-4 gap-3">
+            <button
+              onClick={() => navigate("/map")}
+              className="w-10 h-10 shrink-0 rounded-full bg-white flex items-center justify-center border-2 border-gray-200 shadow-sm"
+            >
+              <X size={18} className="text-gray-500" />
+            </button>
+            <div className="flex-1 flex justify-center">
+              <span className="bg-red text-white font-bold text-lg px-10 py-2 rounded-3xl text-center">
+                ¡Ups!
+              </span>
+            </div>
+            <div className="w-10 shrink-0" />
+          </div>
+
+          {/* Contenido */}
+          <div className="flex-1 flex flex-col items-center justify-center px-10 gap-6">
+
+            {/* Ícono de error */}
+            <div className="w-30 h-30 rounded-full bg-red-50 border-4 border-red flex items-center justify-center">
+              <X size={55} className="text-red" strokeWidth={2.5} />
+            </div>
+
+            <div className="flex flex-col items-center gap-2 text-center">
+              <p className="text-2xl font-extrabold text-brown leading-tight">
+                Ese no es el glifo correcto
+              </p>
+              <p className="text-md text-gray-400 font-medium">
+                Busca otra tarjeta e inténtalo de nuevo
+              </p>
+            </div>
+          </div>
+
+          {/* Botón reintentar */}
+          <div className="px-5 pb-8 pt-4">
+            <button
+              onClick={handleReintentar}
+              className="w-full py-4 bg-gold rounded-2xl font-extrabold text-white text-base tracking-widest uppercase shadow-[0_8px_0_#C88F12] active:shadow-[0_2px_0_#C88F12] active:translate-y-1 transition-all"
+            >
+              Reintentar
+            </button>
+          </div>
         </div>
       </div>
     )
