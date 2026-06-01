@@ -22,6 +22,7 @@ export default function LevelMap() {
   const [showLogoutModal, setShowLogoutModal] = useState(false)
 
   const scrollRef = useRef(null)
+  const currentNodeRef = useRef(null) 
 
   useEffect(() => {
     if (!currentUser) return
@@ -43,8 +44,8 @@ export default function LevelMap() {
 
   // Scroll automático al nivel actual
   useEffect(() => {
-    if (levels.length > 0 && scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: 'smooth', block: 'center'})
+    if (levels.length > 0 && currentNodeRef.current) {
+      currentNodeRef.current.scrollIntoView({ behavior: 'smooth', block: 'center'})
     }
   }, [levels])
 
@@ -173,7 +174,7 @@ export default function LevelMap() {
                   {/* Nodo */}
                   <div
                     className={`w-full flex flex-col ${alignment}`}
-                    ref={isCurrent ? scrollRef : null}
+                    ref={isCurrent ? currentNodeRef : null}
                   >
                     {isCurrentActive && (
                       <div className="mb-2 bg-white rounded-2xl shadow-lg p-4 w-44 flex flex-col items-center gap-3">
