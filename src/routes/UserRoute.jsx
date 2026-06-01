@@ -15,9 +15,15 @@ export default function UserRoute({ children }) {
   }
 
   // Si el usuario es un administrador, no debería entrar a las rutas de niño
-  const esAdmin = currentUser && (currentUser.rol === 'ADMIN' || currentUser.email);
+  const esAdmin = currentUser && (Number(currentUser.rol_id) === 1 || currentUser.email);
   if (esAdmin) {
     return <Navigate to="/admin" replace />;
+  }
+
+  // Si el usuario es un docente, redirigirlo a su vista correspondiente
+  const esDocente = currentUser && Number(currentUser.rol_id) === 3;
+  if (esDocente) {
+    return <Navigate to="/docente" replace />;
   }
 
   // Si hay usuario, renderizar el componente protegido
