@@ -68,8 +68,6 @@ export default function LevelPlay() {
         if (navigator.onLine) {
           procesarColaSincronizacion(currentUser.local_id);
         }
-      } else {
-        navigate("/map")
       }
     } catch (error) {
       console.error("Error al verificar insignias desbloqueadas:", error)
