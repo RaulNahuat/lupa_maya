@@ -28,7 +28,7 @@ export default function QuizLevel({ level, onComplete }) {
   //const [intentos, setIntentos] = useState(0)
 
   const preguntaActual = preguntas[indice]
-  const progreso = (indice + 1 / totalPreguntas) * 100
+  const progreso = ((indice + 1) / totalPreguntas) * 100
 
   const handleSelect = (option) => {
     if (answered) return
@@ -134,7 +134,7 @@ export default function QuizLevel({ level, onComplete }) {
       <div className="w-full md:w-[390px] md:max-h-[844px] min-h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
       
       {/* Header */}
-      <div className="flex items-center justify-between p-5 pt-5 pb-5 gap-3">
+      <div className="flex items-center justify-between p-5 pt-5 pb-4 gap-3">
         <button
           onClick={() => navigate("/map")}
           title="Cerrar"
@@ -160,7 +160,7 @@ export default function QuizLevel({ level, onComplete }) {
       <div className="flex-1 flex flex-col items-center px-5 pt-2">
         {/* Glifo */}
         {preguntaActual.imagen_url && (
-          <div className="bg-white w-45 h-45 rounded-3xl border-2 border-light-gray shadow-[0_6px_0_#E5E7EB] flex items-center justify-center mb-3">
+          <div className="bg-white w-45 h-45 rounded-3xl border-2 border-light-gray shadow-[0_6px_0_#E5E7EB] flex items-center justify-center mb-4">
             <img
               src={preguntaActual.imagen_url}
               alt={preguntaActual.nombre_maya ?? "Glifo maya"}
@@ -188,7 +188,7 @@ export default function QuizLevel({ level, onComplete }) {
         )}
 
         {/* Pregunta */}
-        <p className="font-bold text-brown mt-3 mb-7 px-4 text-center text-xl">
+        <p className="font-bold text-brown mt-3 mb-5 px-4 text-center text-xl">
           {preguntaActual.question}
         </p>
 
@@ -211,7 +211,7 @@ export default function QuizLevel({ level, onComplete }) {
 
         {/* Feedback — solo al acertar */}
         {answered && esCorrecta && (
-          <div className="mt-7 text-center">
+          <div className="mt-5 text-center">
             <p className="font-bold text-2xl text-light-green">
               ¡Correcto!
             </p>
@@ -220,7 +220,7 @@ export default function QuizLevel({ level, onComplete }) {
 
         {/* Feedback — incorrecto (desaparece solo con el reset) */}
         {answered && !esCorrecta && (
-          <div className="mt-7 text-center">
+          <div className="mt-5 text-center">
             <p className="font-bold text-2xl text-red">
               Inténtalo de nuevo
             </p>
