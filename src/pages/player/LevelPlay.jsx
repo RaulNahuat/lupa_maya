@@ -18,14 +18,14 @@ export default function LevelPlay() {
 
   const [unlockedBadge, setUnlockedBadge] = useState(null)
 
-  const handleCompleteLevel = async (nivelId, estrellas, intentos) => {
+  const handleCompleteLevel = async (nivelId, estrellas, intentos, aprobado) => {
     try {
       //Obtiene el estado de los niveles antes de completar
       const freshLevelsBefore = useGameStore.getState().levels
       const rachaBefore = racha
 
       //Completa el nivel
-      await completeLevel(currentUser, nivelId, estrellas, intentos)
+      await completeLevel(currentUser, nivelId, estrellas, intentos, aprobado)
 
       //Obtiene el estado de los niveles después de completar
       const freshLevelsAfter = useGameStore.getState().levels
@@ -41,12 +41,9 @@ export default function LevelPlay() {
 
       if (newlyUnlockedBadge) {
         setUnlockedBadge(newlyUnlockedBadge)
-      } else {
-        navigate("/map")
       }
     } catch (error) {
       console.error("Error al verificar insignias desbloqueadas:", error)
-      navigate("/map")
     }
   }
 

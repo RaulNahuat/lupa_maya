@@ -7,6 +7,10 @@ import { useGameStore } from "../../store/game/useGameStore"
 import * as tmImage from "@teachablemachine/image"
 import { API_BASE_URL } from "../../config/api"
 
+const sonidoCorrecto = new Audio('/assets/sounds/correcto.mp3')
+const sonidoError = new Audio('/assets/sounds/incorrecto.mp3')
+const sonidoWin = new Audio('/assets/sounds/win.mp3')
+
 export default function ScanLevel({ level, onComplete }) {
   const videoRef = useRef(null)
   const videoClearRef = useRef(null) // segundo video para el área clara del visor
@@ -103,6 +107,12 @@ export default function ScanLevel({ level, onComplete }) {
     setDetectado({ coincide, glifo: contenido.glifo, confianza: top.probability })
     setScanned(true)
     setScanning(false)
+
+    if (coincide) {
+      sonidoWin.play()
+    } else {
+      sonidoError.play()
+    }
   }
 
   const handleReintentar = async () => {
@@ -220,7 +230,7 @@ export default function ScanLevel({ level, onComplete }) {
               onClick={handleComplete}
               className="w-full py-4 bg-light-green rounded-2xl font-extrabold text-white tracking-widest uppercase shadow-[0_8px_0_#065f46] active:shadow-[0_2px_0_#065f46] active:translate-y-1 transition-all"
             >
-              CONTINUAR
+              Siguiente nivel
             </button>
           </div>
         </div>
