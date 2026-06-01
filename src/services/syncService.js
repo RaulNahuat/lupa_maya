@@ -38,7 +38,8 @@ export const descargarCambios = async (usuarioLocalId = null) => {
         opciones_respuestas = [],
         nivel_glifos_objetivos = [],
         progreso_usuarios = [],
-        insignias = []
+        insignias = [],
+        usuario_insignias = []
     } = result.cambios;
 
     // Obtener los IDs de elementos que tienen cambios locales pendientes de sincronizar
@@ -77,12 +78,21 @@ export const descargarCambios = async (usuarioLocalId = null) => {
         db.nivel_glifos_objetivos,
         db.progreso_usuarios,
         db.insignias,
+        db.usuario_insignias,
         db.configuracion,
         async () => {
 
             // INSIGNIAS
             if (insignias.length > 0) {
                 await db.insignias.bulkPut(insignias);
+            }
+
+            // USUARIO_INSIGNIAS
+            if (usuario_insignias && usuario_insignias.length > 0) {
+                await db.usuario_insignias.bulkPut(usuario_insignias.map(ui => ({
+                    ...ui,
+                    sync_status: 'SINCRONIZADO'
+                })));
             }
 
             // USUARIOS
@@ -216,6 +226,7 @@ const procesarItem = async (item) => {
         db.preguntas,
         db.opciones_respuestas,
         db.nivel_glifos_objetivos,
+        db.usuario_insignias,
         async () => {
             await db.cola_sincronizacion.put({ ...item, estado: 'ENVIADO' });
 
@@ -253,6 +264,17 @@ const procesarItem = async (item) => {
                     await db.progreso_usuarios.put({
                         ...progreso,
                         sync_status: 'SINCRONIZADO'
+                    });
+                }
+            }
+
+            if (item.entidad === 'usuario_insignias') {
+                const ui = await db.usuario_insignias.get(item.datos.local_id);
+                if (ui) {
+                    await db.usuario_insignias.put({
+                        ...ui,
+                        sync_status: 'SINCRONIZADO',
+                        usuario_id: ui.usuario_id || result.data?.usuario_id || null
                     });
                 }
             }
@@ -509,6 +531,7 @@ export const procesarColaSincronizacion = async (usuarioLocalId = null) => {
         const ordenados = [
             ...porEntidad('usuarios'),
             ...porEntidad('progreso_usuarios'),
+            ...porEntidad('usuario_insignias'),
             ...porEntidad('grupos_niveles'),
             ...porEntidad('glifos'),
             ...porEntidad('niveles'),
@@ -516,7 +539,7 @@ export const procesarColaSincronizacion = async (usuarioLocalId = null) => {
             ...porEntidad('opciones_respuestas'),
             ...porEntidad('nivel_glifos_objetivos'),
             ...items.filter((i) => ![
-                'usuarios', 'progreso_usuarios', 'grupos_niveles', 'glifos', 
+                'usuarios', 'progreso_usuarios', 'usuario_insignias', 'grupos_niveles', 'glifos', 
                 'niveles', 'preguntas', 'opciones_respuestas', 'nivel_glifos_objetivos'
             ].includes(i.entidad))
         ];

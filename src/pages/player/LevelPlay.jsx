@@ -6,6 +6,8 @@ import ScanLevel from "../../components/game/ScanLevel"
 import { useState } from "react"
 import BadgeUnlockModal from "../../components/game/BadgeUnlockModal"
 import { checkBadgeUnlock } from "../../services/player/badgeUnlockService"
+import { db } from "../../data/db"
+import { procesarColaSincronizacion } from "../../services/syncService"
 
 export default function LevelPlay() {
   const { id } = useParams()
@@ -40,7 +42,32 @@ export default function LevelPlay() {
       })
 
       if (newlyUnlockedBadge) {
-        setUnlockedBadge(newlyUnlockedBadge)
+        const local_id = crypto.randomUUID();
+        const badgeRelation = {
+          local_id,
+          usuario_id: currentUser.id || null,
+          usuario_local_id: currentUser.local_id,
+          insignia_id: newlyUnlockedBadge.id,
+          obtenida_en: new Date().toISOString(),
+          sync_status: 'PENDIENTE'
+        };
+
+        await db.transaction('rw', db.usuario_insignias, db.cola_sincronizacion, async () => {
+          await db.usuario_insignias.add(badgeRelation);
+          await db.cola_sincronizacion.add({
+            entidad: 'usuario_insignias',
+            accion: 'UPSERT',
+            datos: badgeRelation,
+            estado: 'PENDIENTE',
+            created_at: new Date().getTime()
+          });
+        });
+
+        setUnlockedBadge(newlyUnlockedBadge);
+        
+        if (navigator.onLine) {
+          procesarColaSincronizacion(currentUser.local_id);
+        }
       } else {
         navigate("/map")
       }
