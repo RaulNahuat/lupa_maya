@@ -6,6 +6,7 @@ import { useGameStore } from "../../store/game/useGameStore"
 
 import * as tmImage from "@teachablemachine/image"
 import { API_BASE_URL } from "../../config/api"
+import { getCachedActiveAiModel } from "../../services/recognition/aiModelCacheService"
 
 export default function ScanLevel({ level, onComplete }) {
   const videoRef = useRef(null)
@@ -26,6 +27,7 @@ export default function ScanLevel({ level, onComplete }) {
   const [intentos, setIntentos] = useState(0)
   const [camaraError, setCamaraError] = useState(null)
   const [scanning, setScanning] = useState(false)
+  const [modelLoading, setModelLoading] = useState(true)
 
   useEffect(() => {
     startCamera()
@@ -38,16 +40,49 @@ export default function ScanLevel({ level, onComplete }) {
 
   const loadModel = async () => {
     console.log("Cargando modelo...")
+    setModelLoading(true)
     try {
+      // Intenta cargar el modelo desde la caché local (offline)
+      const cachedModelData = await getCachedActiveAiModel()
+      if (
+        cachedModelData &&
+        cachedModelData.assets?.model &&
+        cachedModelData.assets?.weights &&
+        cachedModelData.assets?.metadata
+      ) {
+        console.log("Cargando modelo de IA desde la caché local offline...")
+        try {
+          const modelBlob = await cachedModelData.assets.model.blob()
+          const weightsBlob = await cachedModelData.assets.weights.blob()
+          const metadataBlob = await cachedModelData.assets.metadata.blob()
+
+          const modelFile = new File([modelBlob], "model.json", { type: "application/json" })
+          const weightsFile = new File([weightsBlob], "weights.bin", { type: "application/octet-stream" })
+          const metadataFile = new File([metadataBlob], "metadata.json", { type: "application/json" })
+
+          const model = await tmImage.loadFromFiles(modelFile, weightsFile, metadataFile)
+          modelRef.current = model
+          console.log("Modelo cargado exitosamente desde la caché offline:", model)
+          console.log("Clases:", model.getClassLabels())
+          return
+        } catch (cacheErr) {
+          console.warn("Fallo al procesar los archivos de la caché, reintentando por red...", cacheErr)
+        }
+      }
+
+      // Fallback a la red si no está en la caché o falló
+      console.log("Cargando modelo de IA desde el servidor remoto...")
       const model = await tmImage.load(
         `${API_BASE_URL}/models/model.json`,
         `${API_BASE_URL}/models/metadata.json`
       )
       modelRef.current = model
-      console.log("Modelo cargado:", model)
+      console.log("Modelo cargado remotamente:", model)
       console.log("Clases:", model.getClassLabels())
     } catch (err) {
       console.error("Error al cargar modelo:", err)
+    } finally {
+      setModelLoading(false)
     }
   }
 
@@ -388,11 +423,15 @@ export default function ScanLevel({ level, onComplete }) {
 
           <button
             onClick={handleScan}
-            disabled={scanning}
+            disabled={scanning || modelLoading}
             className="w-full py-4 bg-gold rounded-2xl font-bold tracking-widest text-white text-base flex items-center justify-center gap-4 disabled:opacity-50 shadow-[0_8px_0_#C88F12]"
           >
-            <Camera size={26} />
-            ESCANEAR GLIFO
+            {modelLoading ? (
+              <div className="w-6 h-6 rounded-full border-3 border-white border-t-transparent animate-spin" />
+            ) : (
+              <Camera size={26} />
+            )}
+            {modelLoading ? "CARGANDO MODELO..." : "ESCANEAR GLIFO"}
           </button>
         </div>
       </div>
