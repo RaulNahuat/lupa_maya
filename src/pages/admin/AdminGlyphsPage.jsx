@@ -9,9 +9,11 @@ import PrimaryButton from '../../components/PrimaryButton';
 import BlockEditModal from '../../components/admin/BlockEditModal';
 import { db } from '../../data/db';
 import { procesarColaSincronizacion } from '../../services/syncService';
+import { useToast } from '../../context/ToastContext';
 
 const AdminGlyphsPage = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [blocks, setBlocks] = useState([]);
   const [glyphs, setGlyphs] = useState([]);
   const [activeFilter, setActiveFilter] = useState('TODOS');
@@ -141,6 +143,46 @@ const AdminGlyphsPage = () => {
     }
   };
 
+  const handleToggleActive = async (block, e) => {
+    e.stopPropagation(); // Evitar navegar al detalle del bloque
+    const nuevoEstado = block.activo === false ? true : false;
+    
+    try {
+      const blockData = {
+        ...block,
+        activo: nuevoEstado,
+        updated_at: new Date().toISOString()
+      };
+
+      await db.transaction('rw', db.grupos_niveles, db.cola_sincronizacion, async () => {
+        await db.grupos_niveles.put(blockData);
+        await db.cola_sincronizacion.add({
+          entidad: 'grupos_niveles',
+          accion: 'EDITAR',
+          datos: blockData,
+          estado: 'PENDIENTE',
+          created_at: new Date().getTime()
+        });
+      });
+
+      // Actualizar estado local
+      setBlocks(prev => prev.map(b => b.id === block.id ? blockData : b));
+      
+      showToast(
+        nuevoEstado ? 'Bloque Habilitado' : 'Bloque Deshabilitado',
+        `El bloque "${block.nombre}" ahora ${nuevoEstado ? 'aparece' : 'está oculto'} en el mapa de los estudiantes.`,
+        'success'
+      );
+
+      if (navigator.onLine) {
+        procesarColaSincronizacion();
+      }
+    } catch (error) {
+      console.error("Error al actualizar estado en Dexie:", error);
+      showToast('Error', 'No se pudo guardar el cambio localmente.', 'error');
+    }
+  };
+
   const totalPages = Math.max(1, Math.ceil(filteredBlocks.length / blocksPerPage));
   const safeCurrentPage = Math.min(currentPage, totalPages);
   const startIndex = (safeCurrentPage - 1) * blocksPerPage;
@@ -239,8 +281,35 @@ const AdminGlyphsPage = () => {
                       </div>
 
                       {/* Indicador de acción*/}
-                      <div className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-slate-50 group-hover:bg-emerald-50 border border-transparent group-hover:border-emerald-100 transition-colors shrink-0">
-                        <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-600 transition-all group-hover:translate-x-0.5" />
+                      <div className="flex items-center gap-4 shrink-0 pl-3 border-l border-slate-100">
+                        {/* Toggle switch para habilitar/deshabilitar */}
+                        <div className="flex flex-col items-center gap-1">
+                          <button
+                            onClick={(e) => handleToggleActive(block, e)}
+                            className={`w-12 h-7 rounded-full p-0.5 transition-all duration-300 outline-none flex items-center relative ${
+                              block.activo !== false 
+                                ? 'bg-linear-to-r from-emerald-400 to-emerald-500 shadow-[0_2px_8px_rgba(16,185,129,0.2)]' 
+                                : 'bg-slate-200'
+                            }`}
+                          >
+                            <div 
+                              className={`w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform duration-300 flex items-center justify-center font-bold text-[8px] ${
+                                block.activo !== false 
+                                  ? 'translate-x-6 text-emerald-500' 
+                                  : 'translate-x-0 text-slate-400'
+                              }`}
+                            >
+                              {block.activo !== false ? 'SÍ' : 'NO'}
+                            </div>
+                          </button>
+                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">
+                            {block.activo !== false ? 'ACTIVO' : 'OCULTO'}
+                          </span>
+                        </div>
+
+                        <div className="hidden sm:flex items-center justify-center w-9 h-9 rounded-full bg-slate-50 group-hover:bg-emerald-50 border border-transparent group-hover:border-emerald-100 transition-colors shrink-0">
+                          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 transition-all group-hover:translate-x-0.5" />
+                        </div>
                       </div>
                     </div>
                   );

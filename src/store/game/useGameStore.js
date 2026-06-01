@@ -57,7 +57,11 @@ export const useGameStore = create((set, get) => ({
       )
     }
     
-    const gruposArr = await db.grupos_niveles.toArray()
+    let gruposArr = await db.grupos_niveles.toArray()
+    const esDocente = currentUser && Number(currentUser.rol_id) === 3;
+    if (!esDocente) {
+      gruposArr = gruposArr.filter(g => g.activo !== false);
+    }
     const gruposMap = Object.fromEntries(gruposArr.map((g) => [g.id, g]))
 
     // Agrupar niveles por grupo_id

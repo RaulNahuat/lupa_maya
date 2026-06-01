@@ -18,6 +18,8 @@ import { getGlifosPull } from "./controllers/pullController/glifosPullController
 import { getGlifosObjetivoPull } from "./controllers/pullController/glifosObjetivoPullController.js";
 import { getInsigniasPull } from "./controllers/pullController/insigniasPullController.js";
 import { getAllUsuarios, updateUsuario, deleteUsuario } from "./controllers/admin/AdminUsuariosController.js";
+import { handleSyncUsuarioInsignia } from "./controllers/pushController/usuarioInsigniasPushController.js";
+import { getUsuarioInsigniasPull } from "./controllers/pullController/usuarioInsigniasPullController.js";
 import { createAiModel, uploadAiModelFiles } from "./controllers/admin/AiModelsController.js";
 import { getActiveAiModel } from "./controllers/pullController/aiModelsPullController.js";
 import { getGruposNivelesPull } from "./controllers/pullController/gruposNivelesPullController.js";
@@ -103,6 +105,8 @@ app.post("/api/sync", async (req, res) => {
       case "nivel_glifos_objetivos:CREAR":
       case "nivel_glifos_objetivos:ELIMINAR":
         return await handleSyncGlifosObjetivo(req, res, db, io);
+      case "usuario_insignias:UPSERT":
+        return await handleSyncUsuarioInsignia(req, res, db, io);
       default:
         return res.status(400).json({ success: false, message: "Entidad o acción no soportada" });
     }
@@ -134,6 +138,7 @@ app.get("/api/sync/pull", async (req, res) => {
     const progreso_usuarios = await getProgresoPull(db, Op, lastSyncDate, usuario_local_id);
     const insignias = await getInsigniasPull(db);
     const grupos_niveles = await getGruposNivelesPull(db, Op, lastSyncDate);
+    const usuario_insignias = await getUsuarioInsigniasPull(db, Op, lastSyncDate, usuario_local_id);
 
     res.json({
       success: true,
@@ -147,7 +152,8 @@ app.get("/api/sync/pull", async (req, res) => {
         opciones_respuestas, 
         nivel_glifos_objetivos,
         progreso_usuarios,
-        insignias
+        insignias,
+        usuario_insignias
       },
       serverTime: new Date().getTime()
     });

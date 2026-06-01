@@ -40,11 +40,14 @@ const LoginUser = () => {
       const user = await loginOffline({ username, pin });
       
       loginUser(user);
-      showToast('¡Bienvenido!', `Hola ${user.nombre}, prepárate para jugar.`, 'success');
-
-      // Navegar inmediatamente — LevelMap se encarga del sync y la carga
-      // de niveles a través de syncAndReload, sin bloquear al usuario aquí.
-      navigate('/map');
+      
+      if (Number(user.rol_id) === 3) {
+        showToast('¡Bienvenido, Docente!', `Hola ${user.nombre}, listo para gestionar.`, 'success');
+        navigate('/docente');
+      } else {
+        showToast('¡Bienvenido!', `Hola ${user.nombre}, prepárate para jugar.`, 'success');
+        navigate('/map');
+      }
 
     } catch (error) {
       console.error(error);

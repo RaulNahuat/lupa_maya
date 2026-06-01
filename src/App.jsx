@@ -12,6 +12,8 @@ import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminSettingsPage from './pages/admin/AdminSettingsPage';
 import UserRoute from './routes/UserRoute';
 import AdminRoute from './routes/AdminRoute';
+import DocenteRoute from './routes/DocenteRoute';
+import DocenteLobbyPage from './pages/admin/DocenteLobbyPage';
 import './App.css';
 
 function App() {
@@ -30,6 +32,9 @@ function App() {
           <Route path="/admin/glyphs/block/:blockId" element={<AdminRoute><AdminBlockDetailPage /></AdminRoute>} />
           <Route path="/admin/glyphs/block/:blockId/level/:levelId" element={<AdminRoute><AdminLevelDetailPage /></AdminRoute>} />
           <Route path="/admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
+
+          {/* DOCENTE */}
+          <Route path="/docente" element={<DocenteRoute><DocenteLobbyPage /></DocenteRoute>} />
 
           {/* PLAYER */}
           <Route path="/map" element={<UserRoute><LevelMap /></UserRoute>} />
