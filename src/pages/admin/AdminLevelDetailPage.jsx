@@ -375,7 +375,7 @@ const AdminLevelDetailPage = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
           <div className="flex items-center gap-3">
             <button 
-              onClick={() => navigate(`/admin/glyphs/block/${blockId}`)}
+              onClick={() => navigate(`/admin/glyphs/block/${blockId}`, { state: { tab: 'levels' } })}
               className="w-10 h-10 bg-white border border-slate-200 hover:bg-slate-50 flex items-center justify-center rounded-2xl shadow-sm transition-all"
               title="Volver al Bloque"
             >
@@ -393,7 +393,7 @@ const AdminLevelDetailPage = () => {
                 </span>
               </div>
               <div className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mt-0.5">
-                Bloque: {block.nombre} • Orden de Secuencia: {level.orden_secuencia}
+                Bloque: {block.nombre} • Posición de Bloque: {level.posicion_bloque}
               </div>
             </div>
           </div>
@@ -440,7 +440,7 @@ const AdminLevelDetailPage = () => {
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1 transition-opacity">
                           <button 
                             onClick={() => handleOpenEditQuestion(q)}
                             className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-slate-50 rounded-lg transition-all"

@@ -24,14 +24,13 @@ module.exports = (sequelize, DataTypes) => {
     },
     numero: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-      unique: true
+      allowNull: false
     },
     tipo: {
       type: DataTypes.ENUM('APRENDIZAJE', 'BUSQUEDA'),
       allowNull: false
     },
-    orden_secuencia: {
+    posicion_bloque: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
@@ -45,7 +44,19 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'niveles',
     timestamps: true,
     createdAt: false,
-    updatedAt: 'updated_at'
+    updatedAt: 'updated_at',
+    indexes: [
+      {
+        unique: true,
+        fields: ['grupo_id', 'numero'],
+        name: 'niveles_grupo_id_numero_unique'
+      },
+      {
+        unique: true,
+        fields: ['grupo_id', 'posicion_bloque'],
+        name: 'niveles_grupo_id_posicion_bloque_unique'
+      }
+    ]
   });
 
   return Nivel;

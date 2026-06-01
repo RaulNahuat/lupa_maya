@@ -26,7 +26,7 @@ const LevelCard = ({ level, onConfigure, onDelete }) => {
               {level.tipo}
             </span>
             <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-              Secuencia: {level.orden_secuencia}
+              Posición: {level.posicion_bloque}
             </span>
           </div>
         </div>

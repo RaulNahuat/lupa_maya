@@ -6,11 +6,12 @@ export async function handleSyncNiveles(req, res, db, io) {
     if (accion === 'CREAR') {
       const existente = await db.Nivel.findOne({
         where: {
+          grupo_id: datos.grupo_id,
           numero: datos.numero
         }
       });
       if (existente) {
-        console.log(`[SYNC NIVELES] Ya existe el nivel con número:`, existente.numero);
+        console.log(`[SYNC NIVELES] Ya existe el nivel con número ${existente.numero} en el grupo ${existente.grupo_id}`);
         return res.status(200).json({
           success: true,
           message: "Nivel ya existe",
@@ -18,12 +19,26 @@ export async function handleSyncNiveles(req, res, db, io) {
         });
       }
 
+      console.log(`[SYNC NIVELES] Calculando posición sin conflictos en el grupo...`);
+      let finalPos = datos.posicion_bloque ?? datos.orden_secuencia ?? 1;
+      const posConflict = await db.Nivel.findOne({
+        where: {
+          grupo_id: datos.grupo_id,
+          posicion_bloque: finalPos
+        }
+      });
+      if (posConflict) {
+        const maxPos = await db.Nivel.max('posicion_bloque', { where: { grupo_id: datos.grupo_id } });
+        finalPos = (maxPos || 0) + 1;
+        console.log(`[SYNC NIVELES] Conflicto de posición detectado. Reasignado a: ${finalPos}`);
+      }
+
       console.log(`[SYNC NIVELES] Creando nuevo Nivel en DB...`);
       const nuevo = await db.Nivel.create({
         grupo_id: datos.grupo_id,
         numero: datos.numero,
         tipo: datos.tipo,
-        orden_secuencia: datos.orden_secuencia,
+        posicion_bloque: finalPos,
         version: datos.version ?? 1
       });
 
@@ -43,7 +58,7 @@ export async function handleSyncNiveles(req, res, db, io) {
         grupo_id: datos.grupo_id ?? existente.grupo_id,
         numero: datos.numero ?? existente.numero,
         tipo: datos.tipo ?? existente.tipo,
-        orden_secuencia: datos.orden_secuencia ?? existente.orden_secuencia,
+        posicion_bloque: datos.posicion_bloque ?? datos.orden_secuencia ?? existente.posicion_bloque,
         version: (existente.version || 1) + 1
       });
 
@@ -53,8 +68,8 @@ export async function handleSyncNiveles(req, res, db, io) {
 
     if (accion === 'ELIMINAR') {
       let existente = await db.Nivel.findByPk(datos.id);
-      if (!existente && datos.numero) {
-        existente = await db.Nivel.findOne({ where: { numero: datos.numero } });
+      if (!existente && datos.numero && datos.grupo_id) {
+        existente = await db.Nivel.findOne({ where: { numero: datos.numero, grupo_id: datos.grupo_id } });
       }
 
       if (!existente) {
@@ -70,6 +85,7 @@ export async function handleSyncNiveles(req, res, db, io) {
     return res.status(400).json({ success: false, message: "Acción no soportada para niveles" });
   } catch (error) {
     console.error("Error al sincronizar Nivel:", error);
-    return res.status(500).json({ success: false, error: error.message });
+    const msg = error.errors ? error.errors.map(e => e.message).join(", ") : error.message;
+    return res.status(500).json({ success: false, error: msg });
   }
 }

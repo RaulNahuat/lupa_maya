@@ -122,7 +122,7 @@ export default function LevelMap() {
 
         {/* Indicador sutil de sync en curso — desaparece cuando termina */}
         {!syncReady && (
-          <div className="flex-shrink-0 bg-amber-100 text-amber-700 text-xs text-center py-1">
+          <div className="shrink-0 bg-amber-100 text-amber-700 text-xs text-center py-1">
             Sincronizando contenido...
           </div>
         )}
@@ -133,7 +133,7 @@ export default function LevelMap() {
             {levels.map((level, index) => {
               const isCurrentActive = activeLevel?.id === level.id
               const isCurrent = level.id === nivelActual.id
-              const pos = level.orden_secuencia % 4
+              const pos = index % 4
 
               const alignment =
                 pos === 1 ? "items-center"

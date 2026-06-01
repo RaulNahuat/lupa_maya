@@ -4,16 +4,7 @@ export async function handleSyncPreguntas(req, res, db, io) {
 
   try {
     if (accion === 'CREAR') {
-      // Intentar buscar por el texto de la pregunta y nivel_id para evitar duplicados en caso de re-sincronización
-      const existente = await db.Pregunta.findOne({
-        where: {
-          nivel_id: datos.nivel_id,
-          texto_pregunta: datos.texto_pregunta
-        }
-      });
-      if (existente) {
-        return res.status(200).json({ success: true, message: "Pregunta ya existe", data: existente });
-      }
+      console.log(`[SYNC PREGUNTAS] Creando nueva pregunta en DB...`);
 
       const nuevo = await db.Pregunta.create({
         nivel_id: datos.nivel_id,
@@ -50,6 +41,11 @@ export async function handleSyncPreguntas(req, res, db, io) {
       if (!existente) {
         return res.status(200).json({ success: true, message: "Pregunta ya eliminada o no encontrada" });
       }
+
+      //Elimina las opciones asociadas de esta pregunta primero para evitar fallos de clave foránea
+      await db.OpcionRespuesta.destroy({
+        where: { preguntas_id: datos.id }
+      });
 
       await existente.destroy();
 

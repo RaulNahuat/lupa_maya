@@ -4,6 +4,32 @@ import { guardarProgreso } from "../../services/player/progresoService"
 import { procesarColaSincronizacion } from "../../services/syncService"
 import { obtenerRacha, actualizarRacha } from "../../services/player/rachaService"
 
+//Mezclador pseudo-aleatorio determinista
+function shuffleWithSeed(array, seedString) {
+  let seed = 0;
+  if (seedString) {
+    for (let i = 0; i < seedString.length; i++) {
+      seed = (seed << 5) - seed + seedString.charCodeAt(i);
+      seed |= 0; //Convertir a entero de 32 bits
+    }
+  }
+
+  //Generador congruencial lineal Mulberry32 simple
+  function random() {
+    let t = seed += 0x6D2B79F5;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  }
+
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export const useGameStore = create((set, get) => ({
   levels: [],
   racha: 0,
@@ -15,8 +41,8 @@ export const useGameStore = create((set, get) => ({
    * y calcula el progreso del usuario (completado, estrellas, desbloqueado).
    */
   initLevels: async (currentUser) => {
-    // Traer catalogo completo ordenado por secuencia
-    const niveles = await db.niveles.orderBy('orden_secuencia').toArray()
+    // Traer catálogo completo desde IndexedDB
+    const nivelesRaw = await db.niveles.toArray()
 
     // Traer progreso del usuario si esta logueado
     let progresoMap = {}
@@ -33,6 +59,34 @@ export const useGameStore = create((set, get) => ({
     
     const gruposArr = await db.grupos_niveles.toArray()
     const gruposMap = Object.fromEntries(gruposArr.map((g) => [g.id, g]))
+
+    // Agrupar niveles por grupo_id
+    const nivelesPorGrupo = {}
+    for (const n of nivelesRaw) {
+      if (!nivelesPorGrupo[n.grupo_id]) {
+        nivelesPorGrupo[n.grupo_id] = []
+      }
+      nivelesPorGrupo[n.grupo_id].push(n)
+    }
+
+    //Ordenar internamente cada grupo por posicion_bloque
+    for (const grupoId in nivelesPorGrupo) {
+      nivelesPorGrupo[grupoId].sort((a, b) => (a.posicion_bloque || 0) - (b.posicion_bloque || 0))
+    }
+
+    //Aplicar mezcla pseudo-aleatoria sembrada usando el ID del usuario
+    const seed = currentUser ? currentUser.local_id : 'default-seed'
+    for (const grupoId in nivelesPorGrupo) {
+      nivelesPorGrupo[grupoId] = shuffleWithSeed(nivelesPorGrupo[grupoId], seed)
+    }
+
+    //Aplanar arreglos respetando el orden jerárquico de los grupos
+    const gruposOrdenados = [...gruposArr].sort((a, b) => (a.numero_grupo || 0) - (b.numero_grupo || 0))
+    const niveles = []
+    for (const g of gruposOrdenados) {
+      const grupoNiveles = nivelesPorGrupo[g.id] || []
+      niveles.push(...grupoNiveles)
+    }
 
     // Armar cada nivel con su contenido segun el tipo
     const levelsConContenido = await Promise.all(

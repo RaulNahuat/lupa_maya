@@ -4,13 +4,10 @@ export async function handleSyncOpciones(req, res, db, io) {
 
   try {
     if (accion === 'CREAR') {
-      // Intenta buscar por el texto_opcion y preguntas_id para evitar duplicados en caso de re-sincronización
-      const existente = await db.OpcionRespuesta.findOne({
-        where: {
-          preguntas_id: datos.preguntas_id,
-          texto_opcion: datos.texto_opcion
-        }
+      const existentes = await db.OpcionRespuesta.findAll({
+        where: { preguntas_id: datos.preguntas_id }
       });
+      const existente = existentes.find(opt => opt.texto_opcion === datos.texto_opcion);
       if (existente) {
         return res.status(200).json({ success: true, message: "Opción ya existe", data: existente });
       }

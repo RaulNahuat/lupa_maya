@@ -115,7 +115,7 @@ const LevelsSection = ({ blockId, levels, globalMaxLevel, onRefresh }) => {
   const startIndex = (safeCurrentPage - 1) * itemsPerPage;
   const paginatedLevels = visibleLevels.slice(startIndex, startIndex + itemsPerPage);
 
-  const nextSuggestedNumber = globalMaxLevel + 1;
+  const nextSuggestedNumber = levels.length + 1;
 
   return (
     <div className="space-y-4">

@@ -109,7 +109,8 @@ app.post("/api/sync", async (req, res) => {
 
   } catch (error) {
     console.error("Error en sincronización:", error);
-    res.status(500).json({ success: false, error: error.message });
+    const msg = error.errors ? error.errors.map(e => e.message).join(", ") : error.message;
+    res.status(500).json({ success: false, error: msg });
   }
 });
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Sparkles, Layers } from 'lucide-react';
 import AdminPageShell from '../../components/admin/AdminPageShell';
 import BlockEditModal from '../../components/admin/BlockEditModal';
@@ -13,10 +13,11 @@ import { procesarColaSincronizacion } from '../../services/syncService';
 const AdminBlockDetailPage = () => {
   const { blockId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [block, setBlock] = useState(null);
   const [glyphs, setGlyphs] = useState([]);
   const [levels, setLevels] = useState([]);
-  const [activeSubTab, setActiveSubTab] = useState('glyphs'); // 'glyphs' o 'levels'
+  const [activeSubTab, setActiveSubTab] = useState(location.state?.tab || 'glyphs'); // 'glyphs' o 'levels'
   const [isLoading, setIsLoading] = useState(true);
 
   // Estados para el CRUD de bloques
@@ -37,7 +38,7 @@ const AdminBlockDetailPage = () => {
       if (blockData) {
         setBlock(blockData);
         setGlyphs(allGlyphs);
-        const sorted = allLevels.sort((a, b) => (a.orden_secuencia || 0) - (b.orden_secuencia || 0));
+        const sorted = allLevels.sort((a, b) => (a.posicion_bloque || 0) - (b.posicion_bloque || 0));
         setLevels(sorted);
         
         const maxGlobal = totalGlobalLevels.length > 0

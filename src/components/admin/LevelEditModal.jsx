@@ -6,7 +6,7 @@ const LevelEditModal = ({ isOpen, onClose, level, onSave, isAdding, nextSuggeste
   const [formData, setFormData] = useState({
     numero: '',
     tipo: 'APRENDIZAJE',
-    orden_secuencia: ''
+    posicion_bloque: ''
   });
   const [errorMsg, setErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -16,14 +16,14 @@ const LevelEditModal = ({ isOpen, onClose, level, onSave, isAdding, nextSuggeste
       setFormData({
         numero: level.numero || '',
         tipo: level.tipo || 'APRENDIZAJE',
-        orden_secuencia: level.orden_secuencia || ''
+        posicion_bloque: level.posicion_bloque || ''
       });
       setErrorMsg('');
     } else if (isAdding) {
       setFormData({
         numero: nextSuggestedNumber,
         tipo: 'APRENDIZAJE',
-        orden_secuencia: nextSuggestedNumber
+        posicion_bloque: nextSuggestedNumber
       });
       setErrorMsg('');
     }
@@ -42,7 +42,7 @@ const LevelEditModal = ({ isOpen, onClose, level, onSave, isAdding, nextSuggeste
     setErrorMsg('');
 
     const num = parseInt(formData.numero);
-    const ord = parseInt(formData.orden_secuencia);
+    const pos = parseInt(formData.posicion_bloque);
 
     if (isNaN(num) || num <= 0) {
       setErrorMsg('Por favor ingresa un número de nivel válido (mayor a 0).');
@@ -50,8 +50,8 @@ const LevelEditModal = ({ isOpen, onClose, level, onSave, isAdding, nextSuggeste
       return;
     }
 
-    if (isNaN(ord) || ord <= 0) {
-      setErrorMsg('Por favor ingresa un orden de secuencia válido (mayor a 0).');
+    if (isNaN(pos) || pos <= 0) {
+      setErrorMsg('Por favor ingresa una posición de bloque válida (mayor a 0).');
       setIsSubmitting(false);
       return;
     }
@@ -60,7 +60,7 @@ const LevelEditModal = ({ isOpen, onClose, level, onSave, isAdding, nextSuggeste
       await onSave(level?.id, {
         numero: num,
         tipo: formData.tipo,
-        orden_secuencia: ord
+        posicion_bloque: pos
       });
       onClose();
     } catch (err) {
@@ -142,15 +142,15 @@ const LevelEditModal = ({ isOpen, onClose, level, onSave, isAdding, nextSuggeste
               </div>
             </div>
 
-            {/* Orden Secuencia */}
+            {/* Posición en Bloque */}
             <div className="space-y-1.5">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Orden de Secuencia</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Posición en Bloque</label>
               <div className="relative group">
                 <Layers className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="number"
-                  name="orden_secuencia"
-                  value={formData.orden_secuencia}
+                  name="posicion_bloque"
+                  value={formData.posicion_bloque}
                   onChange={handleChange}
                   placeholder="ej. 5"
                   min="1"

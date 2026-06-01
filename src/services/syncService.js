@@ -200,7 +200,10 @@ const procesarItem = async (item) => {
     });
 
     const result = await response.json();
-    if (!result.success) return;
+    if (!result.success) {
+        console.error(`[SYNC ERROR] Falló la sincronización del item ${item.id} (${item.entidad}):`, result.error || result.message);
+        return;
+    }
 
     await db.transaction(
         'rw',

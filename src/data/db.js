@@ -2,13 +2,13 @@ import Dexie from 'dexie';
 
 export const db = new Dexie("lupa_maya_db");
 
-// Versión 1: esquema en desarrollo (incluye todos los índices necesarios)
+//Version 1: esquema en desarrollo (incluye todos los índices necesarios)
 db.version(1).stores({
     admins: 'local_id, email, sync_status',
     usuarios: 'local_id, username, sync_status',
     cola_sincronizacion: '++id, estado, entidad',
     configuracion: 'clave',
-    niveles: 'id, grupo_id, numero, tipo, orden_secuencia',
+    niveles: 'id, grupo_id, numero, tipo, posicion_bloque, [grupo_id+posicion_bloque]',
     progreso_usuarios: 'local_id, usuario_id, nivel_id, usuario_local_id, sync_status, updated_at, [usuario_local_id+nivel_id]',
     glifos: 'id, grupo_id',
     grupos_niveles: 'id',
