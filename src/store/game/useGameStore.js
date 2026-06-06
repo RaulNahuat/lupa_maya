@@ -2,7 +2,7 @@ import { create } from "zustand"
 import { db } from "../../data/db"
 import { guardarProgreso } from "../../services/player/progresoService"
 import { procesarColaSincronizacion } from "../../services/syncService"
-import { obtenerRacha, actualizarRacha } from "../../services/player/rachaService"
+import { obtenerRacha, actualizarRacha, obtenerRachaEscaneos } from "../../services/player/rachaService"
 
 //Mezclador pseudo-aleatorio determinista
 function shuffleWithSeed(array, seedString) {
@@ -33,6 +33,7 @@ function shuffleWithSeed(array, seedString) {
 export const useGameStore = create((set, get) => ({
   levels: [],
   racha: 0,
+  racha_escaneos: 0,
   syncReady: false, // true cuando el primer pull sync termina
 
   /**
@@ -174,8 +175,9 @@ export const useGameStore = create((set, get) => ({
 
     // Cargar racha persistida del usuario
     const racha = currentUser ? await obtenerRacha(currentUser.local_id) : 0
+    const racha_escaneos = currentUser ? await obtenerRachaEscaneos(currentUser.local_id) : 0
     
-    set({ levels: levelsConContenido, racha })
+    set({ levels: levelsConContenido, racha, racha_escaneos })
   },
 
   syncAndReload: async (currentUser) => {
@@ -209,7 +211,7 @@ export const useGameStore = create((set, get) => ({
     const criterioRacha = aprobado !== undefined ? aprobado : intentos === 1
 
     // Recalcular racha, sube si completó a primera vez, se rompe si no
-    const nuevaRacha = await actualizarRacha(currentUser.local_id, criterioRacha, esPrimeraVez)
+    const { racha: nuevaRacha, racha_escaneos: nuevaRachaEscaneos } = await actualizarRacha(currentUser.local_id, criterioRacha, esPrimeraVez, nivel)
 
     // Actualizar estado en memoria sin tocar el catálogo
     const updatedLevels = levels.map((lvl, index) => {
@@ -230,7 +232,7 @@ export const useGameStore = create((set, get) => ({
       return lvl
     })
 
-    set({ levels: updatedLevels, racha: nuevaRacha })
+    set({ levels: updatedLevels, racha: nuevaRacha, racha_escaneos: nuevaRachaEscaneos })
 
     procesarColaSincronizacion(currentUser.local_id)
   },

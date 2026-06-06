@@ -3,7 +3,8 @@ import {
   Sparkles, 
   Users, 
   Settings, 
-  ChevronRight
+  ChevronRight,
+  Award
 } from 'lucide-react';
 import AdminPageShell from '../../components/admin/AdminPageShell';
 import { useAuth } from '../../context/AuthContext';
@@ -97,6 +98,29 @@ const AdminLobbyPage = () => {
           </div>
           <div className="w-8 h-8 rounded-full bg-slate-50 group-hover:bg-indigo-50 flex items-center justify-center shrink-0 transition-colors">
             <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 transition-all group-hover:translate-x-0.5" />
+          </div>
+        </div>
+
+        {/* Acceso: Insignias */}
+        <div 
+          onClick={() => navigate('/admin/badges')}
+          className="bg-white p-5 rounded-4xl border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 transition-all cursor-pointer group flex items-center justify-between gap-4"
+        >
+          <div className="flex gap-4 items-center min-w-0">
+            <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-500 group-hover:scale-105 transition-all">
+              <Award className="w-7 h-7 text-amber-500 group-hover:scale-105 transition-all" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <h3 className="font-extrabold text-slate-800 text-base leading-tight mb-1 group-hover:text-amber-600 transition-colors">
+                Control de Insignias
+              </h3>
+              <p className="text-xs text-slate-500 font-medium line-clamp-1">
+                Crea, edita y elimina insignias y configura sus condiciones de logro.
+              </p>
+            </div>
+          </div>
+          <div className="w-8 h-8 rounded-full bg-slate-50 group-hover:bg-amber-50 flex items-center justify-center shrink-0 transition-colors">
+            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-amber-600 transition-all group-hover:translate-x-0.5" />
           </div>
         </div>
       </div>

@@ -11,6 +11,7 @@ export default function Rewards() {
   const levels = useGameStore((s) => s.levels)
   const initLevels = useGameStore((s) => s.initLevels)
   const racha = useGameStore((s) => s.racha)
+  const racha_escaneos = useGameStore((s) => s.racha_escaneos)
   const { currentUser } = useAuth()
   const navigate = useNavigate()
 
@@ -44,20 +45,30 @@ export default function Rewards() {
   }
 
   //Criterios dinámicos de desbloqueo basados en el progreso real de la BD
-  const hasCompletedAnySearch = levels.some((l) => l.completado && l.tipo === "BUSQUEDA")
-  const hasCompletedAnyLevel = levels.some((l) => l.completado)
+  const completedLevelsCount = levels.filter((l) => l.completado).length
+  const completedScansCount = levels.filter((l) => l.completado && l.tipo === "BUSQUEDA").length
 
   //Mapeamos las insignias de la BD para calcular dinámicamente si están desbloqueadas y su requisito
   const badgesList = dbBadges.map((badge) => {
     let unlocked = false
     let requirement = ""
 
-    if (badge.tipo_condicion === "ESCANEOS") {
-      unlocked = hasCompletedAnySearch || hasCompletedAnyLevel
-      requirement = `Completa tu primer nivel para comenzar.`
+    if (badge.tipo_condicion === "NIVELES") {
+      unlocked = completedLevelsCount >= badge.valor_condicion
+      requirement = badge.valor_condicion === 1 
+        ? `Completa tu primer nivel para comenzar.`
+        : `Completa al menos ${badge.valor_condicion} niveles para obtenerla.`
+    } else if (badge.tipo_condicion === "ESCANEOS") {
+      unlocked = completedScansCount >= badge.valor_condicion
+      requirement = badge.valor_condicion === 1 
+        ? `Realiza tu primer escaneo para comenzar.`
+        : `Realiza al menos ${badge.valor_condicion} escaneos para obtenerla.`
     } else if (badge.tipo_condicion === "RACHA") {
       unlocked = racha >= badge.valor_condicion
-      requirement = `Consigue una racha de ${badge.valor_condicion} días seguidos de juego.`
+      requirement = `Consigue una racha de ${badge.valor_condicion} niveles seguidos sin errores.`
+    } else if (badge.tipo_condicion === "RACHA_ESCANEOS") {
+      unlocked = racha_escaneos >= badge.valor_condicion
+      requirement = `Consigue una racha de ${badge.valor_condicion} escaneos seguidos sin errores.`
     }
 
     return {

@@ -29,6 +29,7 @@ import { handleSyncNiveles } from "./controllers/pushController/nivelesPushContr
 import { handleSyncPreguntas } from "./controllers/pushController/preguntasPushController.js";
 import { handleSyncOpciones } from "./controllers/pushController/opcionesPushController.js";
 import { handleSyncGlifosObjetivo } from "./controllers/pushController/glifosObjetivosPushController.js";
+import { handleSyncInsignias } from "./controllers/pushController/insigniasPushController.js";
 import multer from "multer";
 import fs from "fs/promises";
 
@@ -46,6 +47,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use('/models', express.static(path.join(process.cwd(), 'public', 'models')));
+app.use('/assets', express.static(path.join(process.cwd(), 'public', 'assets')));
 
 
 db.sequelize.authenticate()
@@ -107,6 +109,10 @@ app.post("/api/sync", async (req, res) => {
         return await handleSyncGlifosObjetivo(req, res, db, io);
       case "usuario_insignias:UPSERT":
         return await handleSyncUsuarioInsignia(req, res, db, io);
+      case "insignias:CREAR":
+      case "insignias:EDITAR":
+      case "insignias:ELIMINAR":
+        return await handleSyncInsignias(req, res, db, io);
       default:
         return res.status(400).json({ success: false, message: "Entidad o acción no soportada" });
     }
@@ -206,6 +212,29 @@ app.post("/api/admin/glyphs/upload", uploadGlyph.single("file"), (req, res) => {
     subfolder = "video/glyphs";
   }
   const relativePath = `/assets/${subfolder}/${req.file.filename}`;
+  res.json({ success: true, url: relativePath });
+});
+
+//Almacenamiento y subida de insignias
+const badgeStorage = multer.diskStorage({
+  destination: async function (req, file, cb) {
+    const dir = path.join(process.cwd(), "public", "assets", "images", "badges");
+    await fs.mkdir(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    cb(null, "badge-" + uniqueSuffix + ext);
+  }
+});
+const uploadBadge = multer({ storage: badgeStorage });
+
+app.post("/api/admin/badges/upload", uploadBadge.single("file"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: "No se subió ningún archivo." });
+  }
+  const relativePath = `/assets/images/badges/${req.file.filename}`;
   res.json({ success: true, url: relativePath });
 });
 

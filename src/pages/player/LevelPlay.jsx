@@ -24,7 +24,8 @@ export default function LevelPlay() {
     try {
       //Obtiene el estado de los niveles antes de completar
       const freshLevelsBefore = useGameStore.getState().levels
-      const rachaBefore = racha
+      const rachaBefore = useGameStore.getState().racha
+      const rachaEscaneosBefore = useGameStore.getState().racha_escaneos
 
       //Completa el nivel
       await completeLevel(currentUser, nivelId, estrellas, intentos, aprobado)
@@ -32,6 +33,7 @@ export default function LevelPlay() {
       //Obtiene el estado de los niveles después de completar
       const freshLevelsAfter = useGameStore.getState().levels
       const updatedRacha = useGameStore.getState().racha
+      const updatedRachaEscaneos = useGameStore.getState().racha_escaneos
 
       //Delegar la verificación del desbloqueo al servicio aislado
       const newlyUnlockedBadge = await checkBadgeUnlock({
@@ -39,6 +41,8 @@ export default function LevelPlay() {
         levelsBefore: freshLevelsBefore,
         freshLevelsAfter,
         updatedRacha,
+        rachaEscaneosBefore,
+        updatedRachaEscaneos,
       })
 
       if (newlyUnlockedBadge) {

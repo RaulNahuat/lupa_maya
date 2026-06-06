@@ -227,6 +227,7 @@ const procesarItem = async (item) => {
         db.opciones_respuestas,
         db.nivel_glifos_objetivos,
         db.usuario_insignias,
+        db.insignias,
         async () => {
             await db.cola_sincronizacion.put({ ...item, estado: 'ENVIADO' });
 
@@ -276,6 +277,38 @@ const procesarItem = async (item) => {
                         sync_status: 'SINCRONIZADO',
                         usuario_id: ui.usuario_id || result.data?.usuario_id || null
                     });
+                }
+            }
+
+            if (item.entidad === 'insignias') {
+                if (item.accion === 'CREAR') {
+                    const idServidor = result.data?.id ?? null;
+                    if (idServidor) {
+                        const insignia = await db.insignias.get(item.datos.id);
+                        if (insignia) {
+                            await db.insignias.delete(item.datos.id);
+                            await db.insignias.put({
+                                ...insignia,
+                                id: Number(idServidor)
+                            });
+                        }
+
+                        // Actualizar referencias a ID temporal en cola_sincronizacion para usuario_insignias
+                        const colaPendiente = await db.cola_sincronizacion
+                            .where('estado')
+                            .equals('PENDIENTE')
+                            .toArray();
+                        for (const c of colaPendiente) {
+                            if (c.entidad === 'usuario_insignias' && c.datos && Number(c.datos.insignia_id) === Number(item.datos.id)) {
+                                c.datos.insignia_id = Number(idServidor);
+                                await db.cola_sincronizacion.put(c);
+                            }
+                        }
+                    }
+                } else {
+                    if (item.accion === 'ELIMINAR') {
+                        await db.insignias.delete(item.datos.id);
+                    }
                 }
             }
 
@@ -530,6 +563,7 @@ export const procesarColaSincronizacion = async (usuarioLocalId = null) => {
         const porEntidad = (entidad) => items.filter((i) => i.entidad === entidad);
         const ordenados = [
             ...porEntidad('usuarios'),
+            ...porEntidad('insignias'),
             ...porEntidad('progreso_usuarios'),
             ...porEntidad('usuario_insignias'),
             ...porEntidad('grupos_niveles'),
@@ -539,7 +573,7 @@ export const procesarColaSincronizacion = async (usuarioLocalId = null) => {
             ...porEntidad('opciones_respuestas'),
             ...porEntidad('nivel_glifos_objetivos'),
             ...items.filter((i) => ![
-                'usuarios', 'progreso_usuarios', 'usuario_insignias', 'grupos_niveles', 'glifos', 
+                'usuarios', 'insignias', 'progreso_usuarios', 'usuario_insignias', 'grupos_niveles', 'glifos', 
                 'niveles', 'preguntas', 'opciones_respuestas', 'nivel_glifos_objetivos'
             ].includes(i.entidad))
         ];

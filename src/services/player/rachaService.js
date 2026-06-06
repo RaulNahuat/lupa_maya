@@ -19,22 +19,43 @@ export const obtenerRacha = async (usuarioLocalId) => {
 };
 
 /**
- * Recalcula y guarda la racha del usuario tras completar un nivel.
+ * Obtiene la racha de escaneos actual del usuario.
+ * Retorna 0 si no existe aún.
+ */
+export const obtenerRachaEscaneos = async (usuarioLocalId) => {
+  const usuario = await db.usuarios.get(usuarioLocalId);
+  if (usuario?.racha_escaneos !== undefined) return usuario.racha_escaneos;
+
+  const config = await db.configuracion.get(`racha_escaneos_${usuarioLocalId}`);
+  return config?.valor ?? 0;
+};
+
+/**
+ * Recalcula y guarda la racha de niveles y la racha de escaneos del usuario tras completar un nivel.
  *
  * Reglas:
  *  - Si intentos === 1 → racha sube +1
  *  - Si intentos > 1  → racha se rompe y vuelve a 0
  *
- * Retorna la nueva racha.
+ * Retorna un objeto { racha, racha_escaneos }.
  */
-export const actualizarRacha = async (usuarioLocalId, aprobado, esPrimeraVez) => {
+export const actualizarRacha = async (usuarioLocalId, aprobado, esPrimeraVez, nivel) => {
   const rachaActual = await obtenerRacha(usuarioLocalId);
+  const rachaEscaneosActual = await obtenerRachaEscaneos(usuarioLocalId);
 
-  // Si es repetición de nivel, no modificar la racha
-  if (!esPrimeraVez) return rachaActual
+  // Si es repetición de nivel, no modificar las rachas
+  if (!esPrimeraVez) {
+    return { racha: rachaActual, racha_escaneos: rachaEscaneosActual };
+  }
 
   const nuevaRacha = aprobado ? rachaActual + 1 : 0;
   
+  // La racha de escaneos solo se actualiza si el nivel es de tipo 'BUSQUEDA' (escanear)
+  let nuevaRachaEscaneos = rachaEscaneosActual;
+  if (nivel?.tipo === 'BUSQUEDA') {
+    nuevaRachaEscaneos = aprobado ? rachaEscaneosActual + 1 : 0;
+  }
+
   await db.transaction('rw', db.usuarios, db.configuracion, db.cola_sincronizacion, async () => {
 
     // Actualizar en db.usuarios
@@ -43,6 +64,7 @@ export const actualizarRacha = async (usuarioLocalId, aprobado, esPrimeraVez) =>
       await db.usuarios.put({
         ...usuario,
         racha: nuevaRacha,
+        racha_escaneos: nuevaRachaEscaneos,
         sync_status: 'PENDIENTE',
         updated_at: new Date().toISOString(),
       });
@@ -52,6 +74,10 @@ export const actualizarRacha = async (usuarioLocalId, aprobado, esPrimeraVez) =>
     await db.configuracion.put({
       clave: rachaKey(usuarioLocalId),
       valor: nuevaRacha,
+    });
+    await db.configuracion.put({
+      clave: `racha_escaneos_${usuarioLocalId}`,
+      valor: nuevaRachaEscaneos,
     });
 
     // Encolar el usuario para que syncService lo suba al servidor
@@ -81,5 +107,5 @@ export const actualizarRacha = async (usuarioLocalId, aprobado, esPrimeraVez) =>
     }
   });
 
-  return nuevaRacha;
+  return { racha: nuevaRacha, racha_escaneos: nuevaRachaEscaneos };
 };
