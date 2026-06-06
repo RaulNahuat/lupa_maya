@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom"
 import { db } from "../../data/db"
 import BadgeFrame from "../../components/game/BadgeFrame"
 import BottomNav from "../../components/game/BottomNav"
+import { procesarColaSincronizacion } from "../../services/syncService"
 import { ArrowLeft, Award, Flame, Trophy, X, Lock, CheckCircle2 } from "lucide-react"
 
 export default function Rewards() {
@@ -35,14 +36,6 @@ export default function Rewards() {
     }
   }, [currentUser])
 
-  if (!currentUser || loading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-amber-50">
-        <div className="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full animate-spin" />
-        <p className="text-gray-400 text-sm">Cargando insignias...</p>
-      </div>
-    )
-  }
 
   //Criterios dinámicos de desbloqueo basados en el progreso real de la BD
   const completedLevelsCount = levels.filter((l) => l.completado).length
@@ -80,6 +73,62 @@ export default function Rewards() {
       requirement
     }
   })
+
+  // Retroactivar el registro y sincronización de insignias que ya están cumplidas pero no guardadas en BD
+  useEffect(() => {
+    if (loading || !currentUser || dbBadges.length === 0) return;
+
+    const syncMissingBadges = async () => {
+      try {
+        const userBadges = await db.usuario_insignias.where('usuario_local_id').equals(currentUser.local_id).toArray();
+        const userBadgeIds = new Set(userBadges.map(ub => Number(ub.insignia_id)));
+        
+        const missingBadges = badgesList.filter(b => b.unlocked && !userBadgeIds.has(Number(b.id)));
+        
+        if (missingBadges.length > 0) {
+          console.log(`[REWARDS] Registrando insignias faltantes desbloqueadas:`, missingBadges.map(b => b.title));
+          await db.transaction('rw', db.usuario_insignias, db.cola_sincronizacion, async () => {
+            for (const badge of missingBadges) {
+              const local_id = crypto.randomUUID();
+              const badgeRelation = {
+                local_id,
+                usuario_id: currentUser.id || null,
+                usuario_local_id: currentUser.local_id,
+                insignia_id: badge.id,
+                obtenida_en: new Date().toISOString(),
+                sync_status: 'PENDIENTE'
+              };
+              await db.usuario_insignias.add(badgeRelation);
+              await db.cola_sincronizacion.add({
+                entidad: 'usuario_insignias',
+                accion: 'UPSERT',
+                datos: badgeRelation,
+                estado: 'PENDIENTE',
+                created_at: new Date().getTime()
+              });
+            }
+          });
+
+          if (navigator.onLine) {
+            procesarColaSincronizacion(currentUser.local_id);
+          }
+        }
+      } catch (err) {
+        console.error("Error al registrar insignias faltantes:", err);
+      }
+    };
+
+    syncMissingBadges();
+  }, [loading, currentUser, dbBadges, badgesList]);
+
+  if (!currentUser || loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-amber-50">
+        <div className="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full animate-spin" />
+        <p className="text-gray-400 text-sm">Cargando insignias...</p>
+      </div>
+    )
+  }
 
   const unlockedCount = badgesList.filter((b) => b.unlocked).length
 

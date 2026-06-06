@@ -88,12 +88,29 @@ export const descargarCambios = async (usuarioLocalId = null) => {
             }
 
             // USUARIO_INSIGNIAS
+            if (usuarioLocalId) {
+                const localSincronizadas = await db.usuario_insignias
+                    .where('usuario_local_id')
+                    .equals(usuarioLocalId)
+                    .filter(ui => ui.sync_status === 'SINCRONIZADO')
+                    .toArray();
+
+                const serverInsigniaIds = new Set((usuario_insignias || []).map(ui => Number(ui.insignia_id)));
+                const aEliminar = localSincronizadas.filter(ui => !serverInsigniaIds.has(Number(ui.insignia_id)));
+                
+                if (aEliminar.length > 0) {
+                    console.log(`[SYNC] Eliminando ${aEliminar.length} insignias locales huérfanas/no sincronizadas en servidor`);
+                    await db.usuario_insignias.bulkDelete(aEliminar.map(ui => ui.local_id));
+                }
+            }
+
             if (usuario_insignias && usuario_insignias.length > 0) {
                 await db.usuario_insignias.bulkPut(usuario_insignias.map(ui => ({
                     ...ui,
                     sync_status: 'SINCRONIZADO'
                 })));
             }
+
 
             // USUARIOS
             for (const user of usuarios) {
@@ -249,6 +266,32 @@ const procesarItem = async (item) => {
                                     ...p,
                                     usuario_id: idServidor
                                 });
+                            }
+                        }
+
+                        // Propagar a usuario_insignias locales
+                        const insigniasLocales = await db.usuario_insignias
+                            .where('usuario_local_id')
+                            .equals(user.local_id)
+                            .toArray();
+                        for (const ui of insigniasLocales) {
+                            if (!ui.usuario_id) {
+                                await db.usuario_insignias.put({
+                                    ...ui,
+                                    usuario_id: idServidor
+                                });
+                            }
+                        }
+
+                        // Propagar a la cola de sincronización pendiente
+                        const colaPendiente = await db.cola_sincronizacion
+                            .where('estado')
+                            .equals('PENDIENTE')
+                            .toArray();
+                        for (const c of colaPendiente) {
+                            if (c.entidad === 'usuario_insignias' && c.datos && c.datos.usuario_local_id === user.local_id) {
+                                c.datos.usuario_id = idServidor;
+                                await db.cola_sincronizacion.put(c);
                             }
                         }
                     }

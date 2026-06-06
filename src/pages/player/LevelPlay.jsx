@@ -36,38 +36,42 @@ export default function LevelPlay() {
       const updatedRachaEscaneos = useGameStore.getState().racha_escaneos
 
       //Delegar la verificación del desbloqueo al servicio aislado
-      const newlyUnlockedBadge = await checkBadgeUnlock({
+      const newlyUnlockedBadges = await checkBadgeUnlock({
         rachaBefore,
         levelsBefore: freshLevelsBefore,
         freshLevelsAfter,
         updatedRacha,
         rachaEscaneosBefore,
         updatedRachaEscaneos,
+        usuarioLocalId: currentUser.local_id
       })
 
-      if (newlyUnlockedBadge) {
-        const local_id = crypto.randomUUID();
-        const badgeRelation = {
-          local_id,
-          usuario_id: currentUser.id || null,
-          usuario_local_id: currentUser.local_id,
-          insignia_id: newlyUnlockedBadge.id,
-          obtenida_en: new Date().toISOString(),
-          sync_status: 'PENDIENTE'
-        };
-
+      if (newlyUnlockedBadges && newlyUnlockedBadges.length > 0) {
         await db.transaction('rw', db.usuario_insignias, db.cola_sincronizacion, async () => {
-          await db.usuario_insignias.add(badgeRelation);
-          await db.cola_sincronizacion.add({
-            entidad: 'usuario_insignias',
-            accion: 'UPSERT',
-            datos: badgeRelation,
-            estado: 'PENDIENTE',
-            created_at: new Date().getTime()
-          });
+          for (const badge of newlyUnlockedBadges) {
+            const local_id = crypto.randomUUID();
+            const badgeRelation = {
+              local_id,
+              usuario_id: currentUser.id || null,
+              usuario_local_id: currentUser.local_id,
+              insignia_id: badge.id,
+              obtenida_en: new Date().toISOString(),
+              sync_status: 'PENDIENTE'
+            };
+
+            await db.usuario_insignias.add(badgeRelation);
+            await db.cola_sincronizacion.add({
+              entidad: 'usuario_insignias',
+              accion: 'UPSERT',
+              datos: badgeRelation,
+              estado: 'PENDIENTE',
+              created_at: new Date().getTime()
+            });
+          }
         });
 
-        setUnlockedBadge(newlyUnlockedBadge);
+        // Mostrar la primera insignia obtenida en el modal emergente
+        setUnlockedBadge(newlyUnlockedBadges[0]);
         
         if (navigator.onLine) {
           procesarColaSincronizacion(currentUser.local_id);
