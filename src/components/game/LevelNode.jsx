@@ -11,7 +11,7 @@ export default function LevelNode({ level, onClick, isActive, isCurrent }) {
     return (
       <button disabled className="flex flex-col items-center cursor-not-allowed">
         <div
-          className="w-21 h-21 rounded-full bg-light-gray flex items-center justify-center border-3 border-white"
+          className="size-nodo rounded-full bg-light-gray flex items-center justify-center border-3 border-white"
           style={{ boxShadow: "0 7px 0 #6B7280" }}
         >
           <Lock size={34} className="text-white" />
@@ -29,7 +29,7 @@ export default function LevelNode({ level, onClick, isActive, isCurrent }) {
         className="flex flex-col items-center gap-1.5 hover:scale-105 transition-transform duration-200"
       >
         <div
-          className="w-21 h-21 rounded-full flex items-center justify-center border-3 border-white"
+          className="size-nodo rounded-full flex items-center justify-center border-3 border-white"
           style={{
             backgroundColor: colorPrincipal,
             boxShadow: `0 7px 0 ${shadowColor}`,
@@ -72,7 +72,7 @@ export default function LevelNode({ level, onClick, isActive, isCurrent }) {
         )}
 
         <div
-          className="relative w-21 h-21 rounded-full flex items-center justify-center border-3 border-white"
+          className="relative size-nodo rounded-full flex items-center justify-center border-3 border-white"
           style={{
             backgroundColor: colorPrincipal,
             boxShadow: `0 7px 0 ${shadowColor}`,
