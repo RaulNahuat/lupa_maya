@@ -49,6 +49,12 @@
     font-family: var(--font-maya);
     background-color: var(--color-maya-cream);
     color: var(--color-maya-dark);
+
+
+    /*
+     * Tipografía con escala proporcional al ancho del viewport.
+     */
+    font-size: clamp(13px, 3.8vw, 17px);
   }
 
   body {
@@ -57,6 +63,71 @@
 
   #root {
     @apply w-full;
+  }
+}
+
+/*
+ * Utilidades de tamaño fluido para elementos.
+ * clamp(mínimo, valor_fluido_en_vw, máximo).
+ *
+ * Referencia de pantallas móviles:
+ *   360px - valor cercano al mínimo
+ *   393px - valor cercano al máximo
+ */
+@layer utilities {
+
+  /* Nodo del mapa de niveles (LevelNode) */
+  .size-nodo {
+    width:  clamp(72px, 19vw, 88px);
+    height: clamp(72px, 19vw, 88px);
+  }
+
+  /* Tarjeta del glifo en QuizLevel y ScanLevel resultado */
+  .size-glifo-card {
+    width:  clamp(140px, 38vw, 180px);
+    height: clamp(140px, 38vw, 180px);
+  }
+
+  /* Imagen dentro de la tarjeta del glifo */
+  .size-glifo-img {
+    width:  clamp(100px, 28vw, 140px);
+    height: clamp(100px, 28vw, 140px);
+  }
+
+  /* Imagen del glifo en la pantalla de resultado correcto de ScanLevel */
+  .size-glifo-result {
+    width:  clamp(120px, 33vw, 160px);
+    height: clamp(120px, 33vw, 160px);
+  }
+
+  /* Botón de audio circular */
+  .size-audio-btn {
+    width:  clamp(52px, 14vw, 64px);
+    height: clamp(52px, 14vw, 64px);
+  }
+
+  /* Ícono lupa flotante en ScanLevel */
+  .size-lupa {
+    width:  clamp(64px, 17vw, 80px);
+    height: clamp(64px, 17vw, 80px);
+  }
+
+  /* Estrella en CompletedLevelModal */
+  .size-star-modal {
+    width:  clamp(36px, 10vw, 48px);
+    height: clamp(36px, 10vw, 48px);
+  }
+
+  /* Padding vertical fluido para botones principales */
+  .py-btn {
+    padding-top:    clamp(12px, 3.2vw, 16px);
+    padding-bottom: clamp(12px, 3.2vw, 16px);
+  }
+
+  /* Padding horizontal fluido para contenedores */
+  .px-screen {
+    padding-left:  clamp(16px, 4.5vw, 24px);
+    padding-right: clamp(16px, 4.5vw, 24px);
   }
 }
 

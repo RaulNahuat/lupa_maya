@@ -41,17 +41,22 @@ const CompletedLevelModal = ({
         </p>
 
         {/* Estrellas */}
-        <div className="flex gap-3 py-2">
+        <div className="flex gap-5 py-2">
           {[1, 2, 3].map((i) => (
-            <Star
+            <div
               key={i}
-              size={48}
-              className={
-                i <= estrellasVisibles
-                  ? "text-amber-400 fill-amber-400 drop-shadow-md"
-                  : "text-gray-200 fill-gray-200"
-              }
-            />
+              className={`transition-all duration-300 ${
+                i <= estrellasVisibles ? "scale-125 opacity-100" : "scale-90 opacity-30"
+              }`}
+            >
+              <Star
+                className={`size-star-modal ${
+                  i <= estrellas
+                    ? "text-amber-400 fill-amber-400 drop-shadow-md"
+                    : "text-gray-200 fill-gray-200"
+                }`}
+              />
+            </div>
           ))}
         </div>
 

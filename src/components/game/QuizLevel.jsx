@@ -164,14 +164,15 @@ export default function QuizLevel({ level, onComplete }) {
         </div>
 
         {/* Contenido principal */}
-        <div className="flex-1 flex flex-col items-center px-5 pt-2">
+        <div className="flex-1 flex flex-col items-center px-screen pt-2 overflow-y-auto">
           {/* Glifo */}
           {preguntaActual.imagen_url && (
-            <div className="bg-white w-45 h-45 rounded-3xl border-2 border-light-gray shadow-[0_6px_0_#E5E7EB] flex items-center justify-center mb-4">
+            <div className="bg-white size-glifo-card rounded-3xl border-2 border-light-gray shadow-[0_6px_0_#E5E7EB] flex items-center justify-center mb-4 shrink-0">
               <img
                 src={preguntaActual.imagen_url}
+
                 alt={preguntaActual.nombre_maya ?? "Glifo maya"}
-                className="w-40 h-40 object-contain"
+                className="size-glifo-img object-contain"
               />
             </div>
           )}
@@ -185,7 +186,7 @@ export default function QuizLevel({ level, onComplete }) {
               {preguntaActual.audio_url && (
                 <button
                   onClick={handleAudio}
-                  className="w-9 h-9 bg-maya-gold rounded-full flex items-center justify-center shadow-sm text-white"
+                  className="size-audio-btn bg-maya-gold rounded-full flex items-center justify-center shadow-sm text-white shrink-0"
                   aria-label="Reproducir pronunciación"
                 >
                   <Volume2 size={18} />
@@ -200,7 +201,7 @@ export default function QuizLevel({ level, onComplete }) {
           </p>
 
           {/* Opciones */}
-          <div className="flex flex-col gap-3 w-full max-w-sm">
+          <div className="flex flex-col gap-2.5 w-full max-w-sm">
             {preguntaActual.options.map((option) => (
               <button
                 key={option}
@@ -236,7 +237,7 @@ export default function QuizLevel({ level, onComplete }) {
         </div>
 
         {/* Botón inferior */}
-        <div className="px-5 pb-8 pt-4">
+        <div className="px-screen pb-8 pt-4">
           {answered && esCorrecta ? (
             <button
               onClick={handleContinue}
