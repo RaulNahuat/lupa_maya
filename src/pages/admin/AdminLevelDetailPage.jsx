@@ -426,7 +426,7 @@ const AdminLevelDetailPage = () => {
             </div>
 
             {questions.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 {questions.map((q, idx) => (
                   <div key={q.id} className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group relative overflow-hidden">
                     <div className="space-y-3">
@@ -500,9 +500,9 @@ const AdminLevelDetailPage = () => {
             <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
               Selecciona exactamente un glifo del bloque como el objetivo principal de este nivel de búsqueda. El usuario lo buscará mediante la cámara de realidad aumentada.
             </p>
-
+ 
             {blockGlyphs.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {blockGlyphs.map(g => {
                   const isSelected = objectiveGlyphId === g.id;
                   return (

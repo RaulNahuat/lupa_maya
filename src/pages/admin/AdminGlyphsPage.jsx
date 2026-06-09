@@ -221,7 +221,7 @@ const AdminGlyphsPage = () => {
         <div className="mt-6">
           {isLoading ? (
             // Estado de carga
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 animate-pulse">
+            <div className="grid grid-cols-1 gap-4 animate-pulse">
               {[1, 2, 3, 4].map(i => (
                 <div key={i} className="bg-white rounded-3xl p-4 sm:p-5 flex gap-4 items-center border border-slate-100 shadow-sm h-28">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 bg-slate-200 rounded-2xl shrink-0"></div>
@@ -236,7 +236,7 @@ const AdminGlyphsPage = () => {
           ) : paginatedBlocks.length > 0 ? (
             // Grid de tarjetas
             <>
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 {paginatedBlocks.map(block => {
                   const blockGlyphs = glyphs.filter(glyph => Number(glyph.grupo_id) === Number(block.id));
                   const diffStyle = getDifficultyColor(block.dificultad);
