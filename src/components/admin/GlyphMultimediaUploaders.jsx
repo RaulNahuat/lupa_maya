@@ -1,4 +1,5 @@
 import { Upload, Trash2, Volume2, Video } from 'lucide-react';
+import { getMediaUrl } from '../../config/api';
 
 const GlyphMultimediaUploaders = ({
   audioPreviewUrl,
@@ -38,7 +39,7 @@ const GlyphMultimediaUploaders = ({
           </div>
           {audioPreviewUrl ? (
             <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex flex-col gap-1.5 shadow-inner">
-              <audio src={audioPreviewUrl} controls className="w-full h-8" />
+              <audio src={getMediaUrl(audioPreviewUrl)} controls className="w-full h-8" />
               <span className="text-[10px] text-slate-400 px-1 truncate font-medium">
                 {audioFile ? audioFile.name : 'Audio cargado'}
               </span>
@@ -80,7 +81,7 @@ const GlyphMultimediaUploaders = ({
           </div>
           {videoPreviewUrl ? (
             <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex flex-col items-center gap-1.5 shadow-inner">
-              <video src={videoPreviewUrl} controls className="w-full max-h-[85px] rounded-lg bg-black object-contain shadow-md" />
+              <video src={getMediaUrl(videoPreviewUrl)} controls className="w-full max-h-[85px] rounded-lg bg-black object-contain shadow-md" />
               <span className="text-[10px] text-slate-400 px-1 truncate font-medium self-start w-full">
                 {videoFile ? videoFile.name : 'Video cargado'}
               </span>

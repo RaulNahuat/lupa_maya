@@ -5,7 +5,7 @@ import { calculateStars } from "../../utils/calculateStars"
 import { useGameStore } from "../../store/game/useGameStore"
 
 import * as tmImage from "@teachablemachine/image"
-import { API_BASE_URL } from "../../config/api"
+import { API_BASE_URL, getMediaUrl } from "../../config/api"
 import { getCachedActiveAiModel } from "../../services/recognition/aiModelCacheService"
 
 const sonidoCorrecto = new Audio('/assets/sounds/correcto.mp3')
@@ -219,7 +219,7 @@ export default function ScanLevel({ level, onComplete }) {
             <div className="w-full bg-white rounded-2xl flex flex-col items-center py-6 px-6 gap-1.5 border-3 border-light-gray shadow-[0_7px_0_#E5E7EB]">
               {detectado.glifo?.imagen_url && (
                 <img
-                  src={detectado.glifo.imagen_url}
+                  src={getMediaUrl(detectado.glifo.imagen_url)}
                   alt={detectado.glifo.nombre_maya ?? "Glifo"}
                   className="w-45 h-45 object-contain"
                 />
@@ -240,7 +240,7 @@ export default function ScanLevel({ level, onComplete }) {
             {detectado.glifo?.audio_url && (
               <div className="flex flex-col items-center gap-2">
                 <button
-                  onClick={() => new Audio(detectado.glifo.audio_url).play()}
+                  onClick={() => new Audio(getMediaUrl(detectado.glifo.audio_url)).play()}
                   className="w-16 h-16 bg-gold rounded-full flex items-center justify-center shadow-[0_4px_0_#C88F12] active:shadow-none active:translate-y-1 transition-all"
                 >
                   <Volume2 size={28} className="text-white" />

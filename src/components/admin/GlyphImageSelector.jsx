@@ -1,4 +1,5 @@
 import { Upload } from 'lucide-react';
+import { getMediaUrl } from '../../config/api';
 
 const GlyphImageSelector = ({ imagePreview, fileInputRef, onFileChange }) => {
   return (
@@ -15,7 +16,7 @@ const GlyphImageSelector = ({ imagePreview, fileInputRef, onFileChange }) => {
       >
         {imagePreview ? (
           <>
-            <img src={imagePreview} alt="Vista Previa" className="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-500" />
+            <img src={getMediaUrl(imagePreview)} alt="Vista Previa" className="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-500" />
             <div className="absolute inset-0 bg-slate-900/35 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity backdrop-blur-[2px] duration-300">
               <div className="flex items-center gap-1.5 text-xs font-bold bg-white/25 px-3 py-1.5 rounded-full shadow-md">
                 <Upload className="w-3.5 h-3.5" /> Reemplazar

@@ -7,6 +7,7 @@ import PrimaryButton from '../../components/PrimaryButton';
 import LevelEditModal from '../../components/admin/LevelEditModal';
 import { db } from '../../data/db';
 import { procesarColaSincronizacion } from '../../services/syncService';
+import { getMediaUrl } from '../../config/api';
 
 const AdminLevelDetailPage = () => {
   const { blockId, levelId } = useParams();
@@ -517,7 +518,7 @@ const AdminLevelDetailPage = () => {
                       <div className="aspect-square bg-slate-50 rounded-xl overflow-hidden mb-3 relative flex items-center justify-center border border-slate-100/50">
                         {g.imagen_url ? (
                           <img 
-                            src={g.imagen_url} 
+                            src={getMediaUrl(g.imagen_url)} 
                             alt={g.nombre_maya} 
                             className="w-full h-full object-cover transition-transform group-hover:scale-105"
                           />

@@ -7,6 +7,7 @@ import BadgeFrame from "../../components/game/BadgeFrame"
 import BottomNav from "../../components/game/BottomNav"
 import { procesarColaSincronizacion } from "../../services/syncService"
 import { ArrowLeft, Award, Flame, Trophy, X, Lock, CheckCircle2 } from "lucide-react"
+import { getMediaUrl } from "../../config/api"
 
 export default function Rewards() {
   const levels = useGameStore((s) => s.levels)
@@ -66,7 +67,7 @@ export default function Rewards() {
 
     return {
       id: badge.id,
-      imageSrc: badge.icono_url,
+      imageSrc: getMediaUrl(badge.icono_url),
       title: badge.nombre,
       description: badge.descripcion,
       unlocked,

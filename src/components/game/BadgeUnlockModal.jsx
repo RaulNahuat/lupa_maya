@@ -1,5 +1,6 @@
 import React from "react"
 import { Award, Sparkles } from "lucide-react"
+import { getMediaUrl } from "../../config/api"
 
 export default function BadgeUnlockModal({ badge, onClose }) {
   if (!badge) return null
@@ -50,7 +51,7 @@ export default function BadgeUnlockModal({ badge, onClose }) {
           
           <div className="relative z-10 w-32 h-32 rounded-2xl flex items-center justify-center border-3 border-amber-300 bg-linear-to-br from-amber-100/70 to-orange-50/30 shadow-xl overflow-hidden animate-spin-once">
             <img
-              src={badge.icono_url}
+              src={getMediaUrl(badge.icono_url)}
               alt={badge.nombre}
               className="w-full h-full object-cover"
             />

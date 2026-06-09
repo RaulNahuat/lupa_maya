@@ -4,6 +4,7 @@ import { X, Volume2 } from "lucide-react"
 import { calculateStars } from "../../utils/calculateStars"
 import { useGameStore } from "../../store/game/useGameStore"
 import CompletedLevelModal from "../../components/game/CompletedLevelModal"
+import { getMediaUrl } from "../../config/api"
 
 const sonidoCorrecto = new Audio('/assets/sounds/correcto.mp3')
 const sonidoError = new Audio('/assets/sounds/incorrecto.mp3')
@@ -99,7 +100,7 @@ export default function QuizLevel({ level, onComplete }) {
 
   const handleAudio = () => {
     if (!preguntaActual.audio_url) return
-    new Audio(preguntaActual.audio_url).play()
+    new Audio(getMediaUrl(preguntaActual.audio_url)).play()
   }
 
   const getOptionStyle = (option) => {
@@ -169,7 +170,7 @@ export default function QuizLevel({ level, onComplete }) {
           {preguntaActual.imagen_url && (
             <div className="bg-white size-glifo-card rounded-3xl border-2 border-light-gray shadow-[0_6px_0_#E5E7EB] flex items-center justify-center mb-4 shrink-0">
               <img
-                src={preguntaActual.imagen_url}
+                src={getMediaUrl(preguntaActual.imagen_url)}
 
                 alt={preguntaActual.nombre_maya ?? "Glifo maya"}
                 className="size-glifo-img object-contain"
