@@ -21,6 +21,7 @@ services:
       - "5000:5000"
     volumes:
       - lupa_maya_models:/app/public/models
+      - lupa_maya_assets:/app/public/assets
     networks:
       - lupa_maya_net
 
@@ -46,3 +47,4 @@ networks:
 
 volumes:
   lupa_maya_models:
+  lupa_maya_assets:
