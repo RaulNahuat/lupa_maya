@@ -3,7 +3,7 @@ const PrimaryButton = ({ children, type = "button", onClick, className = "", ...
     <button
       type={type}
       onClick={onClick}
-      className={`w-full bg-maya-gold hover:bg-maya-gold-hover text-white font-black py-4 rounded-2xl shadow-lg shadow-maya-gold/20 transition-all active:scale-95 uppercase tracking-wider text-sm ${className}`}
+      className={`w-full bg-maya-gold hover:bg-maya-gold-hover text-white font-black py-4 rounded-2xl shadow-lg shadow-maya-gold/20 transition-all active:scale-95 uppercase tracking-wider text-md ${className}`}
       {...props}
     >
       {children}

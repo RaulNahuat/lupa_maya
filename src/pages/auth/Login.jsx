@@ -8,39 +8,42 @@ import Navbar from '../../components/Navbar';
 const Login = () => {
   const { isAdminMode } = useAdmin();
   return (
-    <div className="min-h-screen bg-maya-cream flex items-center justify-center p-4 pt-24 relative overflow-hidden">
+    <div className="min-h-screen bg-maya-cream flex items-center justify-center pt-17 relative overflow-hidden">
       <Navbar />
       <div className="absolute top-[-10%] left-[-5%] w-64 h-64 bg-maya-gold/5 rounded-full blur-3xl"></div>
       <div className="absolute bottom-[-5%] right-[-5%] w-96 h-96 bg-maya-dark/5 rounded-full blur-3xl"></div>
 
-      <div className="max-w-sm w-full bg-white rounded-4xl p-8 shadow-2xl flex flex-col items-center border border-gray-50 relative z-10 transition-all duration-500">
+      <div className="max-w-sm w-full p-5 flex flex-col items-center relative z-10 transition-all duration-500">
 
-        <div className="mb-6 relative">
-          <div className="absolute -inset-4 bg-maya-orange-light rounded-full blur-2xl opacity-40"></div>
+        <div className="mb-5 relative">
           <img
             src={mayaCharacter}
             alt="Ilustración de personaje maya"
-            className="w-32 h-32 object-contain relative z-10 transition-transform duration-500 hover:scale-105"
+            className="w-30 h-30 object-contain rounded-full border border-gray-400 relative z-10 transition-transform duration-500 hover:scale-105 shadow-[0_5px_0_#9CA3AF]"
           />
         </div>
 
         <div className="w-full transition-all duration-500 transform">
           {isAdminMode ? <LoginAdmin /> : <LoginUser />}
         </div>
-        <div className="mt-6 flex flex-col items-center gap-3 w-full pt-4 border-t border-gray-50">
-          {!isAdminMode && (
+
+        {!isAdminMode && (
+          <div className="mt-3 flex flex-col items-center w-full gap-3">
+            <div className="flex items-center gap-3 w-full">
+              <div className="flex-1 h-px bg-gray-300"></div>
+              <span className="text-md text-gray-400 font-medium">o</span>
+              <div className="flex-1 h-px bg-gray-300"></div>
+            </div>
+
             <Link
               to="/register"
-              className="w-full py-3 rounded-2xl border-2 border-gray-100 font-bold text-gray-400 hover:border-maya-gold hover:text-maya-gold transition-all flex justify-center gap-1 text-sm bg-white shadow-sm"
+              className="w-full py-4 rounded-2xl border border-brown font-semibold text-brown hover:border-maya-gold hover:text-maya-gold transition-all flex justify-center gap-1 text-md shadow-[0_4px_0_#7A5000]"
             >
-              ¿No tienes cuenta? <span className="text-maya-gold underline">Regístrate</span>
+              ¿Aún no tienes cuenta?{' '}
+              <span className="text-maya-gold underline font-bold">Regístrate</span>
             </Link>
-          )}
-
-          <button className="w-full py-3 rounded-2xl border-2 border-gray-100 font-bold text-gray-400 hover:border-maya-dark hover:text-maya-dark transition-all text-sm bg-white shadow-sm">
-            Continuar como <span className="text-maya-dark font-black">invitado</span>
-          </button>
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

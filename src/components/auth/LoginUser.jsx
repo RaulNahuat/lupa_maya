@@ -5,6 +5,7 @@ import { loginOffline } from '../../services/auth/offlineAuth';
 import { useNavigate } from "react-router-dom";
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { User, Lock } from "lucide-react"
 
 const LoginUser = () => {
   const navigate = useNavigate();
@@ -57,37 +58,50 @@ const LoginUser = () => {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <h1 className="text-2xl font-extrabold text-maya-dark mb-1 tracking-tight">
-        ¡Hola!
+      <h1 className="text-3xl font-extrabold text-maya-dark mb-2 tracking-tight">
+        ¡Hola, explorador!
       </h1>
-      <p className="text-maya-gray font-medium mb-2 text-sm text-center">Escribe tus datos y tu PIN para jugar</p>
+      <p className="text-maya-gray font-medium mb-6 text-md text-center">Ingresa para descubrir los glifos mayas</p>
 
-      <form onSubmit={handleSubmit} className="w-full space-y-3">
-        <div className="space-y-1">
+      <form onSubmit={handleSubmit} className="w-full space-y-5">
+        <div className="space-y-3 pb-2">
+          <label className='flex items-center gap-2 font-medium text-md'> 
+            <User size={18}/>
+            Tu nombre de explorador
+          </label>
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="Usuario"
-            className="w-full px-4 py-2 rounded-2xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-maya-gold outline-none transition-all placeholder:text-gray-400 text-maya-dark text-center font-bold shadow-sm"
+            placeholder="Escribe tu usuario..."
+            className="w-full px-4 py-3 rounded-2xl border border-gray-400 bg-white focus:bg-white focus:ring-2 focus:ring-maya-gold outline-none transition-all placeholder:text-gray-400 font-semibold shadow-[0_4px_0_#9CA3AF]"
           />
         </div>
 
         {/* PIN Display */}
-        <div className="flex justify-center gap-2 my-1">
-          {[...Array(4)].map((_, i) => (
-            <div
-              key={i}
-              className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-300 ${
-                pin.length > i ? 'bg-maya-gold border-maya-gold scale-110' : 'border-gray-200'
-              }`}
-            />
-          ))}
+        <div className="flex flex-col items-center w-full gap-4">
+          <label className="flex items-center gap-2 font-medium text-md self-start">
+            <Lock size={18} />
+            Tu PIN secreto (4 dígitos)
+          </label>
+
+          {/* Círculos indicadores */}
+          <div className="flex justify-center gap-2">
+            {[...Array(4)].map((_, i) => (
+              <div
+                key={i}
+                className={`w-3.5 h-3.5 rounded-full border transition-all duration-300 ${
+                  pin.length > i ? 'bg-maya-gold border-maya-gold scale-110' : 'bg-white border-gray-400'
+                }`}
+              />
+            ))}
+          </div>
+
+          {/* PinPad */}
+          <PinPad onNumberPress={handleNumberPress} onDelete={handleDelete} />
         </div>
 
-        <PinPad onNumberPress={handleNumberPress} onDelete={handleDelete} />
-
-        <PrimaryButton type="submit" className="mt-2">
+        <PrimaryButton type="submit" className="mt-3">
           ¡A jugar!
         </PrimaryButton>
       </form>

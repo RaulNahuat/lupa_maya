@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Scan, User, UserPlus, ChevronDown, ShieldCheck, Users } from 'lucide-react';
+import { Scan, User, UserPlus, ChevronDown, ShieldCheck, Users, Search } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext';
 const Navbar = () => {
   const { isAdminMode, setIsAdminMode } = useAdmin();
@@ -20,31 +20,31 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6 z-50 shadow-sm">
+    <nav className="fixed top-0 left-0 w-full h-16 bg-white border-b border-gray-100 flex items-center justify-between px-5 z-50 shadow-sm">
       {/* Sección del logo */}
       <button 
         onClick={() => navigate('/login')}
         className="flex items-center gap-2 hover:opacity-80 transition-opacity"
       >
-        <div className="w-10 h-10 bg-maya-orange-light rounded-lg flex items-center justify-center border-2 border-maya-gold">
-          <Scan className="text-maya-gold w-6 h-6" />
+        <div className="w-10 h-9 bg-brown rounded-xl flex items-center justify-center">
+          <Search className="text-white w-6 h-6" strokeWidth={3}/>
         </div>
-        <span className="text-xl font-bold text-maya-dark tracking-tight">
-          Glifo<span className="text-maya-dark">Aventura</span>
+        <span className="text-xl font-bold text-brown tracking-tight">
+          Glifo<span>Aventura</span>
         </span>
       </button>
 
       {/* Iconos de acción */}
       <div className="flex items-center gap-4">
         {isAuthPage && (
-          <div className="relative flex items-center gap-3">
+          <div className="relative flex items-center gap-2">
             
             {/* Dropdown de Acceso */}
             <div className="relative">
               <button 
                 onClick={() => setIsOpen(!isOpen)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all border shadow-sm ${
-                  isOpen ? 'border-maya-gold bg-maya-orange-light' : 'border-gray-100 bg-white hover:border-maya-gold'
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all ${
+                  isOpen ? 'border-maya-gold bg-maya-orange-light' : 'border-gray-100 bg-maya-orange-light hover:border-maya-gold'
                 }`}
               >
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center ${isAdminMode ? 'bg-maya-gold text-white' : 'bg-maya-orange-light text-maya-gold'}`}>
@@ -60,17 +60,17 @@ const Navbar = () => {
               {isOpen && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)}></div>
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-20 animate-in fade-in slide-in-from-top-2 duration-200">
-                    <p className="px-4 py-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">Cambiar acceso</p>
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-1 z-20 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <p className="px-4 py-2 text-sm font-bold text-gray-400">Iniciar como...</p>
                     <button 
                       onClick={() => handleModeSelection(false)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors ${!isAdminMode ? 'text-maya-gold bg-maya-orange-light' : 'text-maya-dark hover:bg-gray-50'}`}
+                      className={`w-full flex items-center gap-2.5 px-4 py-3 text-sm font-bold transition-colors ${!isAdminMode ? 'text-maya-gold bg-maya-orange-light' : 'text-maya-dark hover:bg-gray-50'}`}
                     >
-                      <Users size={18} /> Acceso Niños
+                      <Users size={18} /> Alumno
                     </button>
                     <button 
                       onClick={() => handleModeSelection(true)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors ${isAdminMode ? 'text-maya-gold bg-maya-orange-light' : 'text-maya-dark hover:bg-gray-50'}`}
+                      className={`w-full flex items-center gap-2.5 px-4 py-3 text-sm font-bold transition-colors ${isAdminMode ? 'text-maya-gold bg-maya-orange-light' : 'text-maya-dark hover:bg-gray-50'}`}
                     >
                       <ShieldCheck size={18} /> Administrador
                     </button>
@@ -79,7 +79,7 @@ const Navbar = () => {
               )}
             </div>
 
-            <div className="h-8 w-px bg-gray-100 mx-1"></div>
+            <div className="h-8 w-px bg-gray-200 mx-1"></div>
 
             <button 
               onClick={() => navigate('/register')}
