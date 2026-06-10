@@ -91,6 +91,7 @@ export default function QuizLevel({ level, onComplete }) {
   const handleContinuarModal = () => {
     sonidoWin.pause()
     sonidoWin.currentTime = 0
+    setShowModal(false)
     if (nivelSiguiente) {
       navigate(`/level/${nivelSiguiente.id}`)
     } else {

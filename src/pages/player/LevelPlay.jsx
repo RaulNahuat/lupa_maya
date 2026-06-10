@@ -97,11 +97,11 @@ export default function LevelPlay() {
   return (
     <div className="relative">
       {level.tipo === "APRENDIZAJE" && (
-        <QuizLevel level={level} onComplete={handleCompleteLevel} />
+        <QuizLevel key={level.id} level={level} onComplete={handleCompleteLevel} />
       )}
 
       {level.tipo === "BUSQUEDA" && (
-        <ScanLevel level={level} onComplete={handleCompleteLevel} />
+        <ScanLevel key={level.id} level={level} onComplete={handleCompleteLevel} />
       )}
 
       {level.tipo !== "APRENDIZAJE" && level.tipo !== "BUSQUEDA" && (
@@ -115,7 +115,6 @@ export default function LevelPlay() {
         badge={unlockedBadge}
         onClose={() => {
           setUnlockedBadge(null)
-          navigate("/map")
         }}
       />
     </div>
