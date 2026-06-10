@@ -20,13 +20,13 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 w-full h-16 bg-white border-b border-gray-100 flex items-center justify-between px-5 z-50 shadow-sm">
+    <nav className="w-full h-14 bg-white border-b border-gray-100 flex items-center justify-between px-4 z-50 shadow-sm shrink-0">
       {/* Sección del logo */}
       <button 
         onClick={() => navigate('/login')}
         className="flex items-center gap-2 hover:opacity-80 transition-opacity"
       >
-        <div className="w-10 h-9 bg-brown rounded-xl flex items-center justify-center">
+        <div className="w-9 h-8.5 bg-brown rounded-xl flex items-center justify-center">
           <Search className="text-white w-6 h-6" strokeWidth={3}/>
         </div>
         <span className="text-xl font-bold text-brown tracking-tight">
@@ -43,15 +43,15 @@ const Navbar = () => {
             <div className="relative">
               <button 
                 onClick={() => setIsOpen(!isOpen)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all ${
+                className={`flex items-center gap-1 px-2 py-1.5 rounded-full transition-all ${
                   isOpen ? 'border-maya-gold bg-maya-orange-light' : 'border-gray-100 bg-maya-orange-light hover:border-maya-gold'
                 }`}
               >
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center ${isAdminMode ? 'bg-maya-gold text-white' : 'bg-maya-orange-light text-maya-gold'}`}>
+                <div className={`w-6 h-7 rounded-full flex items-center justify-center ${isAdminMode ? 'bg-maya-gold text-white' : 'bg-maya-orange-light text-maya-gold'}`}>
                   {isAdminMode ? <ShieldCheck size={16} /> : <Users size={16} />}
                 </div>
-                <span className="text-xs font-bold text-maya-dark hidden sm:block">
-                  {isAdminMode ? 'Administrador' : 'Niños'}
+                <span className="text-xs font-bold text-maya-dark hidden hidden">
+                  {isAdminMode ? 'Administrador' : 'Alumno'}
                 </span>
                 <ChevronDown size={14} className={`text-gray-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -83,7 +83,7 @@ const Navbar = () => {
 
             <button 
               onClick={() => navigate('/register')}
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 ${
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 ${
                 location.pathname === '/register' 
                   ? 'bg-maya-dark text-white shadow-lg' 
                   : 'bg-maya-green-light text-maya-dark border border-transparent hover:border-maya-dark/20'

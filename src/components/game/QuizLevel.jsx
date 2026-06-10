@@ -139,138 +139,136 @@ export default function QuizLevel({ level, onComplete }) {
   }
 
   return (
-    <div className="md:min-h-screen md:bg-gray-600 md:flex md:items-center md:justify-center">
-      <div className="w-full md:w-[390px] md:max-h-[844px] min-h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
+    <div className="flex-1 flex flex-col bg-amber-50 min-h-0">
       
-        {/* Header */}
-        <div className="flex items-center justify-between p-5 pt-5 pb-4 gap-3">
-          <button
-            onClick={() => navigate("/map")}
-            title="Cerrar"
-            className="w-10 h-10 shrink-0 rounded-full bg-white flex items-center justify-center border-2 border-gray-300 shadow-sm"
-          >
-            <X size={22} className="text-gray-500" />
-          </button>
+      {/* Header */}
+      <div className="flex items-center justify-between p-5 pt-5 pb-4 gap-3">
+        <button
+          onClick={() => navigate("/map")}
+          title="Cerrar"
+          className="w-10 h-10 shrink-0 rounded-full bg-white flex items-center justify-center border-2 border-gray-300 shadow-sm"
+        >
+          <X size={22} className="text-gray-500" />
+        </button>
 
-          {/* Barra de progreso */}
-          <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gold rounded-full transition-all duration-500"
-              style={{ width: `${progreso}%` }}
-            />
-          </div>
-
-          <span className="shrink-0 bg-gold font-bold text-white text-sm px-3 py-1 rounded-full">
-            NIVEL {numeroNivel}
-          </span>
+        {/* Barra de progreso */}
+        <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gold rounded-full transition-all duration-500"
+            style={{ width: `${progreso}%` }}
+          />
         </div>
 
-        {/* Contenido principal */}
-        <div className="flex-1 flex flex-col items-center px-screen pt-2 overflow-y-auto">
-          {/* Glifo */}
-          {preguntaActual.imagen_url && (
-            <div className="bg-white size-glifo-card rounded-3xl border-2 border-light-gray shadow-[0_6px_0_#E5E7EB] flex items-center justify-center mb-4 shrink-0">
-              <img
-                src={getMediaUrl(preguntaActual.imagen_url)}
-
-                alt={preguntaActual.nombre_maya ?? "Glifo maya"}
-                className="size-glifo-img object-contain"
-              />
-            </div>
-          )}
-
-          {/* Nombre maya + botón audio */}
-          {preguntaActual.nombre_maya && (
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-4xl font-extrabold text-black">
-                {preguntaActual.nombre_maya}
-              </span>
-              {preguntaActual.audio_url && (
-                <button
-                  onClick={handleAudio}
-                  className="size-audio-btn bg-maya-gold rounded-full flex items-center justify-center shadow-sm text-white shrink-0"
-                  aria-label="Reproducir pronunciación"
-                >
-                  <Volume2 size={18} />
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Pregunta */}
-          <p className="font-bold text-brown mt-3 mb-5 px-4 text-center text-xl">
-            {preguntaActual.question}
-          </p>
-
-          {/* Opciones */}
-          <div className="flex flex-col gap-2.5 w-full max-w-sm">
-            {preguntaActual.options.map((option) => (
-              <button
-                key={option}
-                onClick={() => handleSelect(option)}
-                disabled={answered}
-                className={`flex items-center justify-between px-5 py-4 rounded-2xl transition-all ${getOptionStyle(option)}`}
-              >
-                <span className="font-semibold text-lg text-black">
-                  {option}
-                </span>
-                <span className={getRadioStyle(option)} />
-              </button>
-            ))}
-          </div>
-
-          {/* Feedback — solo al acertar */}
-          {answered && esCorrecta && (
-            <div className="mt-5 text-center">
-              <p className="font-bold text-2xl text-light-green">
-                ¡Correcto!
-              </p>
-            </div>
-          )}
-
-          {/* Feedback — incorrecto (desaparece solo con el reset) */}
-          {answered && !esCorrecta && (
-            <div className="mt-5 text-center">
-              <p className="font-bold text-2xl text-red">
-                Inténtalo de nuevo
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Botón inferior */}
-        <div className="px-screen pb-8 pt-4">
-          {answered && esCorrecta ? (
-            <button
-              onClick={handleContinue}
-              className="w-full bg-light-green py-4 rounded-2xl font-bold text-white text-xl tracking-widest shadow-[0_8px_0_#065f46]"
-            >
-              {indice + 1 < totalPreguntas ? "CONTINUAR" : "¡TERMINAR!"}
-            </button>
-          ) : (
-            <button
-              disabled
-              className="w-full bg-light-gray py-4 rounded-2xl font-bold text-white text-xl tracking-widest shadow-[0_8px_0_#6B7280]"
-            >
-              {indice + 1 < totalPreguntas ? "CONTINUAR" : "¡TERMINAR!"}
-            </button>
-          )}
-        </div>
+        <span className="shrink-0 bg-gold font-bold text-white text-sm px-3 py-1 rounded-full">
+          NIVEL {numeroNivel}
+        </span>
       </div>
 
-      {/* Modal de nivel completado */}
-      <CompletedLevelModal
-        isOpen={showModal}
-        numeroNivel={numeroNivel}
-        estrellas={estrellasFinales}
-        hayNivelSiguiente={!!nivelSiguiente}
-        onContinuar={handleContinuarModal}
-        onIrAlMapa={() => {
-          sonidoWin.pause()
-          sonidoWin.currentTime = 0
-          navigate("/map")
-        }}
-      />
-    </div>
+      {/* Contenido principal */}
+      <div className="flex-1 flex flex-col items-center px-screen pt-2 overflow-y-auto">
+        {/* Glifo */}
+        {preguntaActual.imagen_url && (
+          <div className="bg-white size-glifo-card rounded-3xl border-2 border-light-gray shadow-[0_6px_0_#E5E7EB] flex items-center justify-center mb-4 shrink-0">
+            <img
+              src={getMediaUrl(preguntaActual.imagen_url)}
+
+              alt={preguntaActual.nombre_maya ?? "Glifo maya"}
+              className="size-glifo-img object-contain"
+            />
+          </div>
+        )}
+
+        {/* Nombre maya + botón audio */}
+        {preguntaActual.nombre_maya && (
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-4xl font-extrabold text-black">
+              {preguntaActual.nombre_maya}
+            </span>
+            {preguntaActual.audio_url && (
+              <button
+                onClick={handleAudio}
+                className="size-audio-btn bg-maya-gold rounded-full flex items-center justify-center shadow-sm text-white shrink-0"
+                aria-label="Reproducir pronunciación"
+              >
+                <Volume2 size={18} />
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Pregunta */}
+        <p className="font-bold text-brown mt-3 mb-5 px-4 text-center text-xl">
+          {preguntaActual.question}
+        </p>
+
+        {/* Opciones */}
+        <div className="flex flex-col gap-2.5 w-full max-w-sm">
+          {preguntaActual.options.map((option) => (
+            <button
+              key={option}
+              onClick={() => handleSelect(option)}
+              disabled={answered}
+              className={`flex items-center justify-between px-5 py-4 rounded-2xl transition-all ${getOptionStyle(option)}`}
+            >
+              <span className="font-semibold text-lg text-black">
+                {option}
+              </span>
+              <span className={getRadioStyle(option)} />
+            </button>
+          ))}
+        </div>
+
+        {/* Feedback — solo al acertar */}
+        {answered && esCorrecta && (
+          <div className="mt-5 text-center">
+            <p className="font-bold text-2xl text-light-green">
+              ¡Correcto!
+            </p>
+          </div>
+        )}
+
+        {/* Feedback — incorrecto (desaparece solo con el reset) */}
+        {answered && !esCorrecta && (
+          <div className="mt-5 text-center">
+            <p className="font-bold text-2xl text-red">
+              Inténtalo de nuevo
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Botón inferior */}
+      <div className="px-screen pb-8 pt-4">
+        {answered && esCorrecta ? (
+          <button
+            onClick={handleContinue}
+            className="w-full bg-light-green py-4 rounded-2xl font-bold text-white text-xl tracking-widest shadow-[0_8px_0_#065f46]"
+          >
+            {indice + 1 < totalPreguntas ? "CONTINUAR" : "¡TERMINAR!"}
+          </button>
+        ) : (
+          <button
+            disabled
+            className="w-full bg-light-gray py-4 rounded-2xl font-bold text-white text-xl tracking-widest shadow-[0_8px_0_#6B7280]"
+          >
+            {indice + 1 < totalPreguntas ? "CONTINUAR" : "¡TERMINAR!"}
+          </button>
+        )}
+      </div>
+
+    {/* Modal de nivel completado */}
+    <CompletedLevelModal
+      isOpen={showModal}
+      numeroNivel={numeroNivel}
+      estrellas={estrellasFinales}
+      hayNivelSiguiente={!!nivelSiguiente}
+      onContinuar={handleContinuarModal}
+      onIrAlMapa={() => {
+        sonidoWin.pause()
+        sonidoWin.currentTime = 0
+        navigate("/map")
+      }}
+    />
+  </div>
   )
 }

@@ -84,7 +84,7 @@ export default function LevelMap() {
   }
 
   return (
-    <div className="md:min-h-screen md:bg-gray-600 md:flex md:items-center md:justify-center">
+    <div className="md:min-h-screen md:bg-gray-700 md:flex md:items-center md:justify-center">
       <div className="w-full md:w-[390px] md:max-h-[844px] h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
 
         {/* HEADER */}

@@ -180,7 +180,7 @@ export default function ScanLevel({ level, onComplete }) {
   // — Error de cámara —
   if (camaraError) {
     return (
-      <div className="bg-black min-h-screen flex flex-col items-center justify-center px-6 text-center">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 text-center bg-black">
         <p className="text-white font-semibold mb-6">{camaraError}</p>
         <button onClick={() => navigate("/map")}
           className="px-6 py-3 rounded-2xl font-bold text-white bg-gold">
@@ -193,24 +193,23 @@ export default function ScanLevel({ level, onComplete }) {
   // — Resultado correcto —
   if (scanned && detectado?.coincide) {
     return (
-      <div className="md:min-h-screen md:bg-gray-600 md:flex md:items-center md:justify-center">
-        <div className="w-full md:w-[390px] md:max-h-[844px] min-h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
+      <div className="flex-1 flex flex-col bg-amber-50 min-h-0">
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 gap-3">
 
-          {/* Header */}
-          <div className="flex items-center justify-between px-6 pt-6 pb-4 gap-3">
-            <button
-              onClick={() => navigate("/map")}
-              className="w-10 h-10 shrink-0 rounded-full bg-white flex items-center justify-center border-2 border-gray-200 shadow-sm"
-            >
-              <X size={18} className="text-gray-500" />
-            </button>
-            <div className="flex-1 flex justify-center">
-              <span className="bg-light-green text-white font-bold text-lg px-10 py-2 rounded-3xl text-center leading-tight shadow-[0_4px_0_#065f46]">
-                ¡Felicidades!<br />Glifo encontrado
-              </span>
-            </div>
-            <div className="w-10 shrink-0" />
+        {/* Header */}
+          <button
+            onClick={() => navigate("/map")}
+            className="w-10 h-10 shrink-0 rounded-full bg-white flex items-center justify-center border-2 border-gray-200 shadow-sm"
+          >
+            <X size={18} className="text-gray-500" />
+          </button>
+          <div className="flex-1 flex justify-center">
+            <span className="bg-light-green text-white font-bold text-lg px-10 py-2 rounded-3xl text-center leading-tight shadow-[0_4px_0_#065f46]">
+              ¡Felicidades!<br />Glifo encontrado
+            </span>
           </div>
+          <div className="w-10 shrink-0" />
+        </div>
 
           {/* Contenido */}
           <div className="flex-1 flex flex-col items-center px-12 pt-4 gap-5 overflow-y-auto">
@@ -268,7 +267,6 @@ export default function ScanLevel({ level, onComplete }) {
               Siguiente nivel
             </button>
           </div>
-        </div>
       </div>
     )
   }
@@ -276,24 +274,23 @@ export default function ScanLevel({ level, onComplete }) {
   // — Resultado incorrecto —
   if (scanned && !detectado?.coincide) {
     return (
-      <div className="md:min-h-screen md:bg-gray-600 md:flex md:items-center md:justify-center">
-        <div className="w-full md:w-[390px] md:max-h-[844px] min-h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
+      <div className="flex-1 flex flex-col bg-amber-50 min-h-0">
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 gap-3">
 
           {/* Header */}
-          <div className="flex items-center justify-between px-6 pt-6 pb-4 gap-3">
-            <button
-              onClick={() => navigate("/map")}
-              className="w-10 h-10 shrink-0 rounded-full bg-white flex items-center justify-center border-2 border-gray-200 shadow-sm"
-            >
-              <X size={18} className="text-gray-500" />
-            </button>
-            <div className="flex-1 flex justify-center">
-              <span className="bg-red text-white font-bold text-lg px-10 py-2 rounded-3xl text-center">
-                ¡Ups!
-              </span>
-            </div>
-            <div className="w-10 shrink-0" />
+          <button
+            onClick={() => navigate("/map")}
+            className="w-10 h-10 shrink-0 rounded-full bg-white flex items-center justify-center border-2 border-gray-200 shadow-sm"
+          >
+            <X size={18} className="text-gray-500" />
+          </button>
+          <div className="flex-1 flex justify-center">
+            <span className="bg-red text-white font-bold text-lg px-10 py-2 rounded-3xl text-center">
+              ¡Ups!
+            </span>
           </div>
+          <div className="w-10 shrink-0" />
+        </div>
 
           {/* Contenido */}
           <div className="flex-1 flex flex-col items-center justify-center px-10 gap-6">
@@ -322,16 +319,13 @@ export default function ScanLevel({ level, onComplete }) {
               Reintentar
             </button>
           </div>
-        </div>
       </div>
     )
   }
 
   // — Pantalla principal de escaneo —
   return (
-    //<div className="min-h-screen flex flex-col relative overflow-hidden">
-    <div className="md:min-h-screen md:bg-gray-600 md:flex md:items-center md:justify-center">
-      <div className="w-full md:w-[390px] md:max-h-[844px] min-h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
+    <div className="flex-1 flex flex-col relative overflow-hidden min-h-0">
 
       {/* ── Capa 1: video completo oscurecido (fondo) ── */}
       <video
@@ -345,7 +339,7 @@ export default function ScanLevel({ level, onComplete }) {
       <div className="absolute inset-0" style={{ backgroundColor: "rgba(0,0,0,0.55)" }} />
 
       {/* ── Contenido sobre el overlay ── */}
-      <div className="relative z-10 flex flex-col min-h-screen">
+      <div className="relative z-10 flex flex-col flex-1 min-h-0">
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 pt-5 pb-2">
@@ -369,7 +363,7 @@ export default function ScanLevel({ level, onComplete }) {
         </div>
 
         {/* Área del visor */}
-        <div className="flex-1 flex items-center justify-center px-8 py-4">
+        <div className="flex-1 flex items-center justify-center px-8 py-1">
           <div className="relative w-full max-w-xs aspect-square">
 
             {/* ── Capa 2: video sin oscurecer dentro del visor ── */}
@@ -410,22 +404,22 @@ export default function ScanLevel({ level, onComplete }) {
         </div>
 
         {/* Panel inferior */}
-        <div className="bg-cream-background rounded-t-4xl px-6 pt-2 pb-8">
+        <div className="bg-cream-background rounded-t-4xl px-6 pt-1 pb-scan-panel relative z-10">
 
           {/* Ícono lupa flotante */}
-          <div className="flex justify-center -mt-10 mb-5">
+          <div className="flex justify-center -mt-10 mb-3 relative z-10">
             <div className="w-20 h-20 bg-white rounded-full border-4 border-gold flex items-center justify-center shadow-md">
               <Search size={32} className="text-gold" />
             </div>
           </div>
 
-          <h2 className="text-2xl font-extrabold text-center text-black mb-2">
+          <h2 className="text-2xl font-extrabold text-center text-black mb-4 leading-tight">
             Busca {contenido.glifo?.significado_es
               ? `el ${nombreObjetivo}`
               : contenido.glifo?.nombre_maya ?? "el glifo"}
           </h2>
 
-          <p className="text-center text-brown text-md mb-10 font-bold leading-relaxed">
+          <p className="text-center text-brown text-md mb-6 font-bold leading-relaxed leading-tight">
             Apunta tu cámara hacia el glifo<br />
             que creas que hace referencia a{" "}
             {contenido.glifo?.significado_es ? `un ${nombreObjetivo}` : "[significado]"}.
@@ -443,7 +437,6 @@ export default function ScanLevel({ level, onComplete }) {
             )}
             {modelLoading ? "CARGANDO MODELO..." : "ESCANEAR GLIFO"}
           </button>
-        </div>
       </div>
 
       {/* Canvas oculto */}

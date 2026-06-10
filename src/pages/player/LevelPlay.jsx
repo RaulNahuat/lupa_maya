@@ -95,28 +95,30 @@ export default function LevelPlay() {
   }
 
   return (
-    <div className="relative">
-      {level.tipo === "APRENDIZAJE" && (
-        <QuizLevel key={level.id} level={level} onComplete={handleCompleteLevel} />
-      )}
+    <div className="md:min-h-screen md:bg-gray-700 md:flex md:items-center md:justify-center">
+      <div className="w-full md:w-[390px] md:h-[844px] h-screen flex flex-col md:rounded-3xl md:shadow-2xl md:overflow-hidden relative">
+        {level.tipo === "APRENDIZAJE" && (
+          <QuizLevel key={level.id} level={level} onComplete={handleCompleteLevel} />
+        )}
 
-      {level.tipo === "BUSQUEDA" && (
-        <ScanLevel key={level.id} level={level} onComplete={handleCompleteLevel} />
-      )}
+        {level.tipo === "BUSQUEDA" && (
+          <ScanLevel key={level.id} level={level} onComplete={handleCompleteLevel} />
+        )}
 
-      {level.tipo !== "APRENDIZAJE" && level.tipo !== "BUSQUEDA" && (
-        <p className="text-center mt-10">
-          Tipo de nivel no reconocido: {level.tipo}
-        </p>
-      )}
+        {level.tipo !== "APRENDIZAJE" && level.tipo !== "BUSQUEDA" && (
+          <p className="text-center mt-10">
+            Tipo de nivel no reconocido: {level.tipo}
+          </p>
+        )}
 
-      {/*Modal de la insgnia desbloqueada*/}
-      <BadgeUnlockModal
-        badge={unlockedBadge}
-        onClose={() => {
-          setUnlockedBadge(null)
-        }}
-      />
+        {/*Modal de la insgnia desbloqueada*/}
+        <BadgeUnlockModal
+          badge={unlockedBadge}
+          onClose={() => {
+            setUnlockedBadge(null)
+          }}
+        />
+      </div>
     </div>
   )
 }

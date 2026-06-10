@@ -58,13 +58,13 @@ const LoginUser = () => {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <h1 className="text-3xl font-extrabold text-maya-dark mb-2 tracking-tight">
+      <h1 className="text-title font-extrabold text-maya-dark mb-1 tracking-tight">
         ¡Hola, explorador!
       </h1>
       <p className="text-maya-gray font-medium mb-6 text-md text-center">Ingresa para descubrir los glifos mayas</p>
 
       <form onSubmit={handleSubmit} className="w-full space-y-5">
-        <div className="space-y-3 pb-2">
+        <div className="space-y-2 pb-2">
           <label className='flex items-center gap-2 font-medium text-md'> 
             <User size={18}/>
             Tu nombre de explorador
@@ -90,7 +90,7 @@ const LoginUser = () => {
             {[...Array(4)].map((_, i) => (
               <div
                 key={i}
-                className={`w-3.5 h-3.5 rounded-full border transition-all duration-300 ${
+                className={`rounded-full border transition-all duration-300 size-pin-dot ${
                   pin.length > i ? 'bg-maya-gold border-maya-gold scale-110' : 'bg-white border-gray-400'
                 }`}
               />

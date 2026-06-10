@@ -131,6 +131,56 @@
     padding-left:  clamp(16px, 4.5vw, 24px);
     padding-right: clamp(16px, 4.5vw, 24px);
   }
+
+  /* Avatar del login */
+  .size-avatar {
+    width:  clamp(100px, 26vw, 124px);
+    height: clamp(100px, 26vw, 124px);
+  }
+
+  /* Título principal del login */
+  .text-title {
+    font-size: clamp(1.5rem, 6.5vw, 1.9rem);
+  }
+
+  /* Padding vertical fluido para inputs */
+  .py-input {
+    padding-top:    clamp(10px, 2.8vw, 14px);
+    padding-bottom: clamp(10px, 2.8vw, 14px);
+  }
+
+  /* Botones del PinPad */
+  .size-pin-btn {
+    width:  clamp(56px, 15vw, 68px);
+    height: clamp(44px, 11.5vw, 54px);
+  }
+
+  /* Punto indicador del PIN */
+  .size-pin-dot {
+    width:  clamp(12px, 3.2vw, 16px);
+    height: clamp(12px, 3.2vw, 16px);
+  }
+
+  /* Ícono borrar del PinPad */
+  .size-pin-icon {
+    width:  clamp(18px, 5vw, 24px);
+    height: clamp(18px, 5vw, 24px);
+  }
+
+  /* Ancho máximo del contenedor del PinPad */
+  .pinpad-width {
+    max-width: clamp(200px, 55vw, 240px);
+  }
+
+  /* Gap entre botones del PinPad */
+  .gap-pin {
+    gap: clamp(8px, 2.5vw, 14px);
+  }
+
+  /* Padding inferior del panel de escaneo */
+  .pb-scan-panel {
+    padding-bottom: clamp(16px, 4.5vw, 28px);
+  }
 }
 
 @keyframes levelPulse {

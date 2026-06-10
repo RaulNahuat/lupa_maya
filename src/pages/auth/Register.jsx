@@ -19,7 +19,7 @@ const Register = () => {
   const navigate = useNavigate();
 
   const dotsToShow = pin.length < 4 ? pin.length : confirmPin.length;
-  const labelText = pin.length < 4 ? "Elige tu PIN de 4 números" : "Confirma tu PIN";
+  const labelText = pin.length < 4 ? "Elige un PIN de 4 números" : "Confirma tu PIN";
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -64,65 +64,67 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-maya-cream flex items-center justify-center p-4 pt-24 relative overflow-hidden">
+    <div className="md:min-h-screen md:bg-gray-800 md:flex md:items-center md:justify-center">
+      <div className="w-full md:w-[390px] md:max-h-[844px] h-screen flex flex-col bg-maya-cream md:overflow-hidden md:rounded-3xl md:shadow-2xl relative overflow-hidden">
+      
       <Navbar />
-      <div className="absolute top-[-10%] left-[-5%] w-64 h-64 bg-[#02845E]/5 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-[-5%] right-[-5%] w-96 h-96 bg-maya-dark/5 rounded-full blur-3xl"></div>
 
-      <div className="max-w-md w-full bg-white rounded-4xl p-8 shadow-2xl flex flex-col items-center border border-gray-50 relative z-10">
+      {/* Contenido scrolleable */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="w-full px-screen flex flex-col items-center relative z-10 pt-5 pb-8">
 
-        <div className="mb-6 relative">
-          <div className="absolute -inset-4 bg-maya-green-light rounded-full blur-2xl opacity-40"></div>
+        {/* Avatar */}
+        <div className="mb-5">
           <img
             src={mayaCharacter}
             alt="Maya"
-            className="w-24 h-24 object-contain relative z-10 transition-transform duration-500 hover:scale-105"
+            className="object-contain rounded-full border border-gray-400 transition-transform duration-500 hover:scale-105 shadow-[0_5px_0_#9CA3AF] size-avatar"
           />
         </div>
 
-        <h1 className="text-3xl font-extrabold text-maya-dark mb-2 tracking-tight">
-          ¡Únete!
+        <h1 className="text-title font-extrabold text-maya-dark mb-1 tracking-tight">
+          ¡Únete a la aventura!
         </h1>
-        <p className="text-maya-gray font-medium mb-8 text-sm">Crea tu aventura con nombre y PIN</p>
+        <p className="text-maya-gray font-medium mb-7 text-md text-center">Completa lo siguiente para comenzar a jugar</p>
 
-        <form className="w-full space-y-4" onSubmit={handleRegister}>
+        <form className="w-full space-y-3" onSubmit={handleRegister}>
           <div className="space-y-3">
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <input
                 type="text"
                 name="nombre"
                 required
                 placeholder="Nombre"
-                className="w-1/2 px-4 py-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-[#02845E] focus:ring-4 focus:ring-[#02845E]/10 outline-none transition-all placeholder:text-gray-400 text-maya-dark font-semibold shadow-sm hover:border-gray-200"
+                className="w-1/2 px-4 rounded-2xl border border-gray-400 bg-white focus:bg-white focus:ring-2 focus:ring-maya-gold outline-none transition-all placeholder:text-gray-400 text-maya-dark font-semibold shadow-[0_3px_0_#9CA3AF] py-input"
               />
               <input
                 type="text"
                 name="apellido"
                 required
                 placeholder="Apellido"
-                className="w-1/2 px-4 py-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-[#02845E] focus:ring-4 focus:ring-[#02845E]/10 outline-none transition-all placeholder:text-gray-400 text-maya-dark font-semibold shadow-sm hover:border-gray-200"
+                className="w-1/2 px-4 rounded-2xl border border-gray-400 bg-white focus:bg-white focus:ring-2 focus:ring-maya-gold outline-none transition-all placeholder:text-gray-400 text-maya-dark font-semibold shadow-[0_3px_0_#9CA3AF] py-input"
               />
             </div>
             <input
               type="text"
               name="username"
               required
-              placeholder="Usuario (Username único)"
-              className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-[#02845E] focus:ring-4 focus:ring-[#02845E]/10 outline-none transition-all placeholder:text-gray-400 text-maya-dark font-semibold shadow-sm hover:border-gray-200"
+              placeholder="Usuario (Como te llamarás en el juego)"
+              className="w-full px-4 rounded-2xl border border-gray-400 bg-white focus:bg-white focus:ring-2 focus:ring-maya-gold outline-none transition-all placeholder:text-gray-400 text-maya-dark font-semibold shadow-[0_3px_0_#9CA3AF] py-input"
             />
             <input
               type="text"
               name="escuela"
               required
               placeholder="Escuela"
-              className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-[#02845E] focus:ring-4 focus:ring-[#02845E]/10 outline-none transition-all placeholder:text-gray-400 text-maya-dark font-semibold shadow-sm hover:border-gray-200"
+              className="w-full px-4 rounded-2xl border border-gray-400 bg-white focus:bg-white focus:ring-2 focus:ring-maya-gold outline-none transition-all placeholder:text-gray-400 text-maya-dark font-semibold shadow-[0_3px_0_#9CA3AF] py-input"
             />
             <input
               type="text"
               name="lugar_procedencia"
               required
               placeholder="Lugar de procedencia"
-              className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-[#02845E] focus:ring-4 focus:ring-[#02845E]/10 outline-none transition-all placeholder:text-gray-400 text-maya-dark font-semibold shadow-sm hover:border-gray-200"
+              className="w-full px-4 rounded-2xl border border-gray-400 bg-white focus:bg-white focus:ring-2 focus:ring-maya-gold outline-none transition-all placeholder:text-gray-400 text-maya-dark font-semibold shadow-[0_3px_0_#9CA3AF] py-input"
             />
             <div className="flex gap-3">
               <div className="relative w-1/2">
@@ -130,13 +132,13 @@ const Register = () => {
                   name="genero"
                   required
                   defaultValue=""
-                  className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-[#02845E] focus:ring-4 focus:ring-[#02845E]/10 outline-none transition-all text-maya-dark font-semibold shadow-sm hover:border-gray-200 appearance-none"
+                  className="w-full px-4 rounded-2xl border border-gray-400 bg-white focus:bg-white focus:ring-2 focus:ring-maya-gold outline-none transition-all text-gray-400 font-semibold shadow-[0_3px_0_#9CA3AF] appearance-none py-input"
                 >
                   <option value="" disabled className="text-gray-400">Género</option>
                   <option value="Masculino" className="text-maya-dark">Masculino</option>
                   <option value="Femenino" className="text-maya-dark">Femenino</option>
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
+                <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-400">
                   <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                 </div>
               </div>
@@ -145,23 +147,23 @@ const Register = () => {
                 name="grado"
                 required
                 placeholder="Grado"
-                className="w-1/2 px-4 py-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-[#02845E] focus:ring-4 focus:ring-[#02845E]/10 outline-none transition-all placeholder:text-gray-400 text-maya-dark font-semibold shadow-sm hover:border-gray-200"
+                className="w-1/2 px-4 rounded-2xl border border-gray-400 bg-white focus:bg-white focus:ring-2 focus:ring-maya-gold outline-none transition-all placeholder:text-gray-400 text-maya-dark font-semibold shadow-[0_3px_0_#9CA3AF] py-input"
               />
             </div>
           </div>
 
-          <div className="space-y-4 flex flex-col items-center pt-4">
-            <div className="flex flex-col items-center gap-2">
-              <span className="text-sm font-bold text-maya-gray">{labelText}</span>
-              <div className="flex gap-2">
-                {[...Array(4)].map((_, i) => (
-                  <div
-                    key={i}
-                    className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-300 ${dotsToShow > i ? 'bg-[#02845E] border-[#02845E] scale-110' : 'border-gray-200'
-                      }`}
-                  />
-                ))}
-              </div>
+          {/* PIN */}
+          <div className="flex flex-col items-center gap-4 pt-3">
+            <span className="text-md font-bold text-maya-gray">{labelText}</span>
+            <div className="flex gap-2">
+              {[...Array(4)].map((_, i) => (
+                <div
+                  key={i}
+                  className={`rounded-full border-2 transition-all duration-300 size-pin-dot ${
+                    dotsToShow > i ? 'bg-maya-gold border-maya-gold scale-110' : 'border-gray-300'
+                  }`}
+                />
+              ))}
             </div>
 
             <PinPad onNumberPress={handlePinPress} onDelete={handlePinDelete} />
@@ -172,15 +174,13 @@ const Register = () => {
           </SecondaryButton>
         </form>
 
-        <div className="mt-8 flex flex-col items-center gap-4 w-full pt-6 border-t border-gray-50">
-          <p className="text-sm font-bold text-gray-400">
-            ¿Ya tienes una cuenta? <Link to="/login" className="text-maya-gold underline">Iniciar sesión</Link>
+        <div className="mt-7 pt-5 border-t border-gray-300 w-full text-center">
+          <p className="text-md font-semibold text-gray-500">
+            ¿Ya tienes una cuenta? <Link to="/login" className="text-maya-gold underline">Inicia sesión</Link>
           </p>
-
-          <button className="w-full py-3 rounded-2xl border-2 border-gray-100 font-bold text-gray-400 hover:border-maya-dark hover:text-maya-dark transition-all text-sm bg-white shadow-sm">
-            Continuar como <span className="text-maya-dark font-black">invitado</span>
-          </button>
+          </div>
         </div>
+      </div>
       </div>
     </div>
   );
