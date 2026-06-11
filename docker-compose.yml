@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
+      network: host
     container_name: lupa_maya_backend
     restart: always
     environment:
@@ -29,6 +30,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
+      network: host
       args:
         VITE_API_URL: ${VITE_API_URL}
     container_name: lupa_maya_frontend
