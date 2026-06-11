@@ -6,7 +6,8 @@ import LevelNode from "../../components/game/LevelNode"
 import ModalConfirmation from "../../components/ModalConfirmation"
 import BottomNav from "../../components/game/BottomNav"
 import { ensureActiveAiModelCached } from "../../services/recognition/aiModelCacheService"
-import { CircleUserRound, Play, Flame, Star, LogOut } from "lucide-react"
+import { useToast } from '../../context/ToastContext';
+import { CircleUserRound, Play, Flame, Star, LogOut, Camera, CameraOff } from "lucide-react"
 
 export default function LevelMap() {
   const levels = useGameStore((s) => s.levels)
@@ -14,6 +15,8 @@ export default function LevelMap() {
   const syncAndReload = useGameStore((s) => s.syncAndReload)
   const syncReady = useGameStore((s) => s.syncReady)
   const racha = useGameStore((s) => s.racha)
+  const modoSinCamara = useGameStore((s) => s.modoSinCamara)
+  const toggleModoSinCamara = useGameStore((s) => s.toggleModoSinCamara)
 
   const { currentUser, logoutUser } = useAuth()
   const navigate = useNavigate()
@@ -23,6 +26,8 @@ export default function LevelMap() {
 
   const scrollRef = useRef(null)
   const currentNodeRef = useRef(null) 
+
+  const { showToast } = useToast()
 
   useEffect(() => {
     if (!currentUser) return
@@ -83,6 +88,18 @@ export default function LevelMap() {
     setActiveLevel(activeLevel?.id === level.id ? null : level)
   }
 
+  const handleToggleCamara = () => {
+    const nuevoModo = !modoSinCamara
+    toggleModoSinCamara()
+    showToast(
+      nuevoModo ? 'Modo sin cámara' : 'Modo con cámara',
+      nuevoModo 
+        ? 'Los niveles de búsqueda serán de selección de imagen.' 
+        : 'Los niveles de búsqueda requerirán la cámara para escanear.',
+      'info'
+    )
+  }
+
   return (
     <div className="md:min-h-screen md:bg-gray-700 md:flex md:items-center md:justify-center">
       <div className="w-full md:w-[390px] md:max-h-[844px] h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
@@ -100,7 +117,7 @@ export default function LevelMap() {
 
             <div>
               <p className="font-bold text-black leading-tight text-lg">
-                {currentUser.nombre}
+                {currentUser.username}
               </p>
               <p className="text-dark-gold font-medium text-sm">
                 Nivel {nivelActual.numero ?? nivelActual.id}
@@ -118,6 +135,20 @@ export default function LevelMap() {
               <Star size={16} className="text-light-green" />
               <span className="text-sm font-bold text-light-green">{totalEstrellas}</span>
             </div>
+
+            <div className="h-8 w-px bg-gray-200 mx-1"></div>
+            
+            <button
+              onClick={handleToggleCamara}
+              className={`flex items-center gap-1 rounded-full px-3 py-1.5 border transition-all ${
+                modoSinCamara
+                  ? 'bg-maya-dark border-maya-dark text-white'
+                  : 'bg-white border-gray-300 text-gray-400'
+              }`}
+              title={modoSinCamara ? 'Modo sin cámara activo' : 'Activar modo sin cámara'}
+            >
+              {modoSinCamara ? <CameraOff size={15} /> : <Camera size={15} />}
+            </button>
           </div>
         </header>
 

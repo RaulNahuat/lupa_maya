@@ -36,6 +36,14 @@ export const useGameStore = create((set, get) => ({
   racha_escaneos: 0,
   syncReady: false, // true cuando el primer pull sync termina
 
+  modoSinCamara: localStorage.getItem('modoSinCamara') === 'true',
+
+  toggleModoSinCamara: () => {
+    const nuevo = !get().modoSinCamara
+    localStorage.setItem('modoSinCamara', String(nuevo))
+    set({ modoSinCamara: nuevo })
+  },
+
   /**
    * Carga el catálogo de niveles desde IndexedDB, cruza cada nivel con
    * su contenido (pregunta + opciones + glifo, o glifo objetivo según tipo),

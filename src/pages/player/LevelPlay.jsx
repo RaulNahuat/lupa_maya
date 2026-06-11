@@ -3,6 +3,7 @@ import { useGameStore } from "../../store/game/useGameStore"
 import { useAuth } from "../../context/AuthContext"
 import QuizLevel from "../../components/game/QuizLevel"
 import ScanLevel from "../../components/game/ScanLevel"
+import GlyphPickLevel from "../../components/game/GlyphPickLevel"
 import { useState } from "react"
 import BadgeUnlockModal from "../../components/game/BadgeUnlockModal"
 import { checkBadgeUnlock } from "../../services/player/badgeUnlockService"
@@ -16,6 +17,7 @@ export default function LevelPlay() {
   const levels = useGameStore((s) => s.levels)
   const completeLevel = useGameStore((s) => s.completeLevel)
   const racha = useGameStore((s) => s.racha)
+  const cameralessMode = useGameStore((s) => s.modoSinCamara)
   const { currentUser } = useAuth()
 
   const [unlockedBadge, setUnlockedBadge] = useState(null)
@@ -101,8 +103,16 @@ export default function LevelPlay() {
           <QuizLevel key={level.id} level={level} onComplete={handleCompleteLevel} />
         )}
 
-        {level.tipo === "BUSQUEDA" && (
+        {/*{level.tipo === "BUSQUEDA" && (
           <ScanLevel key={level.id} level={level} onComplete={handleCompleteLevel} />
+        )}*/}
+
+        {level.tipo === "BUSQUEDA" && !cameralessMode && (
+          <ScanLevel key={level.id} level={level} onComplete={handleCompleteLevel} />
+        )}
+
+        {level.tipo === "BUSQUEDA" && cameralessMode && (
+          <GlyphPickLevel key={level.id} level={level} onComplete={handleCompleteLevel} />
         )}
 
         {level.tipo !== "APRENDIZAJE" && level.tipo !== "BUSQUEDA" && (
