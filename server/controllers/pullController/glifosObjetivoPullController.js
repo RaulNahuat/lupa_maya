@@ -3,7 +3,7 @@ export async function getGlifosObjetivoPull(db) {
     include: [{
       model: db.Glifo,
       as: 'glifo',
-      attributes: ['id', 'nombre_maya', 'significado_es', 'descripcion', 'imagen_url', 'audio_url', 'clase_modelo']
+      attributes: ['id', 'nombre_maya', 'significado_es', 'descripcion', 'imagen_url', 'audio_url', 'video_url', 'clase_modelo']
     }]
   });
 

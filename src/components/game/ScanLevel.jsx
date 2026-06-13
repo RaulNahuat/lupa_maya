@@ -32,6 +32,8 @@ export default function ScanLevel({ level, onComplete }) {
   const [camaraError, setCamaraError] = useState(null)
   const [scanning, setScanning] = useState(false)
   const [modelLoading, setModelLoading] = useState(true)
+  const [videoTerminado, setVideoTerminado] = useState(false)
+  const [fadeIn, setFadeIn] = useState(false)
 
   useEffect(() => {
     startCamera()
@@ -192,9 +194,11 @@ export default function ScanLevel({ level, onComplete }) {
 
   // — Resultado correcto —
   if (scanned && detectado?.coincide) {
+    const tieneVideo = !!detectado.glifo?.video_url
+
     return (
       <div className="flex-1 flex flex-col bg-amber-50 min-h-0">
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 gap-3">
+        <div className="flex items-center justify-between px-6 pt-6 mb-4 gap-3">
 
         {/* Header */}
           <button
@@ -212,37 +216,63 @@ export default function ScanLevel({ level, onComplete }) {
         </div>
 
           {/* Contenido */}
-          <div className="flex-1 flex flex-col items-center px-12 pt-4 gap-5 overflow-y-auto">
+          <div className="flex-1 flex flex-col items-center px-14 pt-4 gap-5 overflow-y-auto">
 
             {/* Tarjeta del glifo */}
-            <div className="w-full bg-white rounded-2xl flex flex-col items-center py-6 px-6 gap-1.5 border-3 border-light-gray shadow-[0_7px_0_#E5E7EB]">
-              {detectado.glifo?.imagen_url && (
-                <img
-                  src={getMediaUrl(detectado.glifo.imagen_url)}
-                  alt={detectado.glifo.nombre_maya ?? "Glifo"}
-                  className="w-45 h-45 object-contain"
+            <div className="w-full bg-white rounded-2xl flex flex-col items-center py-5 px-5 gap-1.5 border-3 border-light-gray shadow-[0_7px_0_#E5E7EB]">
+
+              {/* Video - se muestra primero si existe y no ha terminado */}
+              {tieneVideo && !videoTerminado && (
+                <video
+                  src={getMediaUrl(detectado.glifo.video_url)}
+                  autoPlay
+                  playsInline
+                  className="w-full rounded-xl max-h-56  object-cover"
+                  //onEnded={() => setVideoTerminado(true)}
+                  onEnded={() => {
+                    setVideoTerminado(true)
+                    setTimeout(() => setFadeIn(true), 50)
+                  }}
                 />
               )}
-              {detectado.glifo?.nombre_maya && (
-                <p className="text-3xl font-extrabold text-gray-900">
-                  {detectado.glifo.nombre_maya}
-                </p>
-              )}
-              {detectado.glifo?.significado_es && (
-                <p className="text-lg font-semibold text-gray-900">
-                  {detectado.glifo.significado_es}
-                </p>
+
+              {/* Contenido del glifo - aparece tras el video o directo si no hay video */}
+              {(!tieneVideo || videoTerminado) && (
+                <div className={`flex flex-col items-center gap-1.5 transition-opacity duration-700 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
+                  {detectado.glifo?.imagen_url && (
+                    <img
+                      src={getMediaUrl(detectado.glifo.imagen_url)}
+                      alt={detectado.glifo.nombre_maya ?? "Glifo"}
+                      className="w-40 h-40 object-contain"
+                    />
+                  )}
+                  {detectado.glifo?.nombre_maya && (
+                    <p className="text-3xl font-extrabold text-gray-900">
+                      {detectado.glifo.nombre_maya}
+                    </p>
+                  )}
+                  {detectado.glifo?.significado_es && (
+                    <p className="text-lg font-semibold text-gray-900">
+                      {detectado.glifo.significado_es}
+                    </p>
+                  )}
+                </div>
               )}
             </div>
 
             {/* Botón de audio */}
             {detectado.glifo?.audio_url && (
-              <div className="flex flex-col items-center gap-2">
+              <div className="flex flex-col items-center gap-2 mt-3">
                 <button
                   onClick={() => new Audio(getMediaUrl(detectado.glifo.audio_url)).play()}
-                  className="w-16 h-16 bg-gold rounded-full flex items-center justify-center shadow-[0_4px_0_#C88F12] active:shadow-none active:translate-y-1 transition-all"
+                  disabled={tieneVideo && !videoTerminado}
+                  className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${
+                    tieneVideo && !videoTerminado
+                      ? 'bg-gray-300 shadow-[0_4px_0_#9CA3AF]'
+                      : 'bg-maya-gold shadow-[0_4px_0_#B8851A] active:shadow-none active:translate-y-1'
+                  }`}
                 >
-                  <Volume2 size={28} className="text-white" />
+                  <Volume2 size={32} className="text-white" />
                 </button>
                 <p className="text-sm text-gray-400 font-medium">Toca para escuchar en maya</p>
               </div>
@@ -250,7 +280,7 @@ export default function ScanLevel({ level, onComplete }) {
 
             {/* Dato cultural / descripción */}
             {detectado.glifo?.descripcion && (
-              <div className="w-full bg-amber-100 rounded-2xl px-5 py-4">
+              <div className="w-full bg-amber-100 rounded-2xl px-5 py-4 mt-2">
                 <p className="text-gray-700 font-medium leading-relaxed">
                   {detectado.glifo.descripcion}
                 </p>
