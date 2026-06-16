@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
-import { procesarColaSincronizacion } from "./syncService";
+import { descargarCambios } from "./syncService";
 import { API_BASE_URL } from "../config/api";
 
 const SOCKET_URL = API_BASE_URL;
@@ -27,9 +27,8 @@ export const initSocket = () => {
     });
 
     socket.on("hay_cambios", async () => {
-        console.log("El servidor notificó cambios. Iniciando sincronización pull...");
-        await procesarColaSincronizacion();
-        //Notifica a los contextos activos para que refresquen su estado en memoria
+        console.log("El servidor notificó cambios. Descargando cambios del servidor...");
+        await descargarCambios();
         window.dispatchEvent(new CustomEvent("sync-completed"));
     });
 
