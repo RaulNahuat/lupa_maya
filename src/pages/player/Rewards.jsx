@@ -18,6 +18,7 @@ export default function Rewards() {
   const navigate = useNavigate()
 
   const [dbBadges, setDbBadges] = useState([])
+  const [userBadgeIds, setUserBadgeIds] = useState(new Set())
   const [loading, setLoading] = useState(true)
   const [selectedBadge, setSelectedBadge] = useState(null)
 
@@ -26,9 +27,12 @@ export default function Rewards() {
       //Inicializa niveles y carga las insignias directamente de IndexedDB (Dexie)
       Promise.all([
         initLevels(currentUser),
-        db.insignias.toArray()
-      ]).then(([_, insigniasFromDb]) => {
+        db.insignias.toArray(),
+        db.usuario_insignias.where('usuario_local_id').equals(currentUser.local_id).toArray()
+      ]).then(([_, insigniasFromDb, userBadgesFromDb]) => {
         setDbBadges(insigniasFromDb)
+        const ids = new Set(userBadgesFromDb.map(ub => Number(ub.insignia_id)))
+        setUserBadgeIds(ids)
         setLoading(false)
       }).catch((err) => {
         console.error("Error cargando insignias desde base de datos:", err)
@@ -65,11 +69,16 @@ export default function Rewards() {
       requirement = `Consigue una racha de ${badge.valor_condicion} escaneos seguidos sin errores.`
     }
 
+    // Si ya existe en la base de datos de insignias del usuario, definitivamente está desbloqueada
+    if (userBadgeIds.has(Number(badge.id))) {
+      unlocked = true
+    }
+
     return {
       id: badge.id,
       imageSrc: getMediaUrl(badge.icono_url),
       title: badge.nombre,
-      description: badge.descripcion,
+      description: badge.description,
       unlocked,
       requirement
     }

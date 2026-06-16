@@ -88,27 +88,17 @@ export const descargarCambios = async (usuarioLocalId = null) => {
             }
 
             // USUARIO_INSIGNIAS
-            if (usuarioLocalId) {
-                const localSincronizadas = await db.usuario_insignias
-                    .where('usuario_local_id')
-                    .equals(usuarioLocalId)
-                    .filter(ui => ui.sync_status === 'SINCRONIZADO')
-                    .toArray();
-
-                const serverInsigniaIds = new Set((usuario_insignias || []).map(ui => Number(ui.insignia_id)));
-                const aEliminar = localSincronizadas.filter(ui => !serverInsigniaIds.has(Number(ui.insignia_id)));
-                
-                if (aEliminar.length > 0) {
-                    console.log(`[SYNC] Eliminando ${aEliminar.length} insignias locales huérfanas/no sincronizadas en servidor`);
-                    await db.usuario_insignias.bulkDelete(aEliminar.map(ui => ui.local_id));
-                }
-            }
-
             if (usuario_insignias && usuario_insignias.length > 0) {
-                await db.usuario_insignias.bulkPut(usuario_insignias.map(ui => ({
-                    ...ui,
-                    sync_status: 'SINCRONIZADO'
-                })));
+                for (const ui of usuario_insignias) {
+                    if (ui.deleted_at) {
+                        await db.usuario_insignias.delete(ui.local_id);
+                    } else {
+                        await db.usuario_insignias.put({
+                            ...ui,
+                            sync_status: 'SINCRONIZADO'
+                        });
+                    }
+                }
             }
 
 
