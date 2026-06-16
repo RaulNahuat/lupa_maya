@@ -13,8 +13,14 @@ import { AdminProvider } from './context/AdminContext.jsx'
 import { ToastProvider } from './context/ToastContext.jsx'
 import ToastContainer from './components/ToastContainer.jsx'
 
-registerSW({ immediate: true })
-descargarCambios(null); // Pull inicial de usuarios y niveles (público)
+//Si hay un update listo, se aplicará automáticamente sin que el usuario tenga que borrar la caché manualmente.
+const updateSW = registerSW({
+  immediate: true,
+  onNeedRefresh() {
+    updateSW(true);
+  },
+});
+descargarCambios(null); 
 initSocket();
 
 createRoot(document.getElementById('root')).render(

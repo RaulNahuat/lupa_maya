@@ -52,6 +52,8 @@ export default defineConfig({
         ]
       },
       workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,jpg,ttf,woff2}'],
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024, // 8MB to support large badge images
         navigateFallbackDenylist: [/^\/api/, /^\/models/, /^\/socket\.io/],

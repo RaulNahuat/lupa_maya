@@ -26,9 +26,11 @@ export const initSocket = () => {
         console.error("Error de conexión Socket.io:", error.message);
     });
 
-    socket.on("hay_cambios", () => {
+    socket.on("hay_cambios", async () => {
         console.log("El servidor notificó cambios. Iniciando sincronización pull...");
-        procesarColaSincronizacion();
+        await procesarColaSincronizacion();
+        //Notifica a los contextos activos para que refresquen su estado en memoria
+        window.dispatchEvent(new CustomEvent("sync-completed"));
     });
 
     return socket;

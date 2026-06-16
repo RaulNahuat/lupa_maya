@@ -57,6 +57,20 @@ export const AuthProvider = ({ children }) => {
         return () => window.removeEventListener('online', handleOnline);
     }, [currentUser, initLevels]);
 
+    //Cuando el socket notifica cambios del servidor y el pull termina,
+    //refresca el store de Zustand con los nuevos datos de IndexedDB.
+    useEffect(() => {
+        if (!currentUser) return;
+
+        const handleSyncCompleted = () => {
+            console.log("Sync completado: recargando niveles desde IndexedDB...");
+            initLevels(currentUser);
+        };
+
+        window.addEventListener("sync-completed", handleSyncCompleted);
+        return () => window.removeEventListener("sync-completed", handleSyncCompleted);
+    }, [currentUser, initLevels]);
+
     const loginUser = (user) => {
         const userWithId = {...user, local_id: user.local_id || Date.now() };
         setCurrentUser(userWithId);
