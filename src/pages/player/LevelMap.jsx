@@ -51,6 +51,18 @@ export default function LevelMap() {
 
   }, [currentUser])
 
+  // Recarga niveles cuando el WebSocket notifica cambios del servidor
+  useEffect(() => {
+    if (!currentUser) return
+
+    const handleSyncCompleted = () => {
+      initLevels(currentUser)
+    }
+
+    window.addEventListener('sync-completed', handleSyncCompleted)
+    return () => window.removeEventListener('sync-completed', handleSyncCompleted)
+  }, [currentUser, initLevels])
+
   // Scroll automático al nivel actual
   useEffect(() => {
     if (levels.length > 0 && currentNodeRef.current) {
