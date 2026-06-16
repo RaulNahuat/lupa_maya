@@ -7,7 +7,8 @@ import ModalConfirmation from "../../components/ModalConfirmation"
 import BottomNav from "../../components/game/BottomNav"
 import { ensureActiveAiModelCached } from "../../services/recognition/aiModelCacheService"
 import { useToast } from '../../context/ToastContext';
-import { CircleUserRound, Play, Flame, Star, LogOut, MoreVertical, Camera, CameraOff } from "lucide-react"
+import { procesarColaSincronizacion } from "../../services/syncService"
+import { CircleUserRound, Play, Flame, Star, LogOut, MoreVertical, Camera, CameraOff, RefreshCw } from "lucide-react"
 
 export default function LevelMap() {
   const levels = useGameStore((s) => s.levels)
@@ -24,6 +25,7 @@ export default function LevelMap() {
   const [activeLevel, setActiveLevel] = useState(null)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
+  const [isSyncing, setIsSyncing] = useState(false)
   const [cameraTapExpanded , setCameraTapExpanded] = useState(false)
 
   const scrollRef = useRef(null)
@@ -104,6 +106,21 @@ export default function LevelMap() {
     )
   }
 
+  const handleManualSync = async () => {
+    setShowMenu(false)
+    if (isSyncing) return
+    setIsSyncing(true)
+    try {
+      await procesarColaSincronizacion(currentUser.local_id)
+      await initLevels(currentUser)
+      showToast('Contenido actualizado', 'Los niveles y datos están al día.', 'success')
+    } catch (e) {
+      showToast('Error al actualizar', 'No se pudo conectar con el servidor.', 'error')
+    } finally {
+      setIsSyncing(false)
+    }
+  }
+
   return (
     <div className="md:min-h-screen md:bg-gray-700 md:flex md:items-center md:justify-center">
       <div className="w-full md:w-[390px] md:max-h-[844px] h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
@@ -147,7 +164,21 @@ export default function LevelMap() {
               {showMenu && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-1 z-20">
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-1 z-20">
+                    <button
+                      onClick={handleManualSync}
+                      disabled={isSyncing}
+                      className="w-full flex items-center gap-2.5 px-4 py-3 text-sm font-bold text-maya-dark hover:bg-gray-50 transition-colors disabled:opacity-50"
+                    >
+                      <RefreshCw
+                        size={16}
+                        className={`shrink-0 text-gray-400 ${isSyncing ? 'animate-spin' : ''}`}
+                      />
+                      <span className="whitespace-nowrap">
+                        {isSyncing ? 'Actualizando...' : 'Actualizar contenido'}
+                      </span>
+                    </button>
+                    <div className="mx-4 h-px bg-gray-100" />
                     <button
                       onClick={() => {
                         setShowMenu(false)
@@ -155,8 +186,8 @@ export default function LevelMap() {
                       }}
                       className="w-full flex items-center gap-2.5 px-4 py-3 text-sm font-bold text-maya-dark hover:bg-gray-50 transition-colors"
                     >
-                      <LogOut size={16} className="text-gray-400" />
-                      Cerrar sesión
+                      <LogOut size={16} className="shrink-0 text-gray-400" />
+                      <span className="whitespace-nowrap">Cerrar sesión</span>
                     </button>
                   </div>
                 </>
@@ -176,7 +207,7 @@ export default function LevelMap() {
         <div className="relative">
           <button
             onClick={handleToggleCamara}
-            className={`absolute top-10 right-0 z-20 flex items-center shadow-lg px-3 py-2.5 shadow-lg border transition-all ${
+            className={`absolute top-10 right-0 z-20 flex items-center shadow-lg px-3 py-2.5 border transition-all ${
               modoSinCamara
                 ? 'bg-maya-dark border-maya-dark text-white'
                 : 'bg-white border-gray-300 text-gray-400'
