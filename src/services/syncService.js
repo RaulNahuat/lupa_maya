@@ -8,12 +8,14 @@ const API_SYNC_URL = `${API_BASE_URL}/api/sync`;
  * Aplica una estrategia "el más reciente gana" para progreso:
  * si el registro local es más nuevo que el remoto, no se sobreescribe.
  */
-export const descargarCambios = async (usuarioLocalId = null) => {
+export const descargarCambios = async (usuarioLocalId = null, forceFullPull = false) => {
     let lastSync = 0;
     const syncKey = usuarioLocalId ? `lastSync_${usuarioLocalId}` : 'lastSync';
 
-    const config = await db.configuracion.get(syncKey);
-    if (config) lastSync = config.valor;
+    if (!forceFullPull) {
+        const config = await db.configuracion.get(syncKey);
+        if (config) lastSync = config.valor;
+    }
 
     const usuarioParam = usuarioLocalId ? `&usuario_local_id=${usuarioLocalId}` : '';
 

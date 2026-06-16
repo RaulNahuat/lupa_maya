@@ -1,7 +1,6 @@
 export async function getPreguntasPull(db, Op, lastSyncDate) {
   const preguntasRaw = await db.Pregunta.findAll({
     where: {
-      activa: true,
       updated_at: { [Op.gt]: lastSyncDate }
     },
     include: [{

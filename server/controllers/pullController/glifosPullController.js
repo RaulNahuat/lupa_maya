@@ -4,8 +4,7 @@ export async function getGlifosPull(db, Op, lastSyncDate) {
 
     const glifos = await db.Glifo.findAll({
       where: {
-        ...(esFirstSync ? {} : { updated_at: { [Op.gt]: lastSyncDate } }),
-        activo: true
+        ...(esFirstSync ? {} : { updated_at: { [Op.gt]: lastSyncDate } })
       },
       include: [{
         model: db.GrupoNivel,

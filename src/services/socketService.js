@@ -27,8 +27,8 @@ export const initSocket = () => {
     });
 
     socket.on("hay_cambios", async () => {
-        console.log("El servidor notificó cambios. Descargando cambios del servidor...");
-        await descargarCambios();
+        console.log("El servidor notificó cambios. Descargando cambios del servidor (full pull)...");
+        await descargarCambios(null, true);
         window.dispatchEvent(new CustomEvent("sync-completed"));
     });
 
