@@ -43,7 +43,7 @@ const AdminLobbyPage = () => {
             </div>
             <div className="flex flex-col min-w-0">
               <h3 className="font-extrabold text-slate-800 text-base leading-tight mb-1 group-hover:text-amber-600 transition-colors">
-                Configuración del Juego
+                Configuración del juego
               </h3>
               <p className="text-xs text-slate-500 font-medium line-clamp-1">
                 Administra parámetros del servidor y sincronizaciones locales.
@@ -66,10 +66,10 @@ const AdminLobbyPage = () => {
             </div>
             <div className="flex flex-col min-w-0">
               <h3 className="font-extrabold text-slate-800 text-base leading-tight mb-1 group-hover:text-emerald-600 transition-colors">
-                Catálogo de Glifos
+                Bloques de glifos y niveles
               </h3>
               <p className="text-xs text-slate-500 font-medium line-clamp-1">
-                Agrega glifos, edita bloques y asocia significados.
+                Gestiona bloques de aprendizaje, niveles de juego y glifos.
               </p>
             </div>
           </div>
@@ -89,7 +89,7 @@ const AdminLobbyPage = () => {
             </div>
             <div className="flex flex-col min-w-0">
               <h3 className="font-extrabold text-slate-800 text-base leading-tight mb-1 group-hover:text-indigo-600 transition-colors">
-                Control de Usuarios
+                Control de usuarios
               </h3>
               <p className="text-xs text-slate-500 font-medium line-clamp-1">
                 Visualiza el progreso de los jugadores y edita sus perfiles.
@@ -112,7 +112,7 @@ const AdminLobbyPage = () => {
             </div>
             <div className="flex flex-col min-w-0">
               <h3 className="font-extrabold text-slate-800 text-base leading-tight mb-1 group-hover:text-amber-600 transition-colors">
-                Control de Insignias
+                Control de insignias
               </h3>
               <p className="text-xs text-slate-500 font-medium line-clamp-1">
                 Crea, edita y elimina insignias y configura sus condiciones de logro.
