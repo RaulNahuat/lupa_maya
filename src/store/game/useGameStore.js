@@ -69,7 +69,7 @@ export const useGameStore = create((set, get) => ({
     let gruposArr = await db.grupos_niveles.toArray()
     const esDocente = currentUser && Number(currentUser.rol_id) === 3;
     if (!esDocente) {
-      gruposArr = gruposArr.filter(g => g.activo !== false);
+      gruposArr = gruposArr.filter(g => g.activo == null || !!g.activo);
     }
     const gruposMap = Object.fromEntries(gruposArr.map((g) => [g.id, g]))
 
@@ -115,7 +115,7 @@ export const useGameStore = create((set, get) => ({
 
           // Filtrar solo activas y mezclar aleatoriamente
           const preguntasMezcladas = preguntasRaw
-            .filter(p => p.activa !== false)
+            .filter(p => p.activa == null || !!p.activa)
             .sort(() => Math.random() - 0.5)
 
           const preguntasConOpciones = await Promise.all(
