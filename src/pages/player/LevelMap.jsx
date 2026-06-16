@@ -7,7 +7,7 @@ import ModalConfirmation from "../../components/ModalConfirmation"
 import BottomNav from "../../components/game/BottomNav"
 import { ensureActiveAiModelCached } from "../../services/recognition/aiModelCacheService"
 import { useToast } from '../../context/ToastContext';
-import { CircleUserRound, Play, Flame, Star, LogOut, Camera, CameraOff } from "lucide-react"
+import { CircleUserRound, Play, Flame, Star, LogOut, MoreVertical, Camera, CameraOff } from "lucide-react"
 
 export default function LevelMap() {
   const levels = useGameStore((s) => s.levels)
@@ -23,6 +23,8 @@ export default function LevelMap() {
 
   const [activeLevel, setActiveLevel] = useState(null)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
+  const [cameraTapExpanded , setCameraTapExpanded] = useState(false)
 
   const scrollRef = useRef(null)
   const currentNodeRef = useRef(null) 
@@ -81,6 +83,8 @@ export default function LevelMap() {
     levels.find((l) => l.desbloqueado && !l.completado) ??
     levels[levels.length - 1]
 
+  const numeroNivelJugador = levels.filter((l) => l.completado).length + 1
+
   const totalEstrellas = levels.reduce((sum, l) => sum + (l.estrellas ?? 0), 0)
 
   const handleNodeClick = (level) => {
@@ -106,21 +110,14 @@ export default function LevelMap() {
 
         {/* HEADER */}
         <header className="shrink-0 bg-white border-b-2 border-gray-200 px-5 py-5 flex items-center justify-between shadow-xs">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowLogoutModal(true)}
-              className="w-12 h-12 rounded-full flex items-center justify-center transition-colors hover:bg-amber-200 active:scale-95"
-              title="Cerrar sesión"
-            >
-              <CircleUserRound strokeWidth={1} size={60} className="text-dark-gold" />
-            </button>
-
+          <div className="flex items-center gap-2">
+            <CircleUserRound strokeWidth={1} size={46} className="text-dark-gold" />
             <div>
               <p className="font-bold text-black leading-tight text-lg">
                 {currentUser.username}
               </p>
               <p className="text-dark-gold font-medium text-sm">
-                Nivel {nivelActual.numero ?? nivelActual.id}
+                Nivel {numeroNivelJugador}
               </p>
             </div>
           </div>
@@ -137,18 +134,34 @@ export default function LevelMap() {
             </div>
 
             <div className="h-8 w-px bg-gray-200 mx-1"></div>
-            
-            <button
-              onClick={handleToggleCamara}
-              className={`flex items-center gap-1 rounded-full px-3 py-1.5 border transition-all ${
-                modoSinCamara
-                  ? 'bg-maya-dark border-maya-dark text-white'
-                  : 'bg-white border-gray-300 text-gray-400'
-              }`}
-              title={modoSinCamara ? 'Modo sin cámara activo' : 'Activar modo sin cámara'}
-            >
-              {modoSinCamara ? <CameraOff size={15} /> : <Camera size={15} />}
-            </button>
+
+            {/* Menú de opciones */}
+            <div className="relative">
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="w-9 h-9 rounded-full flex items-center justify-center border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 transition-all"
+              >
+                <MoreVertical size={18} />
+              </button>
+
+              {showMenu && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-1 z-20">
+                    <button
+                      onClick={() => {
+                        setShowMenu(false)
+                        setShowLogoutModal(true)
+                      }}
+                      className="w-full flex items-center gap-2.5 px-4 py-3 text-sm font-bold text-maya-dark hover:bg-gray-50 transition-colors"
+                    >
+                      <LogOut size={16} className="text-gray-400" />
+                      Cerrar sesión
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </header>
 
@@ -158,6 +171,21 @@ export default function LevelMap() {
             Sincronizando contenido...
           </div>
         )}
+
+        {/* Botón modo cámara */}
+        <div className="relative">
+          <button
+            onClick={handleToggleCamara}
+            className={`absolute top-10 right-0 z-20 flex items-center shadow-lg px-3 py-2.5 shadow-lg border transition-all ${
+              modoSinCamara
+                ? 'bg-maya-dark border-maya-dark text-white'
+                : 'bg-white border-gray-300 text-gray-400'
+            } rounded-l-2xl overflow-hidden`}
+            title={modoSinCamara ? 'Modo sin cámara activo' : 'Activar modo sin cámara'}
+          >
+            {modoSinCamara ? <CameraOff size={18} /> : <Camera size={18} />}
+          </button>
+        </div>
 
         {/* MAPA */}
         <div className="flex-1 overflow-y-auto py-6" ref={scrollRef}>
