@@ -97,7 +97,7 @@ export default function LevelMap() {
     levels.find((l) => l.desbloqueado && !l.completado) ??
     levels[levels.length - 1]
 
-  const numeroNivelJugador = levels.filter((l) => l.completado).length + 1
+  const numeroNivel = levels.filter((l) => l.completado).length + 1
 
   const totalEstrellas = levels.reduce((sum, l) => sum + (l.estrellas ?? 0), 0)
 
@@ -146,7 +146,7 @@ export default function LevelMap() {
                 {currentUser.username}
               </p>
               <p className="text-dark-gold font-medium text-sm">
-                Nivel {numeroNivelJugador}
+                Nivel {numeroNivel}
               </p>
             </div>
           </div>
@@ -281,7 +281,7 @@ export default function LevelMap() {
                     {isCurrentActive && (
                       <div className="mb-2 bg-white rounded-2xl shadow-lg p-4 w-44 flex flex-col items-center gap-3">
                         <p className="text-xl font-extrabold text-brown uppercase">
-                          Nivel {level.numero ?? level.id}
+                          Nivel {index + 1}
                         </p>
                         <div className="w-full rounded-xl p-[2px]">
                           <button

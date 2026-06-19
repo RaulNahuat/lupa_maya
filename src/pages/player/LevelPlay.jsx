@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, Navigate } from "react-router-dom"
 import { useGameStore } from "../../store/game/useGameStore"
 import { useAuth } from "../../context/AuthContext"
 import QuizLevel from "../../components/game/QuizLevel"
@@ -18,6 +18,7 @@ export default function LevelPlay() {
   const completeLevel = useGameStore((s) => s.completeLevel)
   const racha = useGameStore((s) => s.racha)
   const cameralessMode = useGameStore((s) => s.modoSinCamara)
+
   const { currentUser } = useAuth()
 
   const [unlockedBadge, setUnlockedBadge] = useState(null)
@@ -88,6 +89,10 @@ export default function LevelPlay() {
 
   if (!level) return <p className="text-center mt-10">Cargando...</p>
 
+  if (!level.desbloqueado) {
+    return <Navigate to="/map" replace />
+  }
+
   if (!level.contenido) {
     return (
       <p className="text-center mt-10 text-red-500">
@@ -102,10 +107,6 @@ export default function LevelPlay() {
         {level.tipo === "APRENDIZAJE" && (
           <QuizLevel key={level.id} level={level} onComplete={handleCompleteLevel} />
         )}
-
-        {/*{level.tipo === "BUSQUEDA" && (
-          <ScanLevel key={level.id} level={level} onComplete={handleCompleteLevel} />
-        )}*/}
 
         {level.tipo === "BUSQUEDA" && !cameralessMode && (
           <ScanLevel key={level.id} level={level} onComplete={handleCompleteLevel} />

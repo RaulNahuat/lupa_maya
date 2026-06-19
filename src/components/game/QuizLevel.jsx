@@ -17,7 +17,7 @@ export default function QuizLevel({ level, onComplete }) {
   const preguntas = contenido.preguntas ?? []
   const totalPreguntas = preguntas.length
 
-  const numeroNivel = level.orden ?? level.numero ?? level.id ?? ""
+  const numeroNivel = levels.findIndex((l) => l.id === level.id) + 1
 
   // Índice de la pregunta actual
   const [indice, setIndice] = useState(0)

@@ -16,7 +16,7 @@ export default function GlyphPickLevel({ level, onComplete }) {
   const levels = useGameStore((s) => s.levels)
   const { contenido } = level
 
-  const numeroNivel = level.orden ?? level.numero ?? level.id ?? ""
+  const numeroNivel = levels.findIndex((l) => l.id === level.id) + 1
   const glifoCorrecto = contenido.glifo
 
   const [opciones, setOpciones] = useState([])

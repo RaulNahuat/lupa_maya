@@ -177,7 +177,7 @@ export default function ScanLevel({ level, onComplete }) {
   }
 
   const nombreObjetivo = contenido.glifo?.significado_es ?? contenido.glifo?.nombre_maya ?? "el glifo"
-  const numeroNivel = level.orden ?? level.numero ?? level.id ?? ""
+  const numeroNivel = levels.findIndex((l) => l.id === level.id) + 1
 
   // — Error de cámara —
   if (camaraError) {
@@ -438,9 +438,13 @@ export default function ScanLevel({ level, onComplete }) {
 
           {/* Ícono lupa flotante */}
           <div className="flex justify-center -mt-10 mb-3 relative z-10">
-            <div className="w-20 h-20 bg-white rounded-full border-4 border-gold flex items-center justify-center shadow-md">
+            <button 
+              onClick={handleScan}
+              disabled={scanning || modelLoading}
+              className="w-20 h-20 bg-white rounded-full border-4 border-gold flex items-center justify-center shadow-md"
+            >
               <Search size={32} className="text-gold" />
-            </div>
+            </button>
           </div>
 
           <h2 className="text-2xl font-extrabold text-center text-black mb-4 leading-tight">
