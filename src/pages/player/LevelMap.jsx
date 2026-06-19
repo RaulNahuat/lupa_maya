@@ -7,7 +7,7 @@ import ModalConfirmation from "../../components/ModalConfirmation"
 import BottomNav from "../../components/game/BottomNav"
 import { ensureActiveAiModelCached } from "../../services/recognition/aiModelCacheService"
 import { useToast } from '../../context/ToastContext';
-import { procesarColaSincronizacion } from "../../services/syncService"
+import { procesarColaSincronizacion, forzarSincronizacionCompleta } from "../../services/syncService"
 import { CircleUserRound, Play, Flame, Star, LogOut, MoreVertical, Camera, CameraOff, RefreshCw } from "lucide-react"
 
 export default function LevelMap() {
@@ -24,6 +24,7 @@ export default function LevelMap() {
 
   const [activeLevel, setActiveLevel] = useState(null)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
+  const [showForceSyncModal, setShowForceSyncModal] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
   const [cameraTapExpanded , setCameraTapExpanded] = useState(false)
@@ -133,6 +134,21 @@ export default function LevelMap() {
     }
   }
 
+  const handleForceSync = async () => {
+    setShowForceSyncModal(false)
+    if (isSyncing) return
+    setIsSyncing(true)
+    try {
+      await forzarSincronizacionCompleta(currentUser.local_id)
+      await initLevels(currentUser)
+      showToast('Caché limpiado', 'El contenido se ha vuelto a descargar desde el servidor.', 'success')
+    } catch (e) {
+      showToast('Error al actualizar', 'No se pudo conectar con el servidor.', 'error')
+    } finally {
+      setIsSyncing(false)
+    }
+  }
+
   return (
     <div className="md:min-h-screen md:bg-gray-700 md:flex md:items-center md:justify-center">
       <div className="w-full md:w-[390px] md:max-h-[844px] h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
@@ -176,7 +192,7 @@ export default function LevelMap() {
               {showMenu && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-1 z-20">
+                  <div className="absolute right-0 mt-2 w-60 bg-white rounded-2xl shadow-xl border border-gray-100 py-1 z-20">
                     <button
                       onClick={handleManualSync}
                       disabled={isSyncing}
@@ -188,6 +204,22 @@ export default function LevelMap() {
                       />
                       <span className="whitespace-nowrap">
                         {isSyncing ? 'Actualizando...' : 'Actualizar contenido'}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowMenu(false)
+                        setShowForceSyncModal(true)
+                      }}
+                      disabled={isSyncing}
+                      className="w-full flex items-center gap-2.5 px-4 py-3 text-sm font-bold text-maya-dark hover:bg-gray-50 transition-colors disabled:opacity-50"
+                    >
+                      <RefreshCw
+                        size={16}
+                        className={`shrink-0 text-gray-400 ${isSyncing ? 'animate-spin' : ''}`}
+                      />
+                      <span className="whitespace-nowrap">
+                        Forzar sincronización
                       </span>
                     </button>
                     <div className="mx-4 h-px bg-gray-100" />
@@ -333,6 +365,17 @@ export default function LevelMap() {
             navigate('/login')
           }}
           onCancel={() => setShowLogoutModal(false)}
+        />
+
+        {/* MODAL DE FORZAR SINCRONIZACIÓN */}
+        <ModalConfirmation
+          isOpen={showForceSyncModal}
+          title="¿Restablecer y recargar datos?"
+          message="Se limpiará la base de datos temporal en este dispositivo y se volverá a descargar todo desde el servidor (incluyendo tu progreso actual). ¿Deseas continuar?"
+          confirmText="Confirmar"
+          cancelText="Cancelar"
+          onConfirm={handleForceSync}
+          onCancel={() => setShowForceSyncModal(false)}
         />
       </div>
     </div>

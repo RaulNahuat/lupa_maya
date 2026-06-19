@@ -2,15 +2,31 @@ import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ModalConfirmation from '../ModalConfirmation';
+import { forzarSincronizacionCompleta } from '../../services/syncService';
+import { RefreshCw } from 'lucide-react';
 
 const AdminHeader = () => {
   const { currentUser, logoutUser } = useAuth();
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showSyncModal, setShowSyncModal] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const name = currentUser?.nombre ? currentUser.nombre : 'Administrador';
   const role = currentUser?.rol || 'Administrador';
   const avatar = currentUser?.avatar || null;
+
+  const handleForceSync = async () => {
+    setShowSyncModal(false);
+    setIsSyncing(true);
+    try {
+      await forzarSincronizacionCompleta(currentUser?.local_id);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error al forzar la sincronización:", error);
+      setIsSyncing(false);
+    }
+  };
 
   return (
     <>
@@ -37,12 +53,24 @@ const AdminHeader = () => {
           </div>
         </div>
         
-        <button 
-          onClick={() => setShowLogoutModal(true)}
-          className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-full border-2 border-maya-orange-light text-[11px] sm:text-sm text-maya-gold font-bold hover:bg-maya-orange-light transition-all active:scale-95 shadow-sm whitespace-nowrap"
-        >
-          Cerrar sesión
-        </button>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button 
+            onClick={() => setShowSyncModal(true)}
+            disabled={isSyncing}
+            className="p-2 sm:px-4 sm:py-2.5 rounded-full border-2 border-maya-orange-light text-[11px] sm:text-sm text-maya-gold font-bold hover:bg-maya-orange-light transition-all active:scale-95 shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+            title="Forzar actualización de datos desde el servidor"
+          >
+            <RefreshCw size={14} className={isSyncing ? "animate-spin" : ""} />
+            <span className="hidden sm:inline">{isSyncing ? "Sincronizando..." : "Recargar Datos"}</span>
+          </button>
+
+          <button 
+            onClick={() => setShowLogoutModal(true)}
+            className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-full border-2 border-maya-orange-light text-[11px] sm:text-sm text-maya-gold font-bold hover:bg-maya-orange-light transition-all active:scale-95 shadow-sm whitespace-nowrap"
+          >
+            Cerrar sesión
+          </button>
+        </div>
       </div>
 
       <ModalConfirmation 
@@ -56,6 +84,16 @@ const AdminHeader = () => {
           navigate('/login');
         }}
         onCancel={() => setShowLogoutModal(false)}
+      />
+
+      <ModalConfirmation 
+        isOpen={showSyncModal}
+        title="¿Sincronizar y Limpiar Caché?"
+        message="Se eliminarán los datos locales temporales y se descargarán nuevamente desde la base de datos real del servidor. Tu sesión y cambios pendientes están seguros. ¿Deseas continuar?"
+        confirmText="Confirmar"
+        cancelText="Cancelar"
+        onConfirm={handleForceSync}
+        onCancel={() => setShowSyncModal(false)}
       />
     </>
   );

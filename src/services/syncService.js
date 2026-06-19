@@ -692,3 +692,40 @@ export const procesarColaSincronizacion = async (usuarioLocalId = null) => {
         console.log("Ciclo de sincronizacion finalizado.");
     }
 };
+
+/**
+ * Limpia las tablas locales de IndexedDB y fuerza una sincronización completa
+ * desde el segundo cero (lastSync = 0). Preserva los datos de sesión local.
+ */
+export const forzarSincronizacionCompleta = async (usuarioLocalId = null) => {
+    const syncKey = usuarioLocalId ? `lastSync_${usuarioLocalId}` : 'lastSync';
+    
+    await db.configuracion.delete(syncKey);
+
+    const tablasALimpiar = [
+        'niveles',
+        'glifos',
+        'grupos_niveles',
+        'preguntas',
+        'opciones_respuestas',
+        'nivel_glifos_objetivos',
+        'insignias',
+        'grupos_escolares',
+        'grupo_escolar_grupo_nivel',
+        'usuario_grupo_nivel',
+        'progreso_usuarios',
+        'usuario_insignias',
+        'registro_escaneos',
+        'cola_sincronizacion'
+    ];
+
+    for (const tabla of tablasALimpiar) {
+        try {
+            await db[tabla].clear();
+        } catch (err) {
+            console.error(`Error al limpiar tabla ${tabla}:`, err);
+        }
+    }
+
+    await descargarCambios(usuarioLocalId, true);
+};
