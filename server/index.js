@@ -30,6 +30,8 @@ import { handleSyncPreguntas } from "./controllers/pushController/preguntasPushC
 import { handleSyncOpciones } from "./controllers/pushController/opcionesPushController.js";
 import { handleSyncGlifosObjetivo } from "./controllers/pushController/glifosObjetivosPushController.js";
 import { handleSyncInsignias } from "./controllers/pushController/insigniasPushController.js";
+import { getGruposEscolaresPull, getGrupoEscolarGrupoNivelPull, getUsuarioGrupoNivelPull } from "./controllers/pullController/gruposEscolaresPullController.js";
+import { handleSyncGruposEscolares, handleSyncGrupoEscolarGrupoNivel, handleSyncUsuarioGrupoNivel } from "./controllers/pushController/gruposEscolaresPushController.js";
 import multer from "multer";
 import fs from "fs/promises";
 
@@ -113,6 +115,20 @@ app.post("/api/sync", async (req, res) => {
       case "insignias:EDITAR":
       case "insignias:ELIMINAR":
         return await handleSyncInsignias(req, res, db, io);
+      case "grupos_escolares:CREAR":
+      case "grupos_escolares:EDITAR":
+      case "grupos_escolares:ELIMINAR":
+        return await handleSyncGruposEscolares(req, res, db, io);
+      case "grupo_escolar_grupo_nivel:CREAR":
+      case "grupo_escolar_grupo_nivel:EDITAR":
+      case "grupo_escolar_grupo_nivel:ELIMINAR":
+      case "grupo_escolar_grupo_nivel:UPSERT":
+        return await handleSyncGrupoEscolarGrupoNivel(req, res, db, io);
+      case "usuario_grupo_nivel:CREAR":
+      case "usuario_grupo_nivel:EDITAR":
+      case "usuario_grupo_nivel:ELIMINAR":
+      case "usuario_grupo_nivel:UPSERT":
+        return await handleSyncUsuarioGrupoNivel(req, res, db, io);
       default:
         return res.status(400).json({ success: false, message: "Entidad o acción no soportada" });
     }
@@ -146,6 +162,10 @@ app.get("/api/sync/pull", async (req, res) => {
     const grupos_niveles = await getGruposNivelesPull(db, Op, lastSyncDate);
     const usuario_insignias = await getUsuarioInsigniasPull(db, Op, lastSyncDate, usuario_local_id);
 
+    const grupos_escolares = await getGruposEscolaresPull(db, Op, lastSyncDate);
+    const grupo_escolar_grupo_nivel = await getGrupoEscolarGrupoNivelPull(db, Op, lastSyncDate);
+    const usuario_grupo_nivel = await getUsuarioGrupoNivelPull(db, Op, lastSyncDate);
+
     res.json({
       success: true,
       cambios: { 
@@ -159,7 +179,10 @@ app.get("/api/sync/pull", async (req, res) => {
         nivel_glifos_objetivos,
         progreso_usuarios,
         insignias,
-        usuario_insignias
+        usuario_insignias,
+        grupos_escolares,
+        grupo_escolar_grupo_nivel,
+        usuario_grupo_nivel
       },
       serverTime: new Date().getTime()
     });

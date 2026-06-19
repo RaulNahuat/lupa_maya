@@ -41,7 +41,10 @@ export const descargarCambios = async (usuarioLocalId = null, forceFullPull = fa
         nivel_glifos_objetivos = [],
         progreso_usuarios = [],
         insignias = [],
-        usuario_insignias = []
+        usuario_insignias = [],
+        grupos_escolares = [],
+        grupo_escolar_grupo_nivel = [],
+        usuario_grupo_nivel = []
     } = result.cambios;
 
     // Obtener los IDs de elementos que tienen cambios locales pendientes de sincronizar
@@ -81,6 +84,9 @@ export const descargarCambios = async (usuarioLocalId = null, forceFullPull = fa
         db.progreso_usuarios,
         db.insignias,
         db.usuario_insignias,
+        db.grupos_escolares,
+        db.grupo_escolar_grupo_nivel,
+        db.usuario_grupo_nivel,
         db.configuracion,
         async () => {
 
@@ -133,6 +139,30 @@ export const descargarCambios = async (usuarioLocalId = null, forceFullPull = fa
                         sync_status: 'SINCRONIZADO'
                     });
                 }
+            }
+
+            // GRUPOS ESCOLARES
+            if (grupos_escolares && grupos_escolares.length > 0) {
+                for (const ge of grupos_escolares) {
+                    if (ge.deleted_at) {
+                        await db.grupos_escolares.delete(ge.local_id);
+                    } else {
+                        await db.grupos_escolares.put({
+                            ...ge,
+                            sync_status: 'SINCRONIZADO'
+                        });
+                    }
+                }
+            }
+
+            // GRUPO ESCOLAR GRUPO NIVEL
+            if (grupo_escolar_grupo_nivel && grupo_escolar_grupo_nivel.length > 0) {
+                await db.grupo_escolar_grupo_nivel.bulkPut(grupo_escolar_grupo_nivel);
+            }
+
+            // USUARIO GRUPO NIVEL
+            if (usuario_grupo_nivel && usuario_grupo_nivel.length > 0) {
+                await db.usuario_grupo_nivel.bulkPut(usuario_grupo_nivel);
             }
 
             // NIVELES - Filtrar para no sobreescribir niveles con cambios locales pendientes
@@ -237,6 +267,9 @@ const procesarItem = async (item) => {
         db.nivel_glifos_objetivos,
         db.usuario_insignias,
         db.insignias,
+        db.grupos_escolares,
+        db.grupo_escolar_grupo_nivel,
+        db.usuario_grupo_nivel,
         async () => {
             await db.cola_sincronizacion.put({ ...item, estado: 'ENVIADO' });
 
@@ -560,6 +593,30 @@ const procesarItem = async (item) => {
                     }
                 }
             }
+
+            if (item.entidad === 'grupos_escolares') {
+                const ge = await db.grupos_escolares.get(item.datos.local_id);
+                if (ge) {
+                    await db.grupos_escolares.put({ ...ge, sync_status: 'SINCRONIZADO' });
+                    if (item.accion === 'ELIMINAR') {
+                        await db.grupos_escolares.delete(item.datos.local_id);
+                    }
+                }
+            }
+
+            if (item.entidad === 'grupo_escolar_grupo_nivel') {
+                const ggn = await db.grupo_escolar_grupo_nivel.where('[grupo_escolar_id+grupo_nivel_id]').equals([item.datos.grupo_escolar_id, item.datos.grupo_nivel_id]).first();
+                if (ggn) {
+                    await db.grupo_escolar_grupo_nivel.put({ ...ggn, sync_status: 'SINCRONIZADO' });
+                }
+            }
+
+            if (item.entidad === 'usuario_grupo_nivel') {
+                const ugn = await db.usuario_grupo_nivel.where('[usuario_id+grupo_nivel_id]').equals([item.datos.usuario_id, item.datos.grupo_nivel_id]).first();
+                if (ugn) {
+                    await db.usuario_grupo_nivel.put({ ...ugn, sync_status: 'SINCRONIZADO' });
+                }
+            }
         }
     );
 
@@ -597,6 +654,9 @@ export const procesarColaSincronizacion = async (usuarioLocalId = null) => {
 
         const porEntidad = (entidad) => items.filter((i) => i.entidad === entidad);
         const ordenados = [
+            ...porEntidad('grupos_escolares'),
+            ...porEntidad('grupo_escolar_grupo_nivel'),
+            ...porEntidad('usuario_grupo_nivel'),
             ...porEntidad('usuarios'),
             ...porEntidad('insignias'),
             ...porEntidad('progreso_usuarios'),
@@ -609,7 +669,8 @@ export const procesarColaSincronizacion = async (usuarioLocalId = null) => {
             ...porEntidad('nivel_glifos_objetivos'),
             ...items.filter((i) => ![
                 'usuarios', 'insignias', 'progreso_usuarios', 'usuario_insignias', 'grupos_niveles', 'glifos', 
-                'niveles', 'preguntas', 'opciones_respuestas', 'nivel_glifos_objetivos'
+                'niveles', 'preguntas', 'opciones_respuestas', 'nivel_glifos_objetivos',
+                'grupos_escolares', 'grupo_escolar_grupo_nivel', 'usuario_grupo_nivel'
             ].includes(i.entidad))
         ];
 

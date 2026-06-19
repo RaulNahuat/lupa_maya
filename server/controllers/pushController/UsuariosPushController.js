@@ -5,11 +5,18 @@ export async function handleSyncUsuarios(req, res, db, io) {
     where: { local_id: datos.local_id }
   });
 
+  let resolvedGrupoEscolarId = datos.grupo_escolar_id;
+  if (datos.grupo_escolar_id && typeof datos.grupo_escolar_id === 'string' && datos.grupo_escolar_id.includes('-')) {
+    const grupo = await db.GrupoEscolar.findOne({ where: { local_id: datos.grupo_escolar_id } });
+    resolvedGrupoEscolarId = grupo ? grupo.id : null;
+  }
+
   if (existente) {
     //Actualiza racha y rol_id si el cliente manda valores más recientes
     const updates = {};
     if (datos.racha !== undefined && datos.racha !== null) updates.racha = datos.racha;
     if (datos.rol_id !== undefined && datos.rol_id !== null) updates.rol_id = datos.rol_id;
+    if (resolvedGrupoEscolarId !== undefined) updates.grupo_escolar_id = resolvedGrupoEscolarId;
     if (Object.keys(updates).length > 0) {
       await existente.update(updates);
     }
@@ -33,7 +40,8 @@ export async function handleSyncUsuarios(req, res, db, io) {
       pin_hash: datos.pin_hash || datos.pin || null,
       local_id: datos.local_id,
       racha: datos.racha ?? 0,
-      rol_id: datos.rol_id ?? 2
+      rol_id: datos.rol_id ?? 2,
+      grupo_escolar_id: resolvedGrupoEscolarId || null
     });
 
     io.emit("hay_cambios");

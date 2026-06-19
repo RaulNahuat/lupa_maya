@@ -3,9 +3,9 @@ import Dexie from 'dexie';
 export const db = new Dexie("lupa_maya_db");
 
 //Version 1: esquema en desarrollo (incluye todos los índices necesarios)
-db.version(1).stores({
+db.version(3).stores({
     admins: 'local_id, email, sync_status',
-    usuarios: 'local_id, username, sync_status',
+    usuarios: 'local_id, username, grupo_escolar_id, sync_status',
     cola_sincronizacion: '++id, estado, entidad',
     configuracion: 'clave',
     niveles: 'id, grupo_id, numero, tipo, posicion_bloque, [grupo_id+posicion_bloque]',
@@ -17,7 +17,10 @@ db.version(1).stores({
     preguntas: 'id, nivel_id',
     opciones_respuestas: 'id, preguntas_id',
     registro_escaneos: 'local_id, usuario_id, usuario_local_id, nivel_id',
-    usuario_insignias: 'local_id, usuario_id, insignia_id, usuario_local_id'
+    usuario_insignias: 'local_id, usuario_id, insignia_id, usuario_local_id',
+    grupos_escolares: 'local_id, nombre, docente_id, sync_status',
+    grupo_escolar_grupo_nivel: '++id, grupo_escolar_id, grupo_nivel_id, [grupo_escolar_id+grupo_nivel_id]',
+    usuario_grupo_nivel: '++id, usuario_id, grupo_nivel_id, [usuario_id+grupo_nivel_id]'
 });
 
 export const initDB = async () => {

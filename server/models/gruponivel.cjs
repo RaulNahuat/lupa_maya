@@ -6,6 +6,18 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       GrupoNivel.hasMany(models.Glifo, { foreignKey: 'grupo_id', as: 'glifos' });
       GrupoNivel.hasMany(models.Nivel, { foreignKey: 'grupo_id', as: 'niveles' });
+      GrupoNivel.belongsToMany(models.GrupoEscolar, {
+        through: models.GrupoEscolarGrupoNivel,
+        foreignKey: 'grupo_nivel_id',
+        otherKey: 'grupo_escolar_id',
+        as: 'gruposEscolares'
+      });
+      GrupoNivel.belongsToMany(models.Usuario, {
+        through: models.UsuarioGrupoNivel,
+        foreignKey: 'grupo_nivel_id',
+        otherKey: 'usuario_id',
+        as: 'alumnosPersonalizados'
+      });
     }
   }
 

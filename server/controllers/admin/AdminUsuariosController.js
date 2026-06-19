@@ -4,7 +4,7 @@ export async function getAllUsuarios(req, res, db) {
     const usuarios = await db.Usuario.findAll({
       where: { deleted_at: null },
       attributes: [
-        'id', 'nombre', 'apellido', 'username', 'escuela', 'lugar_procedencia', 'genero', 'grado', 'local_id', 'rol_id', 'created_at'
+        'id', 'nombre', 'apellido', 'username', 'escuela', 'lugar_procedencia', 'genero', 'grado', 'local_id', 'rol_id', 'grupo_escolar_id', 'created_at'
       ],
       include: [
         {
@@ -48,12 +48,18 @@ export async function getAllUsuarios(req, res, db) {
 export async function updateUsuario(req, res, db, io) {
   const { id } = req.params;
   const source = req.body.datos ? req.body.datos : req.body;
-  const { nombre, apellido, username, escuela, lugar_procedencia, genero, grado, pin_hash, rol_id } = source;
+  const { nombre, apellido, username, escuela, lugar_procedencia, genero, grado, pin_hash, rol_id, grupo_escolar_id } = source;
 
   try {
     const usuario = await db.Usuario.findByPk(id);
     if (!usuario) {
       return res.status(404).json({ success: false, message: "Usuario no encontrado" });
+    }
+
+    let resolvedGrupoEscolarId = grupo_escolar_id;
+    if (grupo_escolar_id && typeof grupo_escolar_id === 'string' && grupo_escolar_id.includes('-')) {
+      const grupo = await db.GrupoEscolar.findOne({ where: { local_id: grupo_escolar_id } });
+      resolvedGrupoEscolarId = grupo ? grupo.id : null;
     }
 
     await usuario.update({
@@ -65,7 +71,8 @@ export async function updateUsuario(req, res, db, io) {
       genero,
       grado,
       pin_hash: pin_hash || usuario.pin_hash,
-      rol_id: rol_id !== undefined ? rol_id : usuario.rol_id
+      rol_id: rol_id !== undefined ? rol_id : usuario.rol_id,
+      grupo_escolar_id: resolvedGrupoEscolarId !== undefined ? resolvedGrupoEscolarId : usuario.grupo_escolar_id
     });
 
     if (io) io.emit("hay_cambios");

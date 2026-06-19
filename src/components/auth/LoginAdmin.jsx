@@ -31,11 +31,15 @@ const LoginAdmin = () => {
 
       loginUser(user);
 
-      showToast('¡Bienvenido!', `Hola Administrador, suerte en tu jornada.`, 'success');
-
-      procesarColaSincronizacion();
-      
-      navigate('/admin');
+      if (Number(user.rol_id) === 3) {
+        showToast('¡Bienvenido!', `Hola Docente, suerte en tu jornada.`, 'success');
+        procesarColaSincronizacion();
+        navigate('/docente');
+      } else {
+        showToast('¡Bienvenido!', `Hola Administrador, suerte en tu jornada.`, 'success');
+        procesarColaSincronizacion();
+        navigate('/admin');
+      }
     } catch (error) {
       showToast('Error de acceso', String(error), 'error');
     }
