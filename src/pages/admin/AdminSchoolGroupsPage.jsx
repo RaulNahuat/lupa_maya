@@ -7,6 +7,7 @@ import ModalConfirmation from '../../components/ModalConfirmation';
 import GroupCard from '../../components/admin/GroupCard';
 import GroupEditModal from '../../components/admin/GroupEditModal';
 import GroupStudentsModal from '../../components/admin/GroupStudentsModal';
+import Pagination from '../../components/admin/Pagination';
 import { db } from '../../data/db';
 import { useToast } from '../../context/ToastContext';
 import { procesarColaSincronizacion } from '../../services/syncService';
@@ -19,6 +20,10 @@ const AdminSchoolGroupsPage = () => {
   const [teachers, setTeachers] = useState([]);
   const [students, setStudents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const groupsPerPage = 5;
 
   // Modales
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -216,6 +221,18 @@ const AdminSchoolGroupsPage = () => {
     }
   };
 
+  // Cálculo de paginación
+  const totalPages = Math.max(1, Math.ceil(groups.length / groupsPerPage));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (safeCurrentPage - 1) * groupsPerPage;
+  const paginatedGroups = groups.slice(startIndex, startIndex + groupsPerPage);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   return (
     <AdminPageShell activeTab="lobby">
       <div className="flex items-center gap-3 mt-2 px-1">
@@ -245,18 +262,26 @@ const AdminSchoolGroupsPage = () => {
           <div className="text-center py-10 opacity-40">
             <span className="font-bold uppercase tracking-widest animate-pulse text-xs">Cargando...</span>
           </div>
-        ) : groups.length > 0 ? (
-          groups.map(group => (
-            <GroupCard
-              key={group.local_id || group.id}
-              group={group}
-              students={students}
-              teachers={teachers}
-              onManageStudents={handleManageStudents}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
+        ) : paginatedGroups.length > 0 ? (
+          <>
+            {paginatedGroups.map(group => (
+              <GroupCard
+                key={group.local_id || group.id}
+                group={group}
+                students={students}
+                teachers={teachers}
+                onManageStudents={handleManageStudents}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            ))}
+            
+            <Pagination
+              currentPage={safeCurrentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => setCurrentPage(page)}
             />
-          ))
+          </>
         ) : (
           <div className="text-center py-10 bg-white/50 rounded-4xl border border-dashed border-gray-300">
             <span className="font-bold uppercase tracking-widest text-xs text-slate-400">No se encontraron grupos escolares</span>
