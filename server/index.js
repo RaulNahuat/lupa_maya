@@ -68,71 +68,90 @@ app.get("/", (req, res) => {
 });
 
 
+//CONFIGURACIÓN DE MANEJADORES DE SINCRONIZACIÓN
+const syncHandlers = {
+  progreso_usuarios: {
+    actions: ["UPSERT"],
+    handler: handleSyncProgreso
+  },
+  admins: {
+    actions: ["EDITAR"],
+    handler: handleSyncAdmins
+  },
+  grupos_niveles: {
+    actions: ["CREAR", "EDITAR", "ELIMINAR"],
+    handler: handleSyncGruposNiveles
+  },
+  glifos: {
+    actions: ["CREAR", "EDITAR", "ELIMINAR"],
+    handler: handleSyncGlifos
+  },
+  niveles: {
+    actions: ["CREAR", "EDITAR", "ELIMINAR"],
+    handler: handleSyncNiveles
+  },
+  preguntas: {
+    actions: ["CREAR", "EDITAR", "ELIMINAR"],
+    handler: handleSyncPreguntas
+  },
+  opciones_respuestas: {
+    actions: ["CREAR", "EDITAR", "ELIMINAR"],
+    handler: handleSyncOpciones
+  },
+  nivel_glifos_objetivos: {
+    actions: ["CREAR", "ELIMINAR"],
+    handler: handleSyncGlifosObjetivo
+  },
+  usuario_insignias: {
+    actions: ["UPSERT"],
+    handler: handleSyncUsuarioInsignia
+  },
+  insignias: {
+    actions: ["CREAR", "EDITAR", "ELIMINAR"],
+    handler: handleSyncInsignias
+  },
+  grupos_escolares: {
+    actions: ["CREAR", "EDITAR", "ELIMINAR"],
+    handler: handleSyncGruposEscolares
+  },
+  grupo_escolar_grupo_nivel: {
+    actions: ["CREAR", "EDITAR", "ELIMINAR", "UPSERT"],
+    handler: handleSyncGrupoEscolarGrupoNivel
+  },
+  usuario_grupo_nivel: {
+    actions: ["CREAR", "EDITAR", "ELIMINAR", "UPSERT"],
+    handler: handleSyncUsuarioGrupoNivel
+  }
+};
+
 // PUSH SYNC
 app.post("/api/sync", async (req, res) => {
   const { entidad, accion } = req.body;
 
   try {
-    switch (`${entidad}:${accion}`) {
-      case "usuarios:CREAR":
+    // Caso especial para usuarios
+    if (entidad === "usuarios") {
+      if (accion === "CREAR") {
         return await handleSyncUsuarios(req, res, db, io);
-      case "usuarios:EDITAR":
-        req.params.id = req.body.datos.id;
+      }
+      if (accion === "EDITAR") {
+        req.params.id = req.body.datos?.id;
         return await updateUsuario(req, res, db, io);
-      case "usuarios:ELIMINAR":
-        req.params.id = req.body.datos.id;
+      }
+      if (accion === "ELIMINAR") {
+        req.params.id = req.body.datos?.id;
         return await deleteUsuario(req, res, db, io);
-      case "progreso_usuarios:UPSERT":
-        return await handleSyncProgreso(req, res, db, io);
-      case "admins:EDITAR":
-        return await handleSyncAdmins(req, res, db, io);
-      case "grupos_niveles:CREAR":
-      case "grupos_niveles:EDITAR":
-      case "grupos_niveles:ELIMINAR":
-        return await handleSyncGruposNiveles(req, res, db, io);
-      case "glifos:CREAR":
-      case "glifos:EDITAR":
-      case "glifos:ELIMINAR":
-        return await handleSyncGlifos(req, res, db, io);
-      case "niveles:CREAR":
-      case "niveles:EDITAR":
-      case "niveles:ELIMINAR":
-        return await handleSyncNiveles(req, res, db, io);
-      case "preguntas:CREAR":
-      case "preguntas:EDITAR":
-      case "preguntas:ELIMINAR":
-        return await handleSyncPreguntas(req, res, db, io);
-      case "opciones_respuestas:CREAR":
-      case "opciones_respuestas:EDITAR":
-      case "opciones_respuestas:ELIMINAR":
-        return await handleSyncOpciones(req, res, db, io);
-      case "nivel_glifos_objetivos:CREAR":
-      case "nivel_glifos_objetivos:ELIMINAR":
-        return await handleSyncGlifosObjetivo(req, res, db, io);
-      case "usuario_insignias:UPSERT":
-        return await handleSyncUsuarioInsignia(req, res, db, io);
-      case "insignias:CREAR":
-      case "insignias:EDITAR":
-      case "insignias:ELIMINAR":
-        return await handleSyncInsignias(req, res, db, io);
-      case "grupos_escolares:CREAR":
-      case "grupos_escolares:EDITAR":
-      case "grupos_escolares:ELIMINAR":
-        return await handleSyncGruposEscolares(req, res, db, io);
-      case "grupo_escolar_grupo_nivel:CREAR":
-      case "grupo_escolar_grupo_nivel:EDITAR":
-      case "grupo_escolar_grupo_nivel:ELIMINAR":
-      case "grupo_escolar_grupo_nivel:UPSERT":
-        return await handleSyncGrupoEscolarGrupoNivel(req, res, db, io);
-      case "usuario_grupo_nivel:CREAR":
-      case "usuario_grupo_nivel:EDITAR":
-      case "usuario_grupo_nivel:ELIMINAR":
-      case "usuario_grupo_nivel:UPSERT":
-        return await handleSyncUsuarioGrupoNivel(req, res, db, io);
-      default:
-        return res.status(400).json({ success: false, message: "Entidad o acción no soportada" });
+      }
+      return res.status(400).json({ success: false, message: "Acción no soportada para usuarios" });
     }
 
+    //Mapeo del caso general
+    const config = syncHandlers[entidad];
+    if (config && config.actions.includes(accion)) {
+      return await config.handler(req, res, db, io);
+    }
+
+    return res.status(400).json({ success: false, message: "Entidad o acción no soportada" });
   } catch (error) {
     console.error("Error en sincronización:", error);
     const msg = error.errors ? error.errors.map(e => e.message).join(", ") : error.message;
