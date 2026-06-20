@@ -219,7 +219,7 @@ export default function LevelMap() {
                         className={`shrink-0 text-gray-400 ${isSyncing ? 'animate-spin' : ''}`}
                       />
                       <span className="whitespace-nowrap">
-                        Forzar sincronización
+                        Reparar mapa
                       </span>
                     </button>
                     <div className="mx-4 h-px bg-gray-100" />
@@ -367,13 +367,13 @@ export default function LevelMap() {
           onCancel={() => setShowLogoutModal(false)}
         />
 
-        {/* MODAL DE FORZAR SINCRONIZACIÓN */}
+        {/* MODAL DE REPARAR MAPA */}
         <ModalConfirmation
           isOpen={showForceSyncModal}
-          title="¿Restablecer y recargar datos?"
-          message="Se limpiará la base de datos temporal en este dispositivo y se volverá a descargar todo desde el servidor (incluyendo tu progreso actual). ¿Deseas continuar?"
-          confirmText="Confirmar"
-          cancelText="Cancelar"
+          title="¿Quieres volver a cargar el juego?"
+          message="Si algún nivel no carga bien o no ves tus estrellas, esto limpiará la memoria temporal y volverá a descargar todo desde internet. No perderás tu progreso. ¿Quieres continuar?"
+          confirmText="Sí, recargar todo"
+          cancelText="No, cancelar"
           onConfirm={handleForceSync}
           onCancel={() => setShowForceSyncModal(false)}
         />
