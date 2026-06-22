@@ -68,7 +68,26 @@ export const useGameStore = create((set, get) => ({
     
     let gruposArr = await db.grupos_niveles.toArray()
     const esDocente = currentUser && Number(currentUser.rol_id) === 3;
-    if (!esDocente) {
+    if (!esDocente && currentUser) {
+      const studentId = currentUser.id ? Number(currentUser.id) : 0;
+      const userCustom = studentId ? await db.usuario_grupo_nivel.where('usuario_id').equals(studentId).toArray() : [];
+      const userCustomMap = Object.fromEntries(userCustom.map(x => [x.grupo_nivel_id, x.activo]));
+
+      const groupEscolarId = currentUser.grupo_escolar_id ? Number(currentUser.grupo_escolar_id) : 0;
+      const groupCustom = groupEscolarId ? await db.grupo_escolar_grupo_nivel.where('grupo_escolar_id').equals(groupEscolarId).toArray() : [];
+      const groupCustomMap = Object.fromEntries(groupCustom.map(x => [x.grupo_nivel_id, x.activo]));
+
+      gruposArr = gruposArr.filter(g => {
+        const blockId = Number(g.id);
+        if (userCustomMap[blockId] !== undefined) {
+          return userCustomMap[blockId];
+        }
+        if (groupCustomMap[blockId] !== undefined) {
+          return groupCustomMap[blockId];
+        }
+        return g.activo == null || !!g.activo;
+      });
+    } else if (!esDocente) {
       gruposArr = gruposArr.filter(g => g.activo == null || !!g.activo);
     }
     const gruposMap = Object.fromEntries(gruposArr.map((g) => [g.id, g]))

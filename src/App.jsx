@@ -15,6 +15,7 @@ import AdminRoute from './routes/AdminRoute';
 import AdminBadgesPage from './pages/admin/AdminBadgesPage';
 import DocenteRoute from './routes/DocenteRoute';
 import DocenteLobbyPage from './pages/admin/DocenteLobbyPage';
+import AdminSchoolGroupsPage from './pages/admin/AdminSchoolGroupsPage';
 import './App.css';
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
           <Route path="/admin/glyphs/block/:blockId/level/:levelId" element={<AdminRoute><AdminLevelDetailPage /></AdminRoute>} />
           <Route path="/admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
           <Route path="/admin/badges" element={<AdminRoute><AdminBadgesPage /></AdminRoute>} />
+          <Route path="/admin/school-groups" element={<AdminRoute><AdminSchoolGroupsPage /></AdminRoute>} />
 
           {/* DOCENTE */}
           <Route path="/docente" element={<DocenteRoute><DocenteLobbyPage /></DocenteRoute>} />

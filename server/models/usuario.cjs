@@ -12,6 +12,14 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'usuario_id',
         as: 'insignias'
       });
+      Usuario.belongsTo(models.GrupoEscolar, { foreignKey: 'grupo_escolar_id', as: 'grupoEscolar' });
+      Usuario.belongsToMany(models.GrupoNivel, {
+        through: models.UsuarioGrupoNivel,
+        foreignKey: 'usuario_id',
+        otherKey: 'grupo_nivel_id',
+        as: 'bloquesPersonalizados'
+      });
+      Usuario.hasMany(models.GrupoEscolar, { foreignKey: 'docente_id', as: 'gruposAsignados' });
     }
   }
 
@@ -25,6 +33,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BIGINT,
       allowNull: false,
       defaultValue: 2
+    },
+    grupo_escolar_id: {
+      type: DataTypes.BIGINT,
+      allowNull: true
     },
     nombre: {
       type: DataTypes.STRING(100),

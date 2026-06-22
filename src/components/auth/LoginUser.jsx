@@ -5,6 +5,7 @@ import { loginOffline } from '../../services/auth/offlineAuth';
 import { useNavigate } from "react-router-dom";
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { useAdmin } from '../../context/AdminContext';
 import { User, Lock } from "lucide-react"
 
 const LoginUser = () => {
@@ -13,6 +14,9 @@ const LoginUser = () => {
   const [pin, setPin] = useState('');
   const { loginUser } = useAuth();
   const { showToast } = useToast();
+  const { loginMode } = useAdmin();
+
+  const isDocente = loginMode === 'docente';
 
   const handleNumberPress = (num) => {
     if (pin.length < 4) {
@@ -40,9 +44,20 @@ const LoginUser = () => {
     try {
       const user = await loginOffline({ username, pin });
       
+      const userRol = Number(user.rol_id);
+
+      if (isDocente && userRol !== 3) {
+        showToast('Acceso denegado', 'Esta cuenta pertenece a un estudiante. Por favor, inicia sesión como Alumno.', 'warning');
+        return;
+      }
+      if (!isDocente && userRol === 3) {
+        showToast('Acceso denegado', 'Esta cuenta pertenece a un docente. Por favor, selecciona la opción de Docente.', 'warning');
+        return;
+      }
+
       loginUser(user);
       
-      if (Number(user.rol_id) === 3) {
+      if (userRol === 3) {
         showToast('¡Bienvenido, Docente!', `Hola ${user.nombre}, listo para gestionar.`, 'success');
         navigate('/docente');
       } else {
@@ -58,22 +73,24 @@ const LoginUser = () => {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <h1 className="text-title font-extrabold text-maya-dark mb-1 tracking-tight">
-        ¡Hola, explorador!
+      <h1 className="text-title font-extrabold text-maya-dark mb-1 tracking-tight text-center">
+        {isDocente ? 'Portal de Docentes' : '¡Hola, explorador!'}
       </h1>
-      <p className="text-maya-gray font-medium mb-6 text-md text-center">Ingresa para descubrir los glifos mayas</p>
+      <p className="text-maya-gray font-medium mb-6 text-md text-center">
+        {isDocente ? 'Ingresa tus credenciales para gestionar tus grupos' : 'Ingresa para descubrir los glifos mayas'}
+      </p>
 
       <form onSubmit={handleSubmit} className="w-full space-y-5">
         <div className="space-y-2 pb-2">
           <label className='flex items-center gap-2 font-medium text-md'> 
             <User size={18}/>
-            Tu nombre de explorador
+            {isDocente ? 'Nombre de usuario' : 'Tu nombre de explorador'}
           </label>
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="Escribe tu usuario..."
+            placeholder={isDocente ? "Escribe tu usuario docente..." : "Escribe tu usuario..."}
             className="w-full px-4 py-3 rounded-2xl border border-gray-400 bg-white focus:bg-white focus:ring-2 focus:ring-maya-gold outline-none transition-all placeholder:text-gray-400 font-semibold shadow-[0_4px_0_#9CA3AF]"
           />
         </div>
@@ -82,7 +99,7 @@ const LoginUser = () => {
         <div className="flex flex-col items-center w-full gap-4">
           <label className="flex items-center gap-2 font-medium text-md self-start">
             <Lock size={18} />
-            Tu PIN secreto (4 dígitos)
+            {isDocente ? 'Tu PIN de acceso (4 dígitos)' : 'Tu PIN secreto (4 dígitos)'}
           </label>
 
           {/* Círculos indicadores */}
@@ -102,7 +119,7 @@ const LoginUser = () => {
         </div>
 
         <PrimaryButton type="submit" className="mt-3">
-          ¡A jugar!
+          {isDocente ? 'Entrar al Panel' : '¡A jugar!'}
         </PrimaryButton>
       </form>
     </div>

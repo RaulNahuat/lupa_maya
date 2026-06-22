@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Scan, User, UserPlus, ChevronDown, ShieldCheck, Users, Search } from 'lucide-react';
+import { Scan, User, UserPlus, ChevronDown, ShieldCheck, Users, Search, GraduationCap } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext';
 const Navbar = () => {
-  const { isAdminMode, setIsAdminMode } = useAdmin();
+  const { loginMode, setLoginMode } = useAdmin();
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -13,8 +13,8 @@ const Navbar = () => {
 
   if (isAdminRoute) return null;
 
-  const handleModeSelection = (admin) => {
-    setIsAdminMode(admin);
+  const handleModeSelection = (mode) => {
+    setLoginMode(mode);
     setIsOpen(false);
     navigate('/login');
   };
@@ -47,11 +47,13 @@ const Navbar = () => {
                   isOpen ? 'border-maya-gold bg-maya-orange-light' : 'border-gray-100 bg-maya-orange-light hover:border-maya-gold'
                 }`}
               >
-                <div className={`w-6 h-7 rounded-full flex items-center justify-center ${isAdminMode ? 'bg-maya-gold text-white' : 'bg-maya-orange-light text-maya-gold'}`}>
-                  {isAdminMode ? <ShieldCheck size={16} /> : <Users size={16} />}
+                <div className={`w-6 h-7 rounded-full flex items-center justify-center ${loginMode === 'admin' ? 'bg-maya-gold text-white' : loginMode === 'docente' ? 'bg-maya-gold text-white' : 'bg-maya-orange-light text-maya-gold'}`}>
+                  {loginMode === 'admin' && <ShieldCheck size={16} />}
+                  {loginMode === 'docente' && <GraduationCap size={16} />}
+                  {loginMode === 'alumno' && <Users size={16} />}
                 </div>
-                <span className="text-xs font-bold text-maya-dark hidden hidden">
-                  {isAdminMode ? 'Administrador' : 'Alumno'}
+                <span className="text-xs font-bold text-maya-dark hidden">
+                  {loginMode === 'admin' ? 'Administrador' : loginMode === 'docente' ? 'Docente' : 'Alumno'}
                 </span>
                 <ChevronDown size={14} className={`text-gray-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -63,14 +65,20 @@ const Navbar = () => {
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-1 z-20 animate-in fade-in slide-in-from-top-2 duration-200">
                     <p className="px-4 py-2 text-sm font-bold text-gray-400">Iniciar como...</p>
                     <button 
-                      onClick={() => handleModeSelection(false)}
-                      className={`w-full flex items-center gap-2.5 px-4 py-3 text-sm font-bold transition-colors ${!isAdminMode ? 'text-maya-gold bg-maya-orange-light' : 'text-maya-dark hover:bg-gray-50'}`}
+                      onClick={() => handleModeSelection('alumno')}
+                      className={`w-full flex items-center gap-2.5 px-4 py-3 text-sm font-bold transition-colors ${loginMode === 'alumno' ? 'text-maya-gold bg-maya-orange-light' : 'text-maya-dark hover:bg-gray-50'}`}
                     >
                       <Users size={18} /> Alumno
                     </button>
                     <button 
-                      onClick={() => handleModeSelection(true)}
-                      className={`w-full flex items-center gap-2.5 px-4 py-3 text-sm font-bold transition-colors ${isAdminMode ? 'text-maya-gold bg-maya-orange-light' : 'text-maya-dark hover:bg-gray-50'}`}
+                      onClick={() => handleModeSelection('docente')}
+                      className={`w-full flex items-center gap-2.5 px-4 py-3 text-sm font-bold transition-colors ${loginMode === 'docente' ? 'text-maya-gold bg-maya-orange-light' : 'text-maya-dark hover:bg-gray-50'}`}
+                    >
+                      <GraduationCap size={18} /> Docente
+                    </button>
+                    <button 
+                      onClick={() => handleModeSelection('admin')}
+                      className={`w-full flex items-center gap-2.5 px-4 py-3 text-sm font-bold transition-colors ${loginMode === 'admin' ? 'text-maya-gold bg-maya-orange-light' : 'text-maya-dark hover:bg-gray-50'}`}
                     >
                       <ShieldCheck size={18} /> Administrador
                     </button>

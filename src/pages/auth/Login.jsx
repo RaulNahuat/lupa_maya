@@ -6,7 +6,7 @@ import { useAdmin } from '../../context/AdminContext';
 import Navbar from '../../components/Navbar';
 
 const Login = () => {
-  const { isAdminMode } = useAdmin();
+  const { loginMode } = useAdmin();
   return (
     <div className="md:min-h-screen md:bg-gray-700 md:flex md:items-center md:justify-center">
       <div className="w-full md:w-[390px] md:max-h-[844px] h-screen flex flex-col bg-maya-cream md:overflow-hidden md:rounded-3xl md:shadow-2xl relative overflow-hidden">
@@ -25,10 +25,10 @@ const Login = () => {
             </div>
 
             <div className="w-full transition-all duration-500 transform">
-              {isAdminMode ? <LoginAdmin /> : <LoginUser />}
+              {loginMode === 'admin' ? <LoginAdmin /> : <LoginUser />}
             </div>
 
-            {!isAdminMode && (
+            {loginMode === 'alumno' && (
               <div className="mt-3 flex flex-col items-center w-full gap-3">
                 <div className="flex items-center gap-3 w-full">
                   <div className="flex-1 h-px bg-gray-300"></div>
