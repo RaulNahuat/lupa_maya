@@ -104,8 +104,8 @@
 
   /* Botón de audio circular */
   .size-audio-btn {
-    width:  clamp(52px, 14vw, 64px);
-    height: clamp(52px, 14vw, 64px);
+    width:  clamp(32px, 13vw, 44px);
+    height: clamp(32px, 13vw, 44px);
   }
 
   /* Ícono lupa flotante en ScanLevel */
