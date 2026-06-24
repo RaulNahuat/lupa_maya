@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import ResetPassword from './pages/auth/ResetPassword';
 import LevelMap from "./pages/player/LevelMap";
 import LevelPlay from "./pages/player/LevelPlay";
 import Rewards from "./pages/player/Rewards";
@@ -26,6 +27,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* ADMIN */}
           <Route path="/admin" element={<AdminRoute><AdminLobbyPage /></AdminRoute>} />
