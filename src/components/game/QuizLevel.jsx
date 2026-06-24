@@ -180,7 +180,7 @@ export default function QuizLevel({ level, onComplete }) {
 
         {/* Nombre maya + botón audio */}
         {preguntaActual.nombre_maya && (
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-4 mb-1">
             <span className="text-4xl font-extrabold text-black">
               {preguntaActual.nombre_maya}
             </span>
@@ -190,7 +190,7 @@ export default function QuizLevel({ level, onComplete }) {
                 className="size-audio-btn bg-maya-gold rounded-full flex items-center justify-center shadow-sm text-white shrink-0"
                 aria-label="Reproducir pronunciación"
               >
-                <Volume2 size={18} />
+                <Volume2 size={20} />
               </button>
             )}
           </div>

@@ -179,7 +179,7 @@ export default function GlyphPickLevel({ level, onComplete }) {
               onClick={() => new Audio(getMediaUrl(glifoCorrecto.audio_url)).play()}
               className="size-audio-btn bg-maya-gold rounded-full flex items-center justify-center shadow-sm text-white"
             >
-              <Volume2 size={18} />
+              <Volume2 size={20} />
             </button>
             <p className="text-xs text-gray-400 font-medium">Toca para escuchar</p>
           </div>
