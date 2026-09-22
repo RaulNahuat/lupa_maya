@@ -1,19 +1,35 @@
-version: '3.8'
-
 services:
+  db_lupa_maya:
+    image: mysql:8.0
+    container_name: lupa_maya_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - lupa_maya_db_data:/var/lib/mysql
+    networks:
+      - lupa_maya_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   backend:
     build:
       context: .
       dockerfile: Dockerfile.backend
       network: host
     container_name: lupa_maya_backend
-    restart: always
+    restart: unless-stopped
     environment:
-      # Usamos la sintaxis ${VARIABLE} para que Docker lea tu archivo .env automáticamente
       NODE_ENV: production
       PORT: 5000
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
+      DB_HOST: db_lupa_maya
+      DB_PORT: 3306
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
@@ -23,11 +39,14 @@ services:
       SMTP_USER: ${SMTP_USER}
       SMTP_PASS: ${SMTP_PASS}
       FRONTEND_URL: ${FRONTEND_URL}
-    ports:
-      - "5000:5000"
+    expose:
+      - "5000"
     volumes:
       - lupa_maya_models:/app/public/models
       - lupa_maya_assets:/app/public/assets
+    depends_on:
+      db_lupa_maya:
+        condition: service_healthy
     networks:
       - lupa_maya_net
 
@@ -39,9 +58,9 @@ services:
       args:
         VITE_API_URL: ${VITE_API_URL}
     container_name: lupa_maya_frontend
-    restart: always
+    restart: unless-stopped
     ports:
-      - "80:80"
+      - "8080:80"
     depends_on:
       - backend
     networks:
@@ -49,9 +68,9 @@ services:
 
 networks:
   lupa_maya_net:
-    external: true
-    name: dokploy-network
+    driver: bridge
 
 volumes:
+  lupa_maya_db_data:
   lupa_maya_models:
   lupa_maya_assets:
