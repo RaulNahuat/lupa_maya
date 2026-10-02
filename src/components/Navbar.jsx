@@ -26,11 +26,11 @@ const Navbar = () => {
         onClick={() => navigate('/login')}
         className="flex items-center gap-2 hover:opacity-80 transition-opacity"
       >
-        <div className="w-9 h-8.5 bg-brown rounded-xl flex items-center justify-center">
+        <div className="w-9 h-9 bg-brown rounded-3xl flex items-center justify-center">
           <Search className="text-white w-6 h-6" strokeWidth={3}/>
         </div>
         <span className="text-xl font-bold text-brown tracking-tight">
-          Glifo<span>Aventura</span>
+          Glifo<span> Aventura</span>
         </span>
       </button>
 

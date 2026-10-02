@@ -73,10 +73,10 @@ const LoginUser = () => {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <h1 className="text-title font-extrabold text-maya-dark mb-1 tracking-tight text-center">
+      <h1 className="text-title font-extrabold text-maya-dark tracking-tight text-center">
         {isDocente ? 'Portal de Docentes' : '¡Hola, explorador!'}
       </h1>
-      <p className="text-maya-gray font-medium mb-6 text-md text-center">
+      <p className="text-maya-gray font-medium mb-6 text-sm text-center">
         {isDocente ? 'Ingresa tus credenciales para gestionar tus grupos' : 'Ingresa para descubrir los glifos mayas'}
       </p>
 
@@ -118,9 +118,10 @@ const LoginUser = () => {
           <PinPad onNumberPress={handleNumberPress} onDelete={handleDelete} />
         </div>
 
-        <PrimaryButton type="submit" className="mt-3">
+        <PrimaryButton type="submit" className="mt-4">
           {isDocente ? 'Entrar al Panel' : '¡A jugar!'}
         </PrimaryButton>
+      
       </form>
     </div>
   );
