@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Scan, User, UserPlus, ChevronDown, ShieldCheck, Users, Search, GraduationCap } from 'lucide-react';
+import { Scan, User, UserPlus, ChevronDown, ShieldCheck, Users, Search, GraduationCap, Info } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext';
+import AboutModal from './AboutModal';
+
 const Navbar = () => {
   const { loginMode, setLoginMode } = useAdmin();
   const [isOpen, setIsOpen] = useState(false);
+  const [showAboutModal, setShowAboutModal] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -20,7 +23,8 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="w-full h-14 bg-white border-b border-gray-100 flex items-center justify-between px-4 z-50 shadow-sm shrink-0">
+    <>
+      <nav className="w-full h-14 bg-white border-b border-gray-100 flex items-center justify-between px-4 z-50 shadow-sm shrink-0">
       {/* Sección del logo */}
       <button 
         onClick={() => navigate('/login')}
@@ -82,6 +86,16 @@ const Navbar = () => {
                     >
                       <ShieldCheck size={18} /> Administrador
                     </button>
+                    <div className="mx-4 h-px bg-gray-100" />
+                    <button
+                      onClick={() => {
+                        setIsOpen(false);
+                        setShowAboutModal(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-4 py-3 text-sm font-bold transition-colors text-maya-dark hover:bg-gray-50"
+                    >
+                      <Info size={18} /> Acerca de
+                    </button>
                   </div>
                 </>
               )}
@@ -104,6 +118,8 @@ const Navbar = () => {
         )}
       </div>
     </nav>
+      <AboutModal isOpen={showAboutModal} onClose={() => setShowAboutModal(false)} />
+    </>
   );
 };
 

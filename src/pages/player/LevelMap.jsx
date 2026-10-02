@@ -6,10 +6,11 @@ import LevelNode from "../../components/game/LevelNode"
 import ModalConfirmation from "../../components/ModalConfirmation"
 import BottomNav from "../../components/game/BottomNav"
 import HelpModal from "../../components/game/HelpModal"
+import AboutModal from "../../components/AboutModal"
 import { ensureActiveAiModelCached } from "../../services/recognition/aiModelCacheService"
 import { useToast } from '../../context/ToastContext';
 import { procesarColaSincronizacion, forzarSincronizacionCompleta } from "../../services/syncService"
-import { CircleUserRound, Play, Flame, Star, LogOut, MoreVertical, Camera, CameraOff, RefreshCw, HelpCircle } from "lucide-react"
+import { CircleUserRound, Play, Flame, Star, LogOut, MoreVertical, Camera, CameraOff, RefreshCw, HelpCircle, Info } from "lucide-react"
 
 export default function LevelMap() {
   const levels = useGameStore((s) => s.levels)
@@ -30,6 +31,7 @@ export default function LevelMap() {
   const [isSyncing, setIsSyncing] = useState(false)
   const [cameraTapExpanded , setCameraTapExpanded] = useState(false)
   const [showHelpModal, setShowHelpModal] = useState(false)
+  const [showAboutModal, setShowAboutModal] = useState(false)
 
   const scrollRef = useRef(null)
   const currentNodeRef = useRef(null) 
@@ -236,6 +238,17 @@ export default function LevelMap() {
                     <button
                       onClick={() => {
                         setShowMenu(false)
+                        setShowAboutModal(true)
+                      }}
+                      className="w-full flex items-center rounded-2xl gap-2.5 px-4 py-2.5 text-sm font-semibold text-maya-dark hover:bg-gray-50 transition-colors"
+                    >
+                      <Info size={16} className="shrink-0 text-gray-400" />
+                      <span className="whitespace-nowrap">Acerca de</span>
+                    </button>
+                    <div className="mx-4 h-px bg-gray-100" />
+                    <button
+                      onClick={() => {
+                        setShowMenu(false)
                         setShowLogoutModal(true)
                       }}
                       className="w-full flex items-center rounded-2xl gap-2.5 px-4 py-2.5 text-sm font-semibold text-maya-dark hover:bg-gray-50 transition-colors"
@@ -365,6 +378,9 @@ export default function LevelMap() {
 
         {/* MODAL DE COMO JUGAR "AYUDA" */}
         <HelpModal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} />
+
+        {/* MODAL ACERCA DE */}
+        <AboutModal isOpen={showAboutModal} onClose={() => setShowAboutModal(false)} />
 
         {/* MODAL DE CERRAR SESIÓN */}
         <ModalConfirmation

@@ -9,7 +9,7 @@ import { useState } from 'react';
 
 const Login = () => {
   const { loginMode } = useAdmin();
-  const [showForgotModal, setShowForgotModal] = useState(false)
+  const [showForgotModal, setShowForgotModal] = useState(false);
 
   const isAdmin = loginMode === 'admin';
   const isAlumno = loginMode === 'alumno';
