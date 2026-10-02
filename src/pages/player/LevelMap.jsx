@@ -5,10 +5,11 @@ import { useNavigate } from "react-router-dom"
 import LevelNode from "../../components/game/LevelNode"
 import ModalConfirmation from "../../components/ModalConfirmation"
 import BottomNav from "../../components/game/BottomNav"
+import HelpModal from "../../components/game/HelpModal"
 import { ensureActiveAiModelCached } from "../../services/recognition/aiModelCacheService"
 import { useToast } from '../../context/ToastContext';
 import { procesarColaSincronizacion, forzarSincronizacionCompleta } from "../../services/syncService"
-import { CircleUserRound, Play, Flame, Star, LogOut, MoreVertical, Camera, CameraOff, RefreshCw } from "lucide-react"
+import { CircleUserRound, Play, Flame, Star, LogOut, MoreVertical, Camera, CameraOff, RefreshCw, HelpCircle } from "lucide-react"
 
 export default function LevelMap() {
   const levels = useGameStore((s) => s.levels)
@@ -28,6 +29,7 @@ export default function LevelMap() {
   const [showMenu, setShowMenu] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
   const [cameraTapExpanded , setCameraTapExpanded] = useState(false)
+  const [showHelpModal, setShowHelpModal] = useState(false)
 
   const scrollRef = useRef(null)
   const currentNodeRef = useRef(null) 
@@ -154,7 +156,7 @@ export default function LevelMap() {
       <div className="w-full md:w-[390px] md:max-h-[844px] h-screen flex flex-col bg-amber-50 md:overflow-hidden md:rounded-3xl md:shadow-2xl">
 
         {/* HEADER */}
-        <header className="shrink-0 bg-white border-b-2 border-gray-200 px-5 py-5 flex items-center justify-between shadow-xs">
+        <header className="shrink-0 bg-white border-b-2 border-gray-200 px-4 py-5 flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-2">
             <CircleUserRound strokeWidth={1} size={46} className="text-dark-gold" />
             <div>
@@ -167,36 +169,44 @@ export default function LevelMap() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 bg-orange-50 border border-orange rounded-full px-3 py-1.5">
+          <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 bg-orange-50 border border-orange rounded-full px-2.5 py-1.5">
               <Flame size={16} className="text-orange" />
               <span className="text-sm font-bold text-orange">{racha}</span>
             </div>
 
-            <div className="flex items-center gap-1 bg-green-50 border border-green-200 rounded-full px-3 py-1.5">
+            <div className="flex items-center gap-1 bg-green-50 border border-green-200 rounded-full px-2.5 py-1.5">
               <Star size={16} className="text-light-green" />
               <span className="text-sm font-bold text-light-green">{totalEstrellas}</span>
             </div>
 
             <div className="h-8 w-px bg-gray-200 mx-1"></div>
 
+            <button
+              onClick={() => setShowHelpModal(true)}
+              aria-label="Ayuda"
+              className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 text-gray-500 hover:bg-gray-200 active:scale-90 transition-all"
+            >
+              <HelpCircle size={18} />
+            </button>
+
             {/* Menú de opciones */}
             <div className="relative">
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="w-9 h-9 rounded-full flex items-center justify-center border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 transition-all"
+                className="w-5 h-8 rounded-full flex items-center justify-center bg-gray-100 text-gray-500 hover:bg-gray-200 active:scale-90 transition-all"
               >
-                <MoreVertical size={18} />
+                <MoreVertical size={20} />
               </button>
 
               {showMenu && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-                  <div className="absolute right-0 mt-2 w-60 bg-white rounded-2xl shadow-xl border border-gray-100 py-1 z-20">
+                  <div className="absolute right-0 mt-2 w-50 bg-white rounded-2xl shadow-xl border border-gray-100 py-1 z-20">
                     <button
                       onClick={handleManualSync}
                       disabled={isSyncing}
-                      className="w-full flex items-center gap-2.5 px-4 py-3 text-sm font-bold text-maya-dark hover:bg-gray-50 transition-colors disabled:opacity-50"
+                      className="w-full flex items-center rounded-2xl gap-2.5 px-4 py-2.5 text-sm font-semibold text-maya-dark hover:bg-gray-50 transition-colors disabled:opacity-50"
                     >
                       <RefreshCw
                         size={16}
@@ -212,7 +222,7 @@ export default function LevelMap() {
                         setShowForceSyncModal(true)
                       }}
                       disabled={isSyncing}
-                      className="w-full flex items-center gap-2.5 px-4 py-3 text-sm font-bold text-maya-dark hover:bg-gray-50 transition-colors disabled:opacity-50"
+                      className="w-full flex items-center rounded-2xl gap-2.5 px-4 py-2.5 text-sm font-semibold text-maya-dark hover:bg-gray-50 transition-colors disabled:opacity-50"
                     >
                       <RefreshCw
                         size={16}
@@ -228,7 +238,7 @@ export default function LevelMap() {
                         setShowMenu(false)
                         setShowLogoutModal(true)
                       }}
-                      className="w-full flex items-center gap-2.5 px-4 py-3 text-sm font-bold text-maya-dark hover:bg-gray-50 transition-colors"
+                      className="w-full flex items-center rounded-2xl gap-2.5 px-4 py-2.5 text-sm font-semibold text-maya-dark hover:bg-gray-50 transition-colors"
                     >
                       <LogOut size={16} className="shrink-0 text-gray-400" />
                       <span className="whitespace-nowrap">Cerrar sesión</span>
@@ -251,11 +261,11 @@ export default function LevelMap() {
         <div className="relative">
           <button
             onClick={handleToggleCamara}
-            className={`absolute top-10 right-0 z-20 flex items-center shadow-lg px-3 py-2.5 border transition-all ${
+            className={`absolute top-6 right-0 z-10 flex items-center shadow-lg px-3 py-2.5 border transition-all ${
               modoSinCamara
                 ? 'bg-maya-dark border-maya-dark text-white'
                 : 'bg-white border-gray-300 text-gray-400'
-            } rounded-l-2xl overflow-hidden`}
+            } rounded-l-full overflow-hidden`}
             title={modoSinCamara ? 'Modo sin cámara activo' : 'Activar modo sin cámara'}
           >
             {modoSinCamara ? <CameraOff size={18} /> : <Camera size={18} />}
@@ -263,7 +273,7 @@ export default function LevelMap() {
         </div>
 
         {/* MAPA */}
-        <div className="flex-1 overflow-y-auto py-6" ref={scrollRef}>
+        <div className="flex-1 overflow-y-auto pt-2 pb-10" ref={scrollRef}>
           <div className="flex flex-col gap-8">
             {levels.map((level, index) => {
               const isCurrentActive = activeLevel?.id === level.id
@@ -352,6 +362,9 @@ export default function LevelMap() {
         </div>
 
         <BottomNav className="shrink-0" />
+
+        {/* MODAL DE COMO JUGAR "AYUDA" */}
+        <HelpModal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} />
 
         {/* MODAL DE CERRAR SESIÓN */}
         <ModalConfirmation
