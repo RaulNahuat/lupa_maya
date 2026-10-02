@@ -13,7 +13,7 @@ services:
     networks:
       - lupa_maya_net
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}" ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -57,6 +57,8 @@ services:
       network: host
       args:
         VITE_API_URL: ${VITE_API_URL}
+        VITE_ADMIN_EMAIL_1: ${VITE_ADMIN_EMAIL_1}
+        VITE_ADMIN_EMAIL_2: ${VITE_ADMIN_EMAIL_2}
     container_name: lupa_maya_frontend
     restart: unless-stopped
     ports:
