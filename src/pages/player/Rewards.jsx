@@ -96,7 +96,6 @@ export default function Rewards() {
         const missingBadges = badgesList.filter(b => b.unlocked && !userBadgeIds.has(Number(b.id)));
         
         if (missingBadges.length > 0) {
-          console.log(`[REWARDS] Registrando insignias faltantes desbloqueadas:`, missingBadges.map(b => b.title));
           await db.transaction('rw', db.usuario_insignias, db.cola_sincronizacion, async () => {
             for (const badge of missingBadges) {
               const local_id = crypto.randomUUID();

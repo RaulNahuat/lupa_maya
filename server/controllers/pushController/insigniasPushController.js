@@ -13,7 +13,6 @@ async function safeUnlink(url) {
     const absolutePath = path.join(process.cwd(), 'public', cleanPath);
     
     await fs.unlink(absolutePath);
-    console.log(`[FILE DELETION] Icono de insignia eliminado físicamente del servidor: ${absolutePath}`);
   } catch (err) {
     console.error(`[FILE DELETION] No se pudo eliminar el archivo de icono ${url}:`, err.message);
   }
@@ -21,7 +20,6 @@ async function safeUnlink(url) {
 
 export async function handleSyncInsignias(req, res, db, io) {
   const { accion, datos } = req.body;
-  console.log(`[SYNC INSIGNIAS] Acción: ${accion}`, JSON.stringify(datos));
 
   try {
     if (accion === 'CREAR') {
@@ -31,7 +29,6 @@ export async function handleSyncInsignias(req, res, db, io) {
         }
       });
       if (existente) {
-        console.log(`[SYNC INSIGNIAS] Ya existe:`, existente.id);
         return res.status(200).json({
           success: true,
           message: "Insignia ya existe",
@@ -39,7 +36,6 @@ export async function handleSyncInsignias(req, res, db, io) {
         });
       }
 
-      console.log(`[SYNC INSIGNIAS] Creando nueva Insignia en DB sin id...`);
       const nuevo = await db.Insignia.create({
         nombre: datos.nombre,
         descripcion: datos.descripcion || null,
@@ -48,8 +44,6 @@ export async function handleSyncInsignias(req, res, db, io) {
         valor_condicion: datos.valor_condicion,
         version: datos.version ?? 1
       });
-
-      console.log(`[SYNC INSIGNIAS] Creado con ID autoincremental de DB:`, nuevo.id);
 
       if (io) io.emit("hay_cambios");
       return res.status(201).json({ success: true, message: "Creado", data: nuevo });

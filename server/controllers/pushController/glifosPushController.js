@@ -15,7 +15,6 @@ async function safeUnlink(url) {
     const absolutePath = path.join(process.cwd(), 'public', cleanPath);
     
     await fs.unlink(absolutePath);
-    console.log(`[FILE DELETION] Archivo eliminado físicamente del servidor: ${absolutePath}`);
   } catch (err) {
     console.error(`[FILE DELETION] No se pudo eliminar el archivo ${url}:`, err.message);
   }
@@ -23,7 +22,6 @@ async function safeUnlink(url) {
 
 export async function handleSyncGlifos(req, res, db, io) {
   const { accion, datos } = req.body;
-  console.log(`[SYNC GLIFOS] Acción: ${accion}`, JSON.stringify(datos));
 
   try {
     if (accion === 'CREAR') {
@@ -35,7 +33,6 @@ export async function handleSyncGlifos(req, res, db, io) {
         }
       });
       if (existente) {
-        console.log(`[SYNC GLIFOS] Ya existe:`, existente.id);
         return res.status(200).json({
           success: true,
           message: "Glifo ya existe",
@@ -43,7 +40,6 @@ export async function handleSyncGlifos(req, res, db, io) {
         });
       }
 
-      console.log(`[SYNC GLIFOS] Creando nuevo Glifo en DB sin id...`);
       const nuevo = await db.Glifo.create({
         grupo_id: datos.grupo_id,
         nombre_maya: datos.nombre_maya,
@@ -57,8 +53,6 @@ export async function handleSyncGlifos(req, res, db, io) {
         activo: datos.activo ?? true,
         version: datos.version ?? 1
       });
-
-      console.log(`[SYNC GLIFOS] Creado con ID autoincremental de DB:`, nuevo.id);
 
       if (io) io.emit("hay_cambios");
       return res.status(201).json({ success: true, message: "Creado", data: nuevo });

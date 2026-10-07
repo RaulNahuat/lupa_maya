@@ -1,6 +1,5 @@
 export async function handleSyncGruposEscolares(req, res, db, io) {
   const { accion, datos } = req.body;
-  console.log(`[SYNC GRUPOS_ESCOLARES] Acción: ${accion}`, JSON.stringify(datos));
 
   try {
     if (accion === 'CREAR') {
@@ -69,7 +68,6 @@ export async function handleSyncGruposEscolares(req, res, db, io) {
 
 export async function handleSyncGrupoEscolarGrupoNivel(req, res, db, io) {
   const { accion, datos } = req.body;
-  console.log(`[SYNC GRUPO_ESCOLAR_GRUPO_NIVEL] Acción: ${accion}`, JSON.stringify(datos));
 
   try {
     if (accion === 'CREAR' || accion === 'EDITAR' || accion === 'UPSERT') {
@@ -111,7 +109,6 @@ export async function handleSyncGrupoEscolarGrupoNivel(req, res, db, io) {
 
 export async function handleSyncUsuarioGrupoNivel(req, res, db, io) {
   const { accion, datos } = req.body;
-  console.log(`[SYNC USUARIO_GRUPO_NIVEL] Acción: ${accion}`, JSON.stringify(datos));
 
   try {
     if (accion === 'CREAR' || accion === 'EDITAR' || accion === 'UPSERT') {

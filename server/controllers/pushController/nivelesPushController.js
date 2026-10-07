@@ -1,6 +1,5 @@
 export async function handleSyncNiveles(req, res, db, io) {
   const { accion, datos } = req.body;
-  console.log(`[SYNC NIVELES] Acción: ${accion}`, JSON.stringify(datos));
 
   try {
     if (accion === 'CREAR') {
@@ -11,7 +10,6 @@ export async function handleSyncNiveles(req, res, db, io) {
         }
       });
       if (existente) {
-        console.log(`[SYNC NIVELES] Ya existe el nivel con número ${existente.numero} en el grupo ${existente.grupo_id}`);
         return res.status(200).json({
           success: true,
           message: "Nivel ya existe",
@@ -19,7 +17,6 @@ export async function handleSyncNiveles(req, res, db, io) {
         });
       }
 
-      console.log(`[SYNC NIVELES] Calculando posición sin conflictos en el grupo...`);
       let finalPos = datos.posicion_bloque ?? datos.orden_secuencia ?? 1;
       const posConflict = await db.Nivel.findOne({
         where: {
@@ -30,10 +27,8 @@ export async function handleSyncNiveles(req, res, db, io) {
       if (posConflict) {
         const maxPos = await db.Nivel.max('posicion_bloque', { where: { grupo_id: datos.grupo_id } });
         finalPos = (maxPos || 0) + 1;
-        console.log(`[SYNC NIVELES] Conflicto de posición detectado. Reasignado a: ${finalPos}`);
       }
 
-      console.log(`[SYNC NIVELES] Creando nuevo Nivel en DB...`);
       const nuevo = await db.Nivel.create({
         grupo_id: datos.grupo_id,
         numero: datos.numero,
@@ -41,8 +36,6 @@ export async function handleSyncNiveles(req, res, db, io) {
         posicion_bloque: finalPos,
         version: datos.version ?? 1
       });
-
-      console.log(`[SYNC NIVELES] Nivel creado con ID:`, nuevo.id);
 
       if (io) io.emit("hay_cambios");
       return res.status(201).json({ success: true, message: "Creado", data: nuevo });

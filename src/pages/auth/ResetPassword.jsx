@@ -58,7 +58,6 @@ const ResetPassword = () => {
             sync_status: 'SINCRONIZADO',
             updated_at: new Date().toISOString()
           });
-          console.log('Password hash actualizado en base de datos local');
         }
       }
 

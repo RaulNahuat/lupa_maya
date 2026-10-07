@@ -1,6 +1,5 @@
 export async function handleSyncGlifosObjetivo(req, res, db, io) {
   const { accion, datos } = req.body;
-  console.log(`[SYNC GLIFOS OBJETIVO] Acción: ${accion}`, JSON.stringify(datos));
 
   try {
     if (accion === 'CREAR') {
