@@ -1,10 +1,8 @@
 export async function handleSyncPreguntas(req, res, db, io) {
   const { accion, datos } = req.body;
-  console.log(`[SYNC PREGUNTAS] Acción: ${accion}`, JSON.stringify(datos));
 
   try {
     if (accion === 'CREAR') {
-      console.log(`[SYNC PREGUNTAS] Creando nueva pregunta en DB...`);
 
       const nuevo = await db.Pregunta.create({
         nivel_id: datos.nivel_id,

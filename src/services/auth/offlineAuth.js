@@ -67,8 +67,6 @@ export const loginOffline = async (credenciales, esAdmin = false) => {
             return username === nBuscado;
         });
         
-        console.log("Usuarios en DB local:", users.length, "Posibles coincidencias:", posibles.length);
-        
         let encontrado = null;
         for (const u of posibles) {
             let esValido = false;

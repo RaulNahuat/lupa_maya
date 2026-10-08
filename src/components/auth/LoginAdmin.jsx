@@ -31,7 +31,6 @@ const LoginAdmin = () => {
 
     try {
       const user = await loginOffline({ email, password }, true);
-      console.log('Login Admin exitoso:', user);
 
       loginUser(user);
 

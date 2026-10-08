@@ -1,6 +1,5 @@
 export async function handleSyncGruposNiveles(req, res, db, io) {
   const { accion, datos } = req.body;
-  console.log(`[SYNC GRUPOS_NIVELES] Acción: ${accion}`, JSON.stringify(datos));
 
   try {
     if (accion === 'CREAR') {
@@ -12,7 +11,6 @@ export async function handleSyncGruposNiveles(req, res, db, io) {
         }
       });
       if (existente) {
-        console.log(`[SYNC GRUPOS_NIVELES] Ya existe:`, existente.id);
         return res.status(200).json({
           success: true,
           message: "GrupoNivel ya existe",
@@ -20,7 +18,6 @@ export async function handleSyncGruposNiveles(req, res, db, io) {
         });
       }
 
-      console.log(`[SYNC GRUPOS_NIVELES] Creando nuevo GrupoNivel en DB sin id...`);
       const nuevo = await db.GrupoNivel.create({
         numero_grupo: datos.numero_grupo,
         nombre: datos.nombre,
@@ -30,8 +27,6 @@ export async function handleSyncGruposNiveles(req, res, db, io) {
         activo: datos.activo ?? true,
         version: datos.version ?? 1
       });
-
-      console.log(`[SYNC GRUPOS_NIVELES] Creado con ID autoincremental de DB:`, nuevo.id);
 
       if (io) io.emit("hay_cambios");
       return res.status(201).json({ success: true, message: "Creado", data: nuevo });

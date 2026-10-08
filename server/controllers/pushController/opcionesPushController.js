@@ -1,6 +1,5 @@
 export async function handleSyncOpciones(req, res, db, io) {
   const { accion, datos } = req.body;
-  console.log(`[SYNC OPCIONES] Acción: ${accion}`, JSON.stringify(datos));
 
   try {
     if (accion === 'CREAR') {

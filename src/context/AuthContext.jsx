@@ -47,7 +47,6 @@ export const AuthProvider = ({ children }) => {
         if (!currentUser) return;
 
         const handleOnline = async () => {
-            console.log("Conexion restaurada. Sincronizando para el usuario actual...");
             await procesarColaSincronizacion(currentUser.local_id);
             initLevels(currentUser);
         };
@@ -63,7 +62,6 @@ export const AuthProvider = ({ children }) => {
         if (!currentUser) return;
 
         const handleSyncCompleted = () => {
-            console.log("Sync completado: recargando niveles desde IndexedDB...");
             initLevels(currentUser);
         };
 

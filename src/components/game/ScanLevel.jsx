@@ -45,7 +45,6 @@ export default function ScanLevel({ level, onComplete }) {
   }, [])
 
   const loadModel = async () => {
-    console.log("Cargando modelo...")
     setModelLoading(true)
     try {
       // Intenta cargar el modelo desde la caché local (offline)
@@ -56,7 +55,6 @@ export default function ScanLevel({ level, onComplete }) {
         cachedModelData.assets?.weights &&
         cachedModelData.assets?.metadata
       ) {
-        console.log("Cargando modelo de IA desde la caché local offline...")
         try {
           const modelBlob = await cachedModelData.assets.model.blob()
           const weightsBlob = await cachedModelData.assets.weights.blob()
@@ -68,8 +66,6 @@ export default function ScanLevel({ level, onComplete }) {
 
           const model = await tmImage.loadFromFiles(modelFile, weightsFile, metadataFile)
           modelRef.current = model
-          console.log("Modelo cargado exitosamente desde la caché offline:", model)
-          console.log("Clases:", model.getClassLabels())
           return
         } catch (cacheErr) {
           console.warn("Fallo al procesar los archivos de la caché, reintentando por red...", cacheErr)
@@ -77,14 +73,11 @@ export default function ScanLevel({ level, onComplete }) {
       }
 
       // Fallback a la red si no está en la caché o falló
-      console.log("Cargando modelo de IA desde el servidor remoto...")
       const model = await tmImage.load(
         `${API_BASE_URL}/models/model.json`,
         `${API_BASE_URL}/models/metadata.json`
       )
       modelRef.current = model
-      console.log("Modelo cargado remotamente:", model)
-      console.log("Clases:", model.getClassLabels())
     } catch (err) {
       console.error("Error al cargar modelo:", err)
     } finally {
@@ -126,15 +119,10 @@ export default function ScanLevel({ level, onComplete }) {
   }
 
   const runPrediction = async (canvas) => {
-    console.log("Modelo disponible:", modelRef.current)
     const predictions = await modelRef.current.predict(canvas)
-    console.log("Predicciones:", predictions) 
     
     // Ordenar por probabilidad más alta
     const top = predictions.sort((a, b) => b.probability - a.probability)[0]
-
-    console.log("Top predicción:", top.className, top.probability)
-    console.log("clase_modelo en BD:", contenido.glifo?.clase_modelo)
 
     const UMBRAL = 0.20 
     const esNinguno = top.className.toLowerCase() === "fondo"
