@@ -9,17 +9,8 @@ let socket = null;
 export const initSocket = () => {
     if (socket) return;
 
-    console.log("Inicializando WebSockets...");
     socket = io(SOCKET_URL, {
         transports: ["websocket"],
-    });
-
-    socket.on("connect", () => {
-        console.log("Conectado al servidor de WebSockets");
-    });
-
-    socket.on("disconnect", (reason) => {
-        console.log("Desconectado del servidor de WebSockets:", reason);
     });
 
     socket.on("connect_error", (error) => {
@@ -27,7 +18,6 @@ export const initSocket = () => {
     });
 
     socket.on("hay_cambios", async () => {
-        console.log("El servidor notificó cambios. Descargando cambios del servidor (full pull)...");
         await descargarCambios(null, true);
         window.dispatchEvent(new CustomEvent("sync-completed"));
     });

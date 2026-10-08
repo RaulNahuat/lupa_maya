@@ -619,8 +619,6 @@ const procesarItem = async (item) => {
             }
         }
     );
-
-    console.log(`Item ${item.id} (${item.entidad}) subido con exito.`);
 };
 
 let isSyncing = false;
@@ -632,12 +630,10 @@ let isSyncing = false;
  */
 export const procesarColaSincronizacion = async (usuarioLocalId = null) => {
     if (isSyncing) {
-        console.log("Sincronización ya en curso, ignorando llamada duplicada.");
         return;
     }
 
     isSyncing = true;
-    console.log("Iniciando ciclo de sincronizacion...");
 
     try {
         await descargarCambios(usuarioLocalId);
@@ -648,7 +644,6 @@ export const procesarColaSincronizacion = async (usuarioLocalId = null) => {
             .toArray();
 
         if (items.length === 0) {
-            console.log("No hay datos locales para subir.");
             return;
         }
 
@@ -689,7 +684,6 @@ export const procesarColaSincronizacion = async (usuarioLocalId = null) => {
         console.error("Error crítico en el proceso de sincronización:", err);
     } finally {
         isSyncing = false;
-        console.log("Ciclo de sincronizacion finalizado.");
     }
 };
 

@@ -66,7 +66,6 @@ const LoginUser = () => {
       }
 
     } catch (error) {
-      console.error(error);
       showToast('Error de acceso', String(error), 'error');
     }
   };

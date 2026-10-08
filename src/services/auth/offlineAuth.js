@@ -80,8 +80,8 @@ export const loginOffline = async (credenciales, esAdmin = false) => {
                     if (bcrypt.compareSync(pBuscado, u.pin_hash)) {
                         esValido = true;
                     }
-                } catch (e) {
-                    console.error("Error al comparar hash (es normal si era texto plano)", e);
+                } catch {
+                    // Si no es un hash bcrypt válido (por ejemplo, formato texto plano), continúa
                 }
             }
             
