@@ -2,7 +2,6 @@ import Dexie from 'dexie';
 
 export const db = new Dexie("lupa_maya_db");
 
-//Version 1: esquema en desarrollo (incluye todos los índices necesarios)
 db.version(3).stores({
     admins: 'local_id, email, sync_status',
     usuarios: 'local_id, username, grupo_escolar_id, sync_status',

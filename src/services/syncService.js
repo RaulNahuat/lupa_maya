@@ -1,5 +1,6 @@
 import { db } from "../data/db";
 import { API_BASE_URL } from "../config/api";
+import { decryptSyncPayload } from "../utils/syncCrypto";
 
 const API_SYNC_URL = `${API_BASE_URL}/api/sync`;
 
@@ -30,6 +31,13 @@ export const descargarCambios = async (usuarioLocalId = null, forceFullPull = fa
 
     if (!result.success) return;
 
+    let cambiosData = result.cambios;
+    if (result.encrypted && result.payload) {
+        cambiosData = decryptSyncPayload(result.payload);
+    }
+
+    if (!cambiosData) return;
+
     const {
         usuarios = [],
         admins = [],
@@ -45,7 +53,7 @@ export const descargarCambios = async (usuarioLocalId = null, forceFullPull = fa
         grupos_escolares = [],
         grupo_escolar_grupo_nivel = [],
         usuario_grupo_nivel = []
-    } = result.cambios;
+    } = cambiosData;
 
     // Obtener los IDs de elementos que tienen cambios locales pendientes de sincronizar
     const itemsPendientes = await db.cola_sincronizacion

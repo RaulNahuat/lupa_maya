@@ -1,5 +1,6 @@
 import express from "express";
 import { Op } from "sequelize";
+import { encryptSyncPayload } from "../utils/syncCrypto.js";
 
 import { handleSyncUsuarios } from "../controllers/pushController/UsuariosPushController.js";
 import { handleSyncProgreso } from "../controllers/pushController/progresoPushController.js";
@@ -12,7 +13,7 @@ import { getPreguntasPull } from "../controllers/pullController/preguntasPullCon
 import { getGlifosPull } from "../controllers/pullController/glifosPullController.js";
 import { getGlifosObjetivoPull } from "../controllers/pullController/glifosObjetivoPullController.js";
 import { getInsigniasPull } from "../controllers/pullController/insigniasPullController.js";
-import { getAllUsuarios, updateUsuario, deleteUsuario } from "../controllers/admin/AdminUsuariosController.js";
+import { updateUsuario, deleteUsuario } from "../controllers/admin/AdminUsuariosController.js";
 import { handleSyncUsuarioInsignia } from "../controllers/pushController/usuarioInsigniasPushController.js";
 import { getUsuarioInsigniasPull } from "../controllers/pullController/usuarioInsigniasPullController.js";
 import { getGruposNivelesPull } from "../controllers/pullController/gruposNivelesPullController.js";
@@ -142,24 +143,29 @@ export default function(db, io) {
       const grupo_escolar_grupo_nivel = await getGrupoEscolarGrupoNivelPull(db, Op, lastSyncDate);
       const usuario_grupo_nivel = await getUsuarioGrupoNivelPull(db, Op, lastSyncDate);
 
+      const cambios = { 
+        usuarios,
+        admins,
+        niveles,
+        grupos_niveles, 
+        glifos,
+        preguntas, 
+        opciones_respuestas, 
+        nivel_glifos_objetivos,
+        progreso_usuarios,
+        insignias,
+        usuario_insignias,
+        grupos_escolares,
+        grupo_escolar_grupo_nivel,
+        usuario_grupo_nivel
+      };
+
+      const encryptedPayload = encryptSyncPayload(cambios);
+
       res.json({
         success: true,
-        cambios: { 
-          usuarios,
-          admins,
-          niveles,
-          grupos_niveles, 
-          glifos,
-          preguntas, 
-          opciones_respuestas, 
-          nivel_glifos_objetivos,
-          progreso_usuarios,
-          insignias,
-          usuario_insignias,
-          grupos_escolares,
-          grupo_escolar_grupo_nivel,
-          usuario_grupo_nivel
-        },
+        encrypted: true,
+        payload: encryptedPayload,
         serverTime: new Date().getTime()
       });
     } catch (error) {
