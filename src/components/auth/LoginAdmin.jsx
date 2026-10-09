@@ -14,7 +14,7 @@ const LoginAdmin = () => {
   const [isSending, setIsSending] = useState(false);
 
   const navigate = useNavigate();
-  const { loginUser } = useAuth();
+  const { loginUser, syncError } = useAuth();
   const { showToast } = useToast();
 
   const handleSubmit = async (e) => {
@@ -30,6 +30,10 @@ const LoginAdmin = () => {
     }
 
     try {
+      if (navigator.onLine && syncError) {
+        throw new Error('No se pudieron descargar los datos del servidor. Intenta nuevamente antes de iniciar sesión.');
+      }
+
       const user = await loginOffline({ email, password }, true);
 
       loginUser(user);

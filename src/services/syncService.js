@@ -3,6 +3,18 @@ import { API_BASE_URL } from "../config/api";
 import { decryptSyncPayload } from "../utils/syncCrypto";
 
 const API_SYNC_URL = `${API_BASE_URL}/api/sync`;
+let initialSyncPromise = null;
+
+export const sincronizarInicialmente = () => {
+    if (!initialSyncPromise) {
+        initialSyncPromise = descargarCambios(null).catch((error) => {
+            initialSyncPromise = null;
+            throw error;
+        });
+    }
+
+    return initialSyncPromise;
+};
 
 /**
  * Pull: descarga cambios del servidor desde la última sincronización.
@@ -23,20 +35,27 @@ export const descargarCambios = async (usuarioLocalId = null, forceFullPull = fa
     let result;
     try {
         const response = await fetch(`${API_SYNC_URL}/pull?lastSync=${lastSync}${usuarioParam}`);
+        if (!response.ok) {
+            throw new Error(`El servidor respondió con HTTP ${response.status}`);
+        }
         result = await response.json();
     } catch (error) {
-        console.warn("Pull sync fallido (sin conexion o error de red):", error);
-        return;
+        console.error("Pull sync fallido (sin conexión, HTTP o respuesta inválida):", error);
+        throw error;
     }
 
-    if (!result.success) return;
+    if (!result.success) {
+        throw new Error(result.error || result.message || 'El servidor rechazó la sincronización');
+    }
 
     let cambiosData = result.cambios;
     if (result.encrypted && result.payload) {
         cambiosData = decryptSyncPayload(result.payload);
     }
 
-    if (!cambiosData) return;
+    if (!cambiosData || typeof cambiosData !== 'object') {
+        throw new Error('No se pudo descifrar o validar la respuesta de sincronización');
+    }
 
     const {
         usuarios = [],

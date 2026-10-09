@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { db } from "../data/db";
-import { procesarColaSincronizacion } from "../services/syncService";
+import { procesarColaSincronizacion, sincronizarInicialmente } from "../services/syncService";
 import { useGameStore } from "../store/game/useGameStore";
 
 const AuthContext = createContext();
@@ -8,10 +8,22 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [syncError, setSyncError] = useState(null);
     const initLevels = useGameStore(s => s.initLevels);
 
     useEffect(() => {
         const initSession = async () => {
+            let initialSyncError = null;
+            if (navigator.onLine) {
+                try {
+                    await sincronizarInicialmente();
+                } catch (error) {
+                    initialSyncError = error;
+                    setSyncError(error);
+                    console.error('No se pudo completar la sincronización inicial:', error);
+                }
+            }
+
             const storedUserStr = localStorage.getItem("lupa_session");
             if (storedUserStr) {
                 const storedUser = JSON.parse(storedUserStr);
@@ -38,6 +50,10 @@ export const AuthProvider = ({ children }) => {
                 }
             }
             setLoading(false);
+
+            if (initialSyncError && !storedUserStr) {
+                console.warn('La aplicación inició sin sesión y sin sincronización inicial.');
+            }
         };
 
         initSession();
@@ -81,7 +97,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ currentUser, loginUser, logoutUser, loading }}>
+        <AuthContext.Provider value={{ currentUser, loginUser, logoutUser, loading, syncError }}>
             {!loading && children}
         </AuthContext.Provider>
     );

@@ -12,7 +12,7 @@ const LoginUser = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [pin, setPin] = useState('');
-  const { loginUser } = useAuth();
+  const { loginUser, syncError } = useAuth();
   const { showToast } = useToast();
   const { loginMode } = useAdmin();
 
@@ -42,6 +42,10 @@ const LoginUser = () => {
     }
 
     try {
+      if (navigator.onLine && syncError) {
+        throw new Error('No se pudieron descargar los datos del servidor. Intenta nuevamente antes de iniciar sesión.');
+      }
+
       const user = await loginOffline({ username, pin });
       
       const userRol = Number(user.rol_id);

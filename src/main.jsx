@@ -6,7 +6,7 @@ import App from './App.jsx'
 
 import { registerSW } from 'virtual:pwa-register'
 import { initSocket } from './services/socketService'
-import { descargarCambios } from './services/syncService'
+import { sincronizarInicialmente } from './services/syncService'
 
 import { AuthProvider } from './context/AuthContext.jsx'
 import { AdminProvider } from './context/AdminContext.jsx'
@@ -20,7 +20,9 @@ const updateSW = registerSW({
     updateSW(true);
   },
 });
-descargarCambios(null); 
+sincronizarInicialmente().catch(() => {
+  // AuthProvider mostrará el estado local y permitirá reintentar desde la interfaz.
+});
 initSocket();
 
 createRoot(document.getElementById('root')).render(
